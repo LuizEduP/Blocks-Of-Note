@@ -1,0 +1,148 @@
+:root {
+    --size-main: 180px;
+    --half-main: 90px;
+    --border-width: 6px;
+    --transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    background-color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+
+.wrapper {
+    position: relative;
+    perspective: 1500px;
+}
+
+/* --- CUBO CENTRAL --- */
+.scene {
+    width: var(--size-main);
+    height: var(--size-main);
+    position: relative;
+    transform-style: preserve-3d;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.cube {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: spin 15s infinite linear;
+}
+
+/* Centralização do texto nas faces */
+.face {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #fff;
+    border: var(--border-width) solid #000;
+    box-sizing: border-box; /* Importante para não quebrar o tamanho com a borda */
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 1.2rem;
+}
+
+.front  { transform: translateZ(var(--half-main)); }
+.back   { transform: rotateY(180deg) translateZ(var(--half-main)); }
+.right  { transform: rotateY(90deg) translateZ(var(--half-main)); }
+.left   { transform: rotateY(-90deg) translateZ(var(--half-main)); }
+.top    { transform: rotateX(90deg) translateZ(var(--half-main)); }
+.bottom { transform: rotateX(-90deg) translateZ(var(--half-main)); }
+
+/* --- BOTÕES CRIAR/REMOVER --- */
+.menu-options {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.opt-btn {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 10px 20px;
+    font-weight: bold;
+    opacity: 0;
+    transition: var(--transition);
+    border: 2px solid #000;
+}
+
+.btn-top { top: -20px; }
+.btn-bottom { bottom: -20px; }
+
+/* CORREÇÃO AQUI: Alinhado com o ID que o JS altera */
+.main-container.active .btn-top {
+    top: -80px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.main-container.active .btn-bottom {
+    bottom: -80px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.opt-btn:hover {
+    background: #fff;
+    color: #000;
+    cursor: pointer;
+}
+
+@keyframes spin {
+    from { transform: rotateX(0) rotateY(0); }
+    to { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+/* --- ÓRBITA E MINI CUBOS --- */
+#notes-orbit {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.mini-note-scene {
+    position: absolute;
+    width: 40px; height: 40px;
+    top: -20px; left: -20px;
+    transform-style: preserve-3d;
+    animation: orbit 12s infinite linear;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.mini-cube {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: spin 6s infinite linear;
+}
+
+.mini-cube .face {
+    width: 40px; height: 40px;
+    border: 2px solid #000;
+    font-size: 14px;
+}
+
+.mini-cube .front  { transform: translateZ(20px); }
+.mini-cube .back   { transform: rotateY(180deg) translateZ(20px); }
+.mini-cube .right  { transform: rotateY(90deg) translateZ(20px); }
+.mini-cube .left   { transform: rotateY(-90deg) translateZ(20px); }
+.mini-cube .top    { transform: rotateX(90deg) translateZ(20px); }
+.mini-cube .bottom { transform: rotateX(-90deg) translateZ(20px); }
+
+@keyframes orbit {
+    from { transform: rotateY(0deg) translateX(250px) rotateY(0deg); }
+    to   { transform: rotateY(360deg) translateX(250px) rotateY(-360deg); }
+}
