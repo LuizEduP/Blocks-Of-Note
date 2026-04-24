@@ -1,0 +1,365 @@
+:root {
+    --size-main: 180px;
+    --half-main: 90px;
+    --size-mini: 40px;
+    --half-mini: 20px;
+    --border-thick: 6px;
+    --border-thin: 2px;
+    --transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+body, html {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+    background-color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+
+.wrapper {
+    position: relative;
+    perspective: 2000px; /* Aumentado para melhor profundidade */
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* --- CUBO CENTRAL --- */
+.main-container {
+    position: relative;
+    width: var(--size-main);
+    height: var(--size-main);
+    transform-style: preserve-3d;
+    z-index: 10;
+}
+
+.scene {
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.cube {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: spin 15s infinite linear;
+}
+
+.face {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #fff;
+    border: var(--border-thick) solid #000;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 1.2rem;
+    box-sizing: border-box;
+    backface-visibility: visible;
+}
+
+/* Posicionamento Faces Cubo Grande */
+.front  { transform: translateZ(var(--half-main)); }
+.back   { transform: rotateY(180deg) translateZ(var(--half-main)); }
+.right  { transform: rotateY(90deg) translateZ(var(--half-main)); }
+.left   { transform: rotateY(-90deg) translateZ(var(--half-main)); }
+.top    { transform: rotateX(90deg) translateZ(var(--half-main)); }
+.bottom { transform: rotateX(-90deg) translateZ(var(--half-main)); }
+
+/* --- MENU --- */
+.menu-options {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+}
+
+.opt-btn {
+    position: absolute;
+    left: 50%; transform: translateX(-50%);
+    background: #000; color: #fff;
+    padding: 10px 20px; font-weight: bold;
+    opacity: 0; transition: var(--transition);
+    border: 2px solid #000;
+}
+
+.btn-top { top: 0; }
+.btn-bottom { bottom: 0; }
+
+.main-container.active .btn-top { top: -120px; opacity: 1; pointer-events: auto; }
+.main-container.active .btn-bottom { bottom: -120px; opacity: 1; pointer-events: auto; }
+.opt-btn:hover { background: #fff; color: #000; cursor: pointer; }
+
+/* --- ÓRBITA --- */
+#notes-orbit {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.mini-note-scene {
+    position: absolute;
+    width: var(--size-mini); height: var(--size-mini);
+    margin-top: calc(var(--half-mini) * -1);
+    margin-left: calc(var(--half-mini) * -1);
+    transform-style: preserve-3d;
+    animation: orbit2D 12s infinite linear;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.mini-cube {
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    animation: spin 6s infinite linear;
+}
+
+.mini-cube .face {
+    border-width: var(--border-thin);
+    pointer-events: none; /* Clique atravessa para a cena */
+}
+
+/* Posicionamento Faces Mini Cubos */
+.mini-cube .front  { transform: translateZ(var(--half-mini)); }
+.mini-cube .back   { transform: rotateY(180deg) translateZ(var(--half-mini)); }
+.mini-cube .right  { transform: rotateY(90deg) translateZ(var(--half-mini)); }
+.mini-cube .left   { transform: rotateY(-90deg) translateZ(var(--half-mini)); }
+.mini-cube .top    { transform: rotateX(90deg) translateZ(var(--half-mini)); }
+.mini-cube .bottom { transform: rotateX(-90deg) translateZ(var(--half-mini)); }
+
+@keyframes spin {
+    from { transform: rotateX(0) rotateY(0); }
+    to { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+@keyframes orbit2D {
+    from { transform: rotate(0deg) translateX(260px) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
+}
+
+/* --- MODAL ESTILO NOTION CLEAN --- */
+/* Fundo do modal com blur mais suave */
+.modal-overlay {
+    display: none; /* Mantém o padrão inicial fechado */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.6); /* Fundo mais claro */
+    backdrop-filter: blur(10px); /* Leve blur no fundo 3D */
+    z-index: 2000;
+    justify-content: center; align-items: center;
+}
+
+/* O corpo da janela - Onde a mágica Notion acontece */
+.modal-content {
+    background: #fff;
+    /* Borda fina e cinza, quase invisível, para suavizar */
+    border: 1px solid #eaeaea; 
+    /* Padding generoso para dar respiro (fundamental!) */
+    padding: 60px 80px; 
+    /* Tamanho ideal para escrita */
+    width: 700px; 
+    max-width: 90%;
+    height: 85vh; /* Quase toda a altura da tela */
+    /* Cantos levemente arredondados para suavizar a "dureza" */
+    border-radius: 16px; 
+    /* Sombra elegante e difusa, diferente da sombra Brutalista sólida */
+    box-shadow: 0 15px 50px rgba(0,0,0,0.06); 
+    
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Garante que o padding não aumente o tamanho */
+    
+    /* Animação suave ao abrir */
+    animation: notionFadeIn 0.4s ease-out;
+}
+
+@keyframes notionFadeIn {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Título estilo Notion - Integrado à escrita */
+#note-title-input {
+    border: none; /* Remove bordas */
+    background: transparent;
+    font-size: 2.8rem; /* Título grande */
+    font-weight: 800; /* Super negrito */
+    width: 100%;
+    outline: none; /* Remove o contorno ao focar */
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0 0 10px 0;
+    color: #000;
+    padding: 0;
+}
+
+/* Metadata (Data) - Discreto */
+.note-meta {
+    font-size: 0.9rem;
+    color: #999; /* Cinza claro */
+    margin-bottom: 30px;
+    font-family: monospace;
+}
+
+/* Linha divisória sutil */
+.divider {
+    height: 1px;
+    background: #f0f0f0; /* Quase invisível */
+    margin-bottom: 40px;
+}
+
+/* Área de Texto Principal - Foco total */
+#note-text {
+    flex: 1; /* Ocupa o resto da janela */
+    width: 100%;
+    border: none; /* Remove bordas */
+    background: transparent;
+    padding: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.15rem; /* Texto confortável */
+    line-height: 1.7; /* Entrelinha arejada */
+    outline: none; /* Remove o contorno */
+    resize: none; /* Remove o controle de tamanho */
+    color: #333; /* Cinza escuro para melhor leitura que o preto puro */
+}
+
+/* Rodapé dos Botões - Minimalista */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end; /* Alinha os botões à direita */
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0; /* Divisória sutil */
+}
+
+/* Estilo Base para os Botões Modernos */
+.modal-footer button {
+    font-family: monospace;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+    border-radius: 8px; /* Cantos arredondados nos botões */
+    padding: 10px 22px;
+    border: none; /* Remove a borda padrão feia */
+}
+
+/* Botão Salvar (Minimalista B&W) */
+.btn-notion-save {
+    background: #000;
+    color: #fff;
+    font-weight: bold;
+}
+
+.btn-notion-save:hover {
+    background: #333; /* Cinza escuro no hover */
+    transform: translateY(-1px);
+}
+
+/* Botão Descartar (Estilo Ghost - Sem fundo) */
+.btn-notion-ghost {
+    background: transparent;
+    color: #888; /* Cinza claro */
+}
+
+.btn-notion-ghost:hover {
+    background: #f5f5f5; /* Leve fundo cinza no hover */
+    color: #000;
+}
+
+/* --- ESTILO DE REMOÇÃO PARA MINI CUBOS --- */
+
+/* Quando o modo remoção está ativo, os mini cubos param e ficam vermelhos */
+.removing .mini-note-scene {
+    animation-play-state: paused !important; /* Para a órbita */
+}
+
+.removing .mini-cube {
+    animation-play-state: paused !important; /* Para o giro do cubo */
+}
+
+.removing .mini-cube .face {
+    border-color: #500000 !important; /* Borda vermelha de alerta */
+    background-color: #fff5f5; /* Leve fundo avermelhado */
+    cursor: no-drop; /* Cursor de "excluir" */
+}
+
+/* Efeito de "balanço" para indicar que podem ser apagados */
+.removing .mini-cube:hover {
+    animation: shakeCube 0.2s infinite;
+    animation-play-state: running !important;
+}
+
+@keyframes shakeCube {
+    0% { transform: rotateX(0deg) translate(1px); }
+    50% { transform: rotateX(5deg) translate(-1px); }
+    100% { transform: rotateX(0deg) translate(1px); }
+}
+
+/* --- NOVAS ANIMAÇÕES --- */
+
+@keyframes gentleShake {
+    0% { transform: translate(0.5px, 0.5px); }
+    50% { transform: translate(-0.5px, -0.5px); }
+    100% { transform: translate(0.5px, -0.5px); }
+}
+
+.btn-back {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    padding: 10px 15px;
+    border: 4px solid #000;
+    z-index: 3000; /* Garante que fique acima de tudo, inclusive do modal */
+    transition: 0.3s;
+}
+
+.btn-back:hover {
+    background: #000;
+    color: #fff;
+    transform: translate(4px, 4px);
+    box-shadow: -4px -4px 0px #ccc; /* Efeito de profundidade invertida ao clicar */
+}
+
+/* Custom Scrollbar para o Editor */
+#note-text::-webkit-scrollbar {
+    width: 8px;
+}
+#note-text::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+#note-text::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+#note-text::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Evita que o texto encoste nas bordas em telas menores */
+@media (max-width: 768px) {
+    .modal-content {
+        padding: 30px;
+    }
+    #note-title-input {
+        font-size: 1.8rem;
+    }
+}
+
+/* Efeito de "Pop" para sumir */
+.mini-note-scene.removing-animation {
+    pointer-events: none; /* Impede cliques extras durante a animação */
+    transform: scale(0) !important; /* Encolhe até sumir */
+    opacity: 0 !important; /* Desvanece */
+    transition: transform 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045), 
+                opacity 0.3s ease !important;
+}
+
+/* Garante que o cubo base aceite transições */
+.mini-note-scene {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}

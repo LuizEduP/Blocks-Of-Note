@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Cubo 3D</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <div class="intro-box">
+            <span class="word">BLOCKS</span>
+            <div class="cube-slot"></div> <span class="word">F NOTES</span>
+        </div>
+    </div>
+
+    <div class="wrapper" id="menuWrapper">
+        
+        <div class="scene scene-side" id="scene-left">
+            <a href="paginanot.html" style="text-decoration: none; color: inherit;">
+                <div class="cube" id="cube-left">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </div>
+            </a>
+            <div class="cube-name">NOTAS</div>
+        </div>
+
+        <div class="scene" id="scene-main">
+            <div class="cube" id="cube-main">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face right"></div>
+                <div class="face left"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+            </div>
+        </div>
+
+        <div class="scene scene-side" id="scene-right">
+            <a href="paginatask.html" style="text-decoration: none; color: inherit;">
+                <div class="cube" id="cube-right">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </div>
+            </a>
+            <div class="cube-name">TAREFAS</div>
+        
+    </div>
+
+    <script>
+        const wrapper = document.getElementById('menuWrapper');
+        const mainCube = document.getElementById('scene-main');
+
+        // Lógica de clique no cubo central para abrir/fechar o menu
+        mainCube.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            wrapper.classList.toggle('active');
+        });
+
+        // Fecha o menu se clicar fora dos cubos (opcional, mas boa prática)
+        document.addEventListener('click', () => {
+            wrapper.classList.remove('active');
+        });
+    </script>
+        <script src="homepage.js"></script>
+    </body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Tarefas - 3D</title>
+    <link rel="stylesheet" href="paginatask.css">
+</head>
+<body>
+    <a href="index.html" class="btn-back">VOLTAR</a>
+
+    <div class="saved-tasks-section">
+        <h2 class="tasks-title">TASKS</h2>
+        <div id="tasks-list" class="tasks-simple-list">
+            </div>
+    </div>
+
+    <div class="divider-main"></div>
+
+    <div class="container">
+        <div class="form-area">
+            <input type="text" id="task-title" class="notion-title" placeholder="Título da tarefa">
+            <div class="meta-info">
+                <div class="meta-row">
+                    <span class="label">📅 Data:</span>
+                    <input type="date" id="task-date">
+                </div>
+                <div class="meta-row">
+                    <span class="label">⏰ Hora:</span>
+                    <input type="time" id="task-time">
+                </div>
+                <div class="meta-row">
+                    <span class="label">📍 Local:</span>
+                    <input type="text" id="task-location" placeholder="Adicionar local">
+                </div>
+            </div>
+            <div class="divider"></div>
+            <textarea id="task-desc" class="notion-text" placeholder="Escreva os detalhes aqui..."></textarea>
+            <div class="form-footer">
+                <button id="btn-save-task" class="btn-save">SALVAR_TAREFA</button>
+            </div>
+        </div>
+<div class="urgency-area">
+    <div class="scene">
+        <div class="cube medium" id="cube">
+            <div class="face front"></div>
+            <div class="face back"></div>
+            <div class="face right"></div>
+            <div class="face left"></div>
+            <div class="face top"></div>
+            <div class="face bottom"></div>
+        </div>
+    </div>
+
+    <div class="urgency-control">
+        <label>GRAU_DE_URGÊNCIA</label>
+        <select id="urgencySelect">
+            <option value="low">I (Baixa)</option>
+            <option value="medium" selected>II (Média)</option>
+            <option value="high">III (Alta)</option>
+            <option value="extra">IV (Extra)</option>
+        </select>
+    </div>
+</div>
+    </div>
+
+    <div id="view-task-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content view-mode">
+            <span class="close-modal" id="btn-close-view">&times;</span>
+            <h1 id="modal-task-title" class="notion-title-display"></h1>
+            <div class="meta-info-display">
+                <span><strong>Data:</strong> <span id="modal-task-date"></span></span>
+                <span><strong>Hora:</strong> <span id="modal-task-time"></span></span>
+                <span><strong>Local:</strong> <span id="modal-task-location"></span></span>
+            </div>
+            <div class="divider"></div>
+            <div id="modal-task-desc" class="notion-text-display"></div>
+            <div class="modal-footer-display">
+                <button id="btn-delete-task" class="btn-delete-minimal">REMOVER_TAREFA</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="paginatask.js"></script>
+</body>
+</html>
