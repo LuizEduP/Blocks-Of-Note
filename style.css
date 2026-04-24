@@ -1,3 +1,111 @@
+@font-face {
+    font-family: 'Geometra';
+    src: url('Geometra.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* --- ESTILO DA INTRODUÇÃO --- */
+#intro-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000; /* Baixamos um pouco para dar margem */
+    transition: opacity 1s ease, visibility 1s;
+}
+
+.intro-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 50px; /* Reduzi um pouco para o texto "abraçar" o cubo */
+    pointer-events: none;
+    position: relative;
+    z-index: 7000;
+}
+
+.word {
+    font-family: 'Geometra', sans-serif;
+    font-size: 5rem; /* Ajuste aqui se o texto ficar maior ou menor que o cubo */
+    font-weight: bold;
+    color: #000;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    line-height: 1;
+    display: inline-block;
+    animation: textEntrance 1s ease-out forwards;
+}
+
+/* Espaço reservado para o cubo central aparecer no meio */
+.cube-slot {
+    width: var(--size-main); /* Usa a variável que você já tem do cubo */
+    height: var(--size-main);
+    visibility: hidden; /* Invisível para mostrar o cubo que está atrás */
+}
+
+/* Animações */
+@keyframes textEntrance {
+    0% { opacity: 0; transform: translateY(20px); filter: blur(10px); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Classe para sumir com a intro */
+.intro-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 1s ease, visibility 1s ease !important;
+    pointer-events: none !important;
+}
+
+/* Ajuste no cubo central para ele dar um "zoom" quando o texto sumir */
+.wrapper.active-intro #scene-main {
+    animation: cubeFocus 2s ease-in-out;
+}
+
+@keyframes cubeFocus {
+    0% { transform: scale(0.6) rotate(10deg); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+/* 1. Criamos a animação de entrada do cubo */
+@keyframes cubeEntrance {
+    0% { 
+        opacity: 0; 
+        filter: blur(10px);
+    }
+    100% { 
+        opacity: 1; 
+        filter: blur(0);
+    }
+}
+
+/* 2. Aplicamos ela ao container do cubo central */
+#scene-main {
+    z-index: 6000 !important;
+    position: relative;
+    width: var(--size-main);
+    height: var(--size-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Aplica a animação: 1 segundo, igual ao texto */
+    animation: cubeEntrance 1s ease-out forwards;
+}
+
+/* 3. Garantimos que o cubo comece a girar APÓS ou DURANTE a entrada */
+#cube-main {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: spin 12s infinite linear;
+}
+
+
 :root {
     /* Tamanho dos cubos menores (laterais) */
     --size-small: 80px;
@@ -26,6 +134,8 @@ body, html {
 
 /* Container principal */
 .wrapper {
+    transform-style: preserve-3d;
+    z-index: 9998; 
     position: relative;
     width: 800px;
     height: 400px;
@@ -33,6 +143,13 @@ body, html {
     justify-content: center;
     align-items: center;
     perspective: 2000px; /* Perspectiva global */
+    pointer-events: none; 
+    transition: pointer-events 0.3s ease; /* Transição suave se quiser */
+}
+
+
+.allow-clicks {
+    pointer-events: auto !important;
 }
 
 /* --- ESTILOS GERAIS DE CUBO (Reutilizáveis) --- */
@@ -74,14 +191,28 @@ body, html {
 /* --- CUBO CENTRAL (Menu Principal) --- */
 
 #scene-main {
-    width: var(--size-main);
-    height: var(--size-main);
-    z-index: 10;
+    width: var(--size-main); /* ESSENCIAL: Mesma largura do cubo */
+    height: var(--size-main); /* ESSENCIAL: Mesma altura do cubo */
+    z-index: 6000 !important;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default; /* Seta normal enquanto bloqueado */
+}
+
+.allow-clicks #scene-main {
+    cursor: pointer; /* Mãozinha quando liberado */
 }
 
 /* Animação do cubo central */
 #cube-main {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
     animation: spin 12s infinite linear;
+    /* Removemos transformações extras aqui para não quebrar o eixo */
 }
 
 /* Faces do cubo central */
@@ -147,8 +278,8 @@ body, html {
 /* --- LÓGICA DE ATIVAÇÃO DO MENU (CSS) --- */
 
 /* Cubo Central diminui */
-.wrapper.active #scene-main {
-    transform: scale(0.7);
+.wrapper.active-intro #scene-main {
+    animation: cubeFocus 2.5s ease-in-out forwards;
 }
 
 /* Cubo Esquerdo aparece e move */
@@ -163,4 +294,25 @@ body, html {
     transform: translateX(250px); /* Apenas posição */
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Estilo do nome embaixo do cubo */
+.cube-name {
+    position: absolute;
+    bottom: -45px; /* Joga o texto para baixo do cubo */
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Courier New', Courier, monospace; /* Estilo mono */
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #000;
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.5s ease; /* Aparece suavemente */
+    pointer-events: none; /* Não atrapalha o clique */
+}
+
+/* Quando o menu 'active' for ativado, o nome aparece */
+.wrapper.active .cube-name {
+    opacity: 1;
 }

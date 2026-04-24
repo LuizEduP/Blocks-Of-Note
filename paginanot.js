@@ -47,9 +47,9 @@ btnRemove.addEventListener('click', (e) => {
     orbitContainer.classList.toggle('removing', isRemovingMode);
     
     if (isRemovingMode) {
-        btnRemove.style.backgroundColor = "#ff0000";
+        btnRemove.style.backgroundColor = "#3d0000";
         btnRemove.style.color = "#fff";
-        btnRemove.innerText = "CANCELAR";
+        btnRemove.innerText = "CANCEL";
     } else {
         resetRemoveButton();
     }
@@ -94,13 +94,18 @@ function renderCube(id) {
 
 // 6. Funções de Dados (AQUI ESTAVA O ERRO)
 function deleteNote(id, element) {
+    // 1. Atualiza o LocalStorage primeiro
     let notes = JSON.parse(localStorage.getItem('my_3d_notes') || "[]");
     notes = notes.filter(n => n.id !== id);
     localStorage.setItem('my_3d_notes', JSON.stringify(notes));
     
-    element.style.transition = "0.3s";
-    element.style.transform = "scale(0)";
-    setTimeout(() => element.remove(), 300);
+    // 2. Aplica a classe de animação de saída
+    element.classList.add('removing-animation');
+    
+    // 3. Aguarda a animação do CSS (300ms) antes de remover de fato do HTML
+    setTimeout(() => {
+        element.remove();
+    }, 300); 
 }
 
 function openEditor(id) {

@@ -277,7 +277,7 @@ body, html {
 }
 
 .removing .mini-cube .face {
-    border-color: #ff4444 !important; /* Borda vermelha de alerta */
+    border-color: #500000 !important; /* Borda vermelha de alerta */
     background-color: #fff5f5; /* Leve fundo avermelhado */
     cursor: no-drop; /* Cursor de "excluir" */
 }
@@ -348,4 +348,18 @@ body, html {
     #note-title-input {
         font-size: 1.8rem;
     }
+}
+
+/* Efeito de "Pop" para sumir */
+.mini-note-scene.removing-animation {
+    pointer-events: none; /* Impede cliques extras durante a animação */
+    transform: scale(0) !important; /* Encolhe até sumir */
+    opacity: 0 !important; /* Desvanece */
+    transition: transform 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045), 
+                opacity 0.3s ease !important;
+}
+
+/* Garante que o cubo base aceite transições */
+.mini-note-scene {
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
