@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Tarefa</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <!-- FORMULÁRIO -->
+    <div class="form-area">
+        <h2>Tarefa:</h2>
+        <input type="text" placeholder="Digite o título da tarefa">
+
+        <h3>Resumo:</h3>
+        <textarea placeholder="Descrição da tarefa"></textarea>
+
+        <div class="info">
+            <label>Data:</label>
+            <input type="date">
+
+            <label>Horário:</label>
+            <input type="time">
+
+            <label>Local:</label>
+            <input type="text" placeholder="Local da tarefa">
+        </div>
+    </div>
+
+    <!-- LADO DIREITO (URGENCIA) -->
+    <div class="urgency-area">
+
+        <!-- CUBO -->
+        <div class="scene">
+            <div class="cube" id="cube">
+                <div class="face front"></div>
+                <div class="face back"></div>
+                <div class="face right"></div>
+                <div class="face left"></div>
+                <div class="face top"></div>
+                <div class="face bottom"></div>
+            </div>
+        </div>
+
+        <p>Cor do cubo indica urgência</p>
+
+        <!-- SELETOR -->
+        <label>Grau de urgência:</label>
+        <select id="urgencySelect">
+            <option value="1">I (Baixa)</option>
+            <option value="2">II (Média)</option>
+            <option value="3">III (Alta)</option>
+        </select>
+
+        <!-- LEGENDA -->
+        <div class="legend">
+            <p><span class="red"></span> Vermelho = Alta</p>
+            <p><span class="yellow"></span> Amarelo = Média</p>
+            <p><span class="green"></span> Verde = Baixa</p>
+            <p><span class="blue"></span> Azul = Extra</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
