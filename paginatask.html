@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Tarefa - 3D</title>
+    <link rel="stylesheet" href="paginatask.css">
+</head>
+<body>
+
+    <a href="index.html" class="btn-back">VOLTAR</a>
+
+    <div class="container">
+        <div class="form-area">
+            <input type="text" id="task-title" class="notion-title" placeholder="Título da tarefa">
+            
+            <div class="meta-info">
+                <div class="meta-row">
+                    <span class="label">📅 Data:</span>
+                    <input type="date" id="task-date">
+                </div>
+                <div class="meta-row">
+                    <span class="label">⏰ Hora:</span>
+                    <input type="time" id="task-time">
+                </div>
+                <div class="meta-row">
+                    <span class="label">📍 Local:</span>
+                    <input type="text" id="task-location" placeholder="Adicionar local">
+                </div>
+            </div>
+
+            <div class="divider"></div>
+            <textarea id="task-desc" class="notion-text" placeholder="Comece a descrever os detalhes desta tarefa..."></textarea>
+            
+            <div class="form-footer">
+                <button id="btn-save-task" class="btn-save">SALVAR_TAREFA</button>
+            </div>
+        </div>
+
+        <div class="urgency-area">
+            <div class="scene">
+                <div class="cube" id="cube">
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
+                </div>
+            </div>
+
+            <div class="urgency-control">
+                <label>GRAU_DE_URGÊNCIA</label>
+                <select id="urgencySelect">
+                    <option value="low">I (Baixa)</option>
+                    <option value="medium" selected>II (Média)</option>
+                    <option value="high">III (Alta)</option>
+                    <option value="extra">IV (Extra)</option>
+                </select>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><span class="dot green"></span> Baixa</div>
+                <div class="legend-item"><span class="dot yellow"></span> Média</div>
+                <div class="legend-item"><span class="dot red"></span> Alta</div>
+                <div class="legend-item"><span class="dot blue"></span> Extra</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="paginatask.js"></script>
+</body>
+</html>

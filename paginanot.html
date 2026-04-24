@@ -7,30 +7,46 @@
     <link rel="stylesheet" href="paginanot.css">
 </head>
 <body>
-
+<a href="index.html" class="btn-back">RETURN</a>
     <div class="wrapper" id="noteWrapper">
         <div class="main-container" id="main-container">
             
             <div class="scene" id="scene-center">
                 <div class="cube" id="cube-main-note">
-                    <div class="face front">NOTAS</div>
-                    <div class="face back">NOTAS</div>
-                    <div class="face right">NOTAS</div>
-                    <div class="face left">NOTAS</div>
-                    <div class="face top">NOTAS</div>
-                    <div class="face bottom">NOTAS</div>
+                    <div class="face front"></div>
+                    <div class="face back"></div>
+                    <div class="face right"></div>
+                    <div class="face left"></div>
+                    <div class="face top"></div>
+                    <div class="face bottom"></div>
                 </div>
             </div>
 
             <div class="menu-options">
-                <div class="opt-btn btn-top" id="btn-create">CRIAR</div>
-                <div class="opt-btn btn-bottom" id="btn-remove">REMOVER</div>
+                <div class="opt-btn btn-top" id="btn-create">CREAT</div>
+                <div class="opt-btn btn-bottom" id="btn-remove">REMOVE</div>
             </div>
         </div>
 
         <div id="notes-orbit"></div>
     </div>
-
+<div id="note-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-notion-header">
+            <input type="text" id="note-title-input" placeholder="Sem título">
+            <div class="note-meta">Criado em: <span id="note-date-display">--/--</span></div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <textarea id="note-text" placeholder="Comece a escrever sua ideia..."></textarea>
+        
+        <div class="modal-footer">
+            <button id="btn-cancel" class="btn-notion-ghost">Descartar</button>
+            <button id="btn-save" class="btn-notion-save">Salvar nota</button>
+        </div>
+    </div>
+</div>
     <script src="paginanot.js"></script>
 </body>
 </html>
