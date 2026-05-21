@@ -1,11 +1,12 @@
 :root {
-    --size-main: 180px;
-    --half-main: 90px;
-    --size-mini: 40px;
-    --half-mini: 20px;
+    --size-main: clamp(100px, 30vw, 180px);
+    --half-main: calc(var(--size-main) / 2);
+    --size-mini: clamp(30px, 10vw, 40px);
+    --half-mini: calc(var(--size-mini) / 2);
     --border-thick: 6px;
     --border-thin: 2px;
     --transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --orbit-radius: 260px;
 }
 
 body, html {
@@ -30,39 +31,12 @@ body, html {
     height: var(--size-main);
     transform-style: preserve-3d;
     z-index: 10;
+    /* Define half-size para o posicionamento das faces via base.css */
+    --half-size: var(--half-main);
 }
 
-.scene {
-    width: 100%; height: 100%;
-    transform-style: preserve-3d;
-    cursor: pointer;
-}
-
-.cube {
-    width: 100%; height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    animation: spin 15s infinite linear;
-}
-
-.face {
-    position: absolute;
-    width: 100%; height: 100%;
-    background: #fff;
-    border: var(--border-thick) solid #000;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 1.2rem;
-    box-sizing: border-box;
-    backface-visibility: visible;
-}
-
-/* Posicionamento Faces Cubo Grande */
-.front  { transform: translateZ(var(--half-main)); }
-.back   { transform: rotateY(180deg) translateZ(var(--half-main)); }
-.right  { transform: rotateY(90deg) translateZ(var(--half-main)); }
-.left   { transform: rotateY(-90deg) translateZ(var(--half-main)); }
-.top    { transform: rotateX(90deg) translateZ(var(--half-main)); }
-.bottom { transform: rotateX(-90deg) translateZ(var(--half-main)); }
+/* NOTA: .scene, .cube, .face, face positioning (.front, .back, etc.)
+   e @keyframes spin estão agora em shared/base.css */
 
 /* --- MENU --- */
 .menu-options {
@@ -85,7 +59,19 @@ body, html {
 
 .main-container.active .btn-top { top: -120px; opacity: 1; pointer-events: auto; }
 .main-container.active .btn-bottom { bottom: -120px; opacity: 1; pointer-events: auto; }
+.main-container.active ~ .search-bar { opacity: 1; pointer-events: auto; }
 .opt-btn:hover { background: #fff; color: #000; cursor: pointer; }
+
+/* Estados do botão REMOVE — substitui manipulação direta de style */
+.btn-remove-normal {
+    background: #000;
+    color: #fff;
+}
+
+.btn-remove-active {
+    background: #3d0000;
+    color: #fff;
+}
 
 /* --- ÓRBITA --- */
 #notes-orbit {
@@ -125,27 +111,27 @@ body, html {
 .mini-cube .top    { transform: rotateX(90deg) translateZ(var(--half-mini)); }
 .mini-cube .bottom { transform: rotateX(-90deg) translateZ(var(--half-mini)); }
 
-@keyframes spin {
-    from { transform: rotateX(0) rotateY(0); }
-    to { transform: rotateX(360deg) rotateY(720deg); }
-}
-
 @keyframes orbit2D {
-    from { transform: rotate(0deg) translateX(260px) rotate(0deg); }
-    to   { transform: rotate(360deg) translateX(260px) rotate(-360deg); }
+    from { transform: rotate(0deg) translateX(var(--orbit-radius, 260px)) rotate(0deg); }
+    to   { transform: rotate(360deg) translateX(var(--orbit-radius, 260px)) rotate(-360deg); }
 }
 
 /* --- MODAL ESTILO NOTION CLEAN --- */
 /* Fundo do modal com blur mais suave */
 .modal-overlay {
-    display: none; /* Mantém o padrão inicial fechado */
+    display: none; /* Fechado por padrão */
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(255, 255, 255, 0.6); /* Fundo mais claro */
-    backdrop-filter: blur(10px); /* Leve blur no fundo 3D */
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px);
     z-index: 2000;
     justify-content: center; align-items: center;
+}
+
+/* Classe toggle para abrir o modal — substitui style.display direto no JS */
+.modal-overlay.modal-open {
+    display: flex;
 }
 
 /* O corpo da janela - Onde a mágica Notion acontece */
@@ -362,4 +348,87 @@ body, html {
 /* Garante que o cubo base aceite transições */
 .mini-note-scene {
     transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* --- BARRA DE BUSCA (Fase 4.2) --- */
+.search-bar {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition, 0.5s ease);
+    z-index: 20;
+    width: 300px;
+    max-width: 80vw;
+}
+
+.search-input-notes {
+    width: 100%;
+    padding: 10px 16px;
+    border: 3px solid #000;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    outline: none;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.search-input-notes:focus {
+    background: #f7f7f7;
+}
+
+/* Botão EXPORT */
+.btn-export {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #fff;
+    color: #000;
+    border: 3px solid #000;
+    padding: 8px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 0.75rem;
+    cursor: pointer;
+    z-index: 100;
+    transition: 0.2s;
+}
+
+.btn-export:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* --- RESPONSIVIDADE NOTAS (Fase 2.3) --- */
+@media (max-width: 768px) {
+    :root {
+        --size-main: clamp(80px, 25vw, 130px);
+        --half-main: calc(var(--size-main) / 2);
+        --size-mini: clamp(24px, 8vw, 32px);
+        --half-mini: calc(var(--size-mini) / 2);
+        --orbit-radius: 160px;
+    }
+
+    .main-container.active .btn-top { top: -80px; }
+    .main-container.active .btn-bottom { bottom: -80px; }
+
+    .opt-btn {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --size-main: clamp(70px, 22vw, 100px);
+        --half-main: calc(var(--size-main) / 2);
+        --size-mini: clamp(20px, 7vw, 26px);
+        --half-mini: calc(var(--size-mini) / 2);
+        --orbit-radius: 110px;
+    }
+
+    .wrapper.active .btn-top { top: -60px; }
+    .wrapper.active .btn-bottom { bottom: -60px; }
 }

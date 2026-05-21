@@ -108,41 +108,44 @@ body {
     align-items: center;
 }
 
-.scene {
+/* Task cube: tamanho fixo de 150px */
+.urgency-area .scene {
+    position: relative;
     width: 150px; height: 150px;
     perspective: 800px;
     margin-bottom: 40px;
 }
 
-.cube {
+.urgency-area .cube {
     width: 100%; height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transform: rotateX(-20deg) rotateY(30deg);
     transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.face {
+/* Task cube face: 150px com half = 75px */
+.urgency-area .face {
     position: absolute;
     width: 150px; height: 150px;
     background: #fff;
     border: 4px solid #000;
     box-sizing: border-box;
+    font-size: 2rem;
+    font-weight: 900;
 }
 
-/* Posicionamento Faces */
-.front  { transform: translateZ(75px); }
-.back   { transform: rotateY(180deg) translateZ(75px); }
-.right  { transform: rotateY(90deg) translateZ(75px); }
-.left   { transform: rotateY(-90deg) translateZ(75px); }
-.top    { transform: rotateX(90deg) translateZ(75px); }
-.bottom { transform: rotateX(-90deg) translateZ(75px); }
+.urgency-area .front  { transform: translateZ(75px); }
+.urgency-area .back   { transform: rotateY(180deg) translateZ(75px); }
+.urgency-area .right  { transform: rotateY(90deg) translateZ(75px); }
+.urgency-area .left   { transform: rotateY(-90deg) translateZ(75px); }
+.urgency-area .top    { transform: rotateX(90deg) translateZ(75px); }
+.urgency-area .bottom { transform: rotateX(-90deg) translateZ(75px); }
 
 /* CORES DINÂMICAS DO CUBO */
-.cube.low .face { background: #dcfce7; border-color: #22c55e; }
-.cube.medium .face { background: #fef9c3; border-color: #eab308; }
-.cube.high .face { background: #fee2e2; border-color: #ef4444; }
-.cube.extra .face { background: #dbeafe; border-color: #3b82f6; }
+.urgency-area .cube.low .face { background: #dcfce7; border-color: #22c55e; }
+.urgency-area .cube.medium .face { background: #fef9c3; border-color: #eab308; }
+.urgency-area .cube.high .face { background: #fee2e2; border-color: #ef4444; }
+.urgency-area .cube.extra .face { background: #dbeafe; border-color: #3b82f6; }
 
 /* SELETOR */
 .urgency-control { width: 100%; margin-bottom: 30px; }
@@ -167,8 +170,101 @@ body {
 .red { background: #ef4444; }
 .blue { background: #3b82f6; }
 
+/* Animação de rotação — preserva inclinação rotateX(-20deg) e começa em rotateY(30deg) */
 @keyframes spin {
-    from { transform: rotateX(-20deg) rotateY(0deg); }
-    to { transform: rotateX(-20deg) rotateY(360deg); }
+    from { transform: rotateX(-20deg) rotateY(30deg); }
+    to { transform: rotateX(-20deg) rotateY(390deg); }
 }
-.cube { animation: spin 10s infinite linear; }
+
+/* --- RESPONSIVIDADE TASKS (Fase 2.2) --- */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        gap: 40px;
+        margin: 60px auto;
+        padding: 16px;
+    }
+
+    .form-area {
+        flex: none;
+    }
+
+    .notion-title {
+        font-size: 2rem;
+    }
+
+    .notion-text {
+        height: 200px;
+    }
+
+    .urgency-area {
+        border-left: none;
+        border-top: 1px solid #eee;
+        padding-left: 0;
+        padding-top: 30px;
+    }
+
+    .urgency-area .scene {
+        width: 120px;
+        height: 120px;
+        perspective: 600px;
+    }
+
+    .urgency-area .face {
+        width: 120px;
+        height: 120px;
+    }
+
+    .urgency-area .front  { transform: translateZ(60px); }
+    .urgency-area .back   { transform: rotateY(180deg) translateZ(60px); }
+    .urgency-area .right  { transform: rotateY(90deg) translateZ(60px); }
+    .urgency-area .left   { transform: rotateY(-90deg) translateZ(60px); }
+    .urgency-area .top    { transform: rotateX(90deg) translateZ(60px); }
+    .urgency-area .bottom { transform: rotateX(-90deg) translateZ(60px); }
+
+    .meta-row {
+        grid-template-columns: 100px 1fr;
+    }
+
+    .btn-save {
+        width: 100%;
+        text-align: center;
+    }
+
+    .legend {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        margin: 40px auto;
+        gap: 30px;
+    }
+
+    .notion-title {
+        font-size: 1.5rem;
+    }
+
+    .meta-row {
+        grid-template-columns: 80px 1fr;
+    }
+
+    .urgency-area .scene {
+        width: 100px;
+        height: 100px;
+        perspective: 500px;
+    }
+
+    .urgency-area .face {
+        width: 100px;
+        height: 100px;
+    }
+
+    .urgency-area .front  { transform: translateZ(50px); }
+    .urgency-area .back   { transform: rotateY(180deg) translateZ(50px); }
+    .urgency-area .right  { transform: rotateY(90deg) translateZ(50px); }
+    .urgency-area .left   { transform: rotateY(-90deg) translateZ(50px); }
+    .urgency-area .top    { transform: rotateX(90deg) translateZ(50px); }
+    .urgency-area .bottom { transform: rotateX(-90deg) translateZ(50px); }
+}

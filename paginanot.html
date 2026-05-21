@@ -4,15 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhas Notas - 3D</title>
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/toast.css">
     <link rel="stylesheet" href="paginanot.css">
 </head>
 <body>
-<a href="index.html" class="btn-back">RETURN</a>
-    <div class="wrapper" id="noteWrapper">
+<a href="index.html" class="btn-back" aria-label="Voltar para página inicial">RETURN</a>
+    <div class="wrapper" id="noteWrapper" role="application" aria-label="Gerenciador de Notas">
         <div class="main-container" id="main-container">
             
             <div class="scene" id="scene-center">
-                <div class="cube" id="cube-main-note">
+                <div class="cube" id="cube-main-note" role="button" aria-label="Abrir menu de notas" tabindex="0">
                     <div class="face front"></div>
                     <div class="face back"></div>
                     <div class="face right"></div>
@@ -23,30 +25,42 @@
             </div>
 
             <div class="menu-options">
-                <div class="opt-btn btn-top" id="btn-create">CREAT</div>
-                <div class="opt-btn btn-bottom" id="btn-remove">REMOVE</div>
+                <div class="opt-btn btn-top" id="btn-create" role="button" tabindex="0" aria-label="Criar nova nota">CREAT</div>
+                <div class="opt-btn btn-bottom" id="btn-remove" role="button" tabindex="0" aria-label="Alternar modo de remoção">REMOVE</div>
             </div>
         </div>
 
-        <div id="notes-orbit"></div>
+        <!-- Barra de busca -->
+        <div id="notes-search-bar" class="search-bar">
+            <input type="text" id="notes-search-input" placeholder="🔍 Buscar notas..." aria-label="Buscar notas pelo título" class="search-input-notes">
+        </div>
+
+        <div id="notes-orbit" aria-label="Lista de notas em órbita"></div>
+
+        <!-- Botão exportar (fixo no canto) -->
+        <button id="btn-export" class="btn-export" aria-label="Exportar notas como JSON">EXPORT</button>
     </div>
-<div id="note-modal" class="modal-overlay">
+<div id="note-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Editor de nota">
     <div class="modal-content">
         <div class="modal-notion-header">
-            <input type="text" id="note-title-input" placeholder="Sem título">
+            <label for="note-title-input" class="sr-only">Título da nota</label>
+            <input type="text" id="note-title-input" placeholder="Sem título" maxlength="200" aria-label="Título da nota">
             <div class="note-meta">Criado em: <span id="note-date-display">--/--</span></div>
         </div>
         
-        <div class="divider"></div>
+        <div class="divider" aria-hidden="true"></div>
         
-        <textarea id="note-text" placeholder="Comece a escrever sua ideia..."></textarea>
+        <label for="note-text" class="sr-only">Conteúdo da nota</label>
+        <textarea id="note-text" placeholder="Comece a escrever sua ideia..." maxlength="5000" aria-label="Conteúdo da nota"></textarea>
         
         <div class="modal-footer">
-            <button id="btn-cancel" class="btn-notion-ghost">Descartar</button>
-            <button id="btn-save" class="btn-notion-save">Salvar nota</button>
+            <button id="btn-cancel" class="btn-notion-ghost" aria-label="Descartar alterações">Descartar</button>
+            <button id="btn-save" class="btn-notion-save" aria-label="Salvar nota">Salvar nota</button>
         </div>
     </div>
 </div>
+    <script src="shared/toast.js"></script>
+    <script src="shared/storage.js"></script>
     <script src="paginanot.js"></script>
 </body>
 </html>

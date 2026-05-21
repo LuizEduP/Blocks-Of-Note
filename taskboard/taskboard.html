@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Board - Blocks Of Note</title>
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="taskboard.css">
+</head>
+<body>
+
+    <header class="taskboard-header">
+        <h1>📋 Task Board</h1>
+        <div class="header-actions">
+            <a href="../paginatask.html" class="btn-header" aria-label="Criar nova tarefa">+ NOVA TAREFA</a>
+            <a href="../index.html" class="btn-header" aria-label="Voltar para página inicial">← VOLTAR</a>
+        </div>
+    </header>
+
+    <div class="taskboard-controls" role="search" aria-label="Filtrar tarefas">
+        <input type="text" id="taskboard-search" class="search-input" placeholder="🔍 Buscar tarefas..." aria-label="Buscar tarefas por título, descrição ou local">
+        <select id="taskboard-filter" class="filter-select" aria-label="Filtrar por urgência">
+            <option value="all">Todas urgências</option>
+            <option value="low">I (Baixa)</option>
+            <option value="medium">II (Média)</option>
+            <option value="high">III (Alta)</option>
+            <option value="extra">IV (Extra)</option>
+        </select>
+        <span id="taskboard-stats" class="stats" aria-live="polite">0 tarefas</span>
+    </div>
+
+    <div id="taskboard-grid" class="taskboard-grid" role="list" aria-label="Lista de tarefas">
+        <!-- Renderizado via JS -->
+    </div>
+
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="taskboard.js"></script>
+</body>
+</html>

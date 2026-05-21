@@ -4,54 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Tarefa - 3D</title>
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/toast.css">
     <link rel="stylesheet" href="paginatask.css">
 </head>
 <body>
 
-    <a href="index.html" class="btn-back">VOLTAR</a>
+    <a href="index.html" class="btn-back" aria-label="Voltar para página inicial">VOLTAR</a>
 
-    <div class="container">
+    <div class="container" role="main" aria-label="Formulário de criação de tarefas">
         <div class="form-area">
-            <input type="text" id="task-title" class="notion-title" placeholder="Título da tarefa">
+            <label for="task-title" class="sr-only">Título da tarefa</label>
+            <input type="text" id="task-title" class="notion-title" placeholder="Título da tarefa" maxlength="200" aria-label="Título da tarefa">
             
             <div class="meta-info">
                 <div class="meta-row">
-                    <span class="label">📅 Data:</span>
-                    <input type="date" id="task-date">
+                    <span class="label" id="date-label">📅 Data:</span>
+                    <input type="date" id="task-date" aria-labelledby="date-label">
                 </div>
                 <div class="meta-row">
-                    <span class="label">⏰ Hora:</span>
-                    <input type="time" id="task-time">
+                    <span class="label" id="time-label">⏰ Hora:</span>
+                    <input type="time" id="task-time" aria-labelledby="time-label">
                 </div>
                 <div class="meta-row">
-                    <span class="label">📍 Local:</span>
-                    <input type="text" id="task-location" placeholder="Adicionar local">
+                    <span class="label" id="location-label">📍 Local:</span>
+                    <input type="text" id="task-location" placeholder="Adicionar local" maxlength="200" aria-labelledby="location-label">
                 </div>
             </div>
 
-            <div class="divider"></div>
-            <textarea id="task-desc" class="notion-text" placeholder="Comece a descrever os detalhes desta tarefa..."></textarea>
+            <div class="divider" aria-hidden="true"></div>
+            <label for="task-desc" class="sr-only">Descrição da tarefa</label>
+            <textarea id="task-desc" class="notion-text" placeholder="Comece a descrever os detalhes desta tarefa..." maxlength="1000" aria-label="Descrição da tarefa"></textarea>
             
             <div class="form-footer">
-                <button id="btn-save-task" class="btn-save">SALVAR_TAREFA</button>
+                <button id="btn-save-task" class="btn-save" aria-label="Salvar tarefa">SALVAR_TAREFA</button>
             </div>
         </div>
 
-        <div class="urgency-area">
+        <div class="urgency-area" role="region" aria-label="Seletor de urgência">
             <div class="scene">
-                <div class="cube" id="cube">
-                    <div class="face front"></div>
-                    <div class="face back"></div>
-                    <div class="face right"></div>
-                    <div class="face left"></div>
-                    <div class="face top"></div>
-                    <div class="face bottom"></div>
+                <div class="cube" id="cube" role="img" aria-label="Indicador visual de urgência">
+                    <div class="face front">I</div>
+                    <div class="face back">II</div>
+                    <div class="face right">III</div>
+                    <div class="face left">IV</div>
+                    <div class="face top">●</div>
+                    <div class="face bottom">●</div>
                 </div>
             </div>
 
             <div class="urgency-control">
-                <label>GRAU_DE_URGÊNCIA</label>
-                <select id="urgencySelect">
+                <label for="urgencySelect">GRAU_DE_URGÊNCIA</label>
+                <select id="urgencySelect" aria-label="Selecionar grau de urgência">
                     <option value="low">I (Baixa)</option>
                     <option value="medium" selected>II (Média)</option>
                     <option value="high">III (Alta)</option>
@@ -59,15 +63,21 @@
                 </select>
             </div>
 
-            <div class="legend">
-                <div class="legend-item"><span class="dot green"></span> Baixa</div>
-                <div class="legend-item"><span class="dot yellow"></span> Média</div>
-                <div class="legend-item"><span class="dot red"></span> Alta</div>
-                <div class="legend-item"><span class="dot blue"></span> Extra</div>
+            <div class="legend" aria-hidden="true">
+                <div class="legend-item"><span class="dot green" aria-hidden="true"></span> Baixa</div>
+                <div class="legend-item"><span class="dot yellow" aria-hidden="true"></span> Média</div>
+                <div class="legend-item"><span class="dot red" aria-hidden="true"></span> Alta</div>
+                <div class="legend-item"><span class="dot blue" aria-hidden="true"></span> Extra</div>
             </div>
         </div>
     </div>
 
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 100;">
+        <a href="taskboard/taskboard.html" class="btn-back" style="position: static; display: inline-block;" aria-label="Visualizar board de tarefas">📋 BOARD</a>
+    </div>
+
+    <script src="shared/toast.js"></script>
+    <script src="shared/storage.js"></script>
     <script src="paginatask.js"></script>
 </body>
 </html>

@@ -4,21 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Cubo 3D</title>
+    <link rel="stylesheet" href="shared/base.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="intro-overlay">
+    <div id="intro-overlay" role="dialog" aria-modal="true" aria-label="Apresentação Blocks of Note">
         <div class="intro-box">
-            <span class="word">BLOCKS</span>
-            <div class="cube-slot"></div> <span class="word">F NOTES</span>
+            <span class="word" aria-hidden="true">BLOCKS</span>
+            <div class="cube-slot" aria-hidden="true"></div>
+            <span class="word" aria-hidden="true">F NOTES</span>
         </div>
     </div>
 
-    <div class="wrapper" id="menuWrapper">
+    <div class="wrapper" id="menuWrapper" role="navigation" aria-label="Menu principal">
         
         <div class="scene scene-side" id="scene-left">
-            <a href="paginanot.html" style="text-decoration: none; color: inherit;">
+            <a href="paginanot.html" class="cube-link" aria-label="Abrir página de Notas">
                 <div class="cube" id="cube-left">
                     <div class="face front"></div>
                     <div class="face back"></div>
@@ -28,11 +30,11 @@
                     <div class="face bottom"></div>
                 </div>
             </a>
-            <div class="cube-name">NOTAS</div>
+            <div class="cube-name" aria-hidden="true">NOTAS</div>
         </div>
 
         <div class="scene" id="scene-main">
-            <div class="cube" id="cube-main">
+            <div class="cube" id="cube-main" role="button" aria-label="Abrir menu principal" tabindex="0">
                 <div class="face front"></div>
                 <div class="face back"></div>
                 <div class="face right"></div>
@@ -43,7 +45,7 @@
         </div>
 
         <div class="scene scene-side" id="scene-right">
-            <a href="paginatask.html" style="text-decoration: none; color: inherit;">
+            <a href="paginatask.html" class="cube-link" aria-label="Abrir página de Tarefas">
                 <div class="cube" id="cube-right">
                     <div class="face front"></div>
                     <div class="face back"></div>
@@ -53,25 +55,10 @@
                     <div class="face bottom"></div>
                 </div>
             </a>
-            <div class="cube-name">TAREFAS</div>
-        
+            <div class="cube-name" aria-hidden="true">TAREFAS</div>
+        </div>
     </div>
 
-    <script>
-        const wrapper = document.getElementById('menuWrapper');
-        const mainCube = document.getElementById('scene-main');
-
-        // Lógica de clique no cubo central para abrir/fechar o menu
-        mainCube.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            wrapper.classList.toggle('active');
-        });
-
-        // Fecha o menu se clicar fora dos cubos (opcional, mas boa prática)
-        document.addEventListener('click', () => {
-            wrapper.classList.remove('active');
-        });
-    </script>
-        <script src="homepage.js"></script>
-    </body>
+    <script src="homepage.js"></script>
+</body>
 </html>

@@ -1,8 +1,10 @@
-@font-face {
-    font-family: 'Geometra';
-    src: url('Geometra.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+/* Fonte Geometra substituída por Bebas Neue (Google Fonts) — similar bold display */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
+/* Classe para links de cubos laterais — substitui estilos inline */
+.cube-link {
+    text-decoration: none;
+    color: inherit;
 }
 
 /* --- ESTILO DA INTRODUÇÃO --- */
@@ -29,7 +31,7 @@
 }
 
 .word {
-    font-family: 'Geometra', sans-serif;
+    font-family: 'Bebas Neue', sans-serif;
     font-size: 5rem; /* Ajuste aqui se o texto ficar maior ou menor que o cubo */
     font-weight: bold;
     color: #000;
@@ -61,16 +63,6 @@
     pointer-events: none !important;
 }
 
-/* Ajuste no cubo central para ele dar um "zoom" quando o texto sumir */
-.wrapper.active-intro #scene-main {
-    animation: cubeFocus 2s ease-in-out;
-}
-
-@keyframes cubeFocus {
-    0% { transform: scale(0.6) rotate(10deg); opacity: 0; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-}
 /* 1. Criamos a animação de entrada do cubo */
 @keyframes cubeEntrance {
     0% { 
@@ -107,13 +99,13 @@
 
 
 :root {
-    /* Tamanho dos cubos menores (laterais) */
-    --size-small: 80px;
-    --half-size-small: 40px;
+    /* Tamanho dos cubos menores (laterais) — fluidos */
+    --size-small: clamp(60px, 12vw, 80px);
+    --half-size-small: calc(var(--size-small) / 2);
     
-    /* Tamanho do cubo central */
-    --size-main: 200px;
-    --half-size-main: 100px;
+    /* Tamanho do cubo central — fluidos */
+    --size-main: clamp(120px, 25vw, 200px);
+    --half-size-main: calc(var(--size-main) / 2);
     
     --border-color: #000000;
     --transition-speed: 0.6s;
@@ -152,41 +144,6 @@ body, html {
     pointer-events: auto !important;
 }
 
-/* --- ESTILOS GERAIS DE CUBO (Reutilizáveis) --- */
-
-.scene {
-    position: absolute;
-    transition: transform var(--transition-speed) cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                opacity var(--transition-speed) ease;
-}
-
-.cube {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-    cursor: pointer;
-    transition: transform var(--hover-speed) ease-out;
-}
-
-.face {
-    position: absolute;
-    border: 4px solid var(--border-color);
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: #000;
-    transition: background var(--hover-speed) ease, 
-                color var(--hover-speed) ease;
-}
-
-/* Animação padrão de rotação */
-@keyframes spin {
-    from { transform: rotateX(0deg) rotateY(0deg); }
-    to   { transform: rotateX(360deg) rotateY(720deg); }
-}
 
 /* --- CUBO CENTRAL (Menu Principal) --- */
 
@@ -277,11 +234,6 @@ body, html {
 
 /* --- LÓGICA DE ATIVAÇÃO DO MENU (CSS) --- */
 
-/* Cubo Central diminui */
-.wrapper.active-intro #scene-main {
-    animation: cubeFocus 2.5s ease-in-out forwards;
-}
-
 /* Cubo Esquerdo aparece e move */
 .wrapper.active #scene-left {
     transform: translateX(-250px); /* Apenas posição */
@@ -315,4 +267,64 @@ body, html {
 /* Quando o menu 'active' for ativado, o nome aparece */
 .wrapper.active .cube-name {
     opacity: 1;
+}
+
+/* --- RESPONSIVIDADE HOMEPAGE (Fase 2.1) --- */
+@media (max-width: 768px) {
+    :root {
+        --size-small: clamp(40px, 10vw, 60px);
+        --half-size-small: calc(var(--size-small) / 2);
+        --size-main: clamp(80px, 20vw, 120px);
+        --half-size-main: calc(var(--size-main) / 2);
+    }
+
+    .wrapper {
+        width: 90vw;
+        height: 50vh;
+    }
+
+    .wrapper.active #scene-left {
+        transform: translateX(-35vw);
+    }
+
+    .wrapper.active #scene-right {
+        transform: translateX(35vw);
+    }
+
+    .intro-box {
+        gap: 20px;
+    }
+
+    .word {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
+    }
+
+    .cube-slot {
+        width: var(--size-main);
+        height: var(--size-main);
+    }
+
+    .cube-name {
+        font-size: 0.7rem;
+        bottom: -35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .word {
+        font-size: 1.8rem;
+    }
+
+    .intro-box {
+        gap: 10px;
+    }
+
+    .wrapper.active #scene-left {
+        transform: translateX(-25vw);
+    }
+
+    .wrapper.active #scene-right {
+        transform: translateX(25vw);
+    }
 }

@@ -1,0 +1,121 @@
+/* ============================================
+   base.css — Estilos Compartilhados Blocks-Of-Note
+   Camada 1 da Arquitetura CSS
+   ============================================ */
+
+/* --- RESET MÍNIMO --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- VARIÁVEIS GLOBAIS --- */
+:root {
+    /* Cores */
+    --color-bg: #ffffff;
+    --color-text: #000000;
+    --color-border: #000000;
+    --color-accent-green: #22c55e;
+    --color-accent-yellow: #eab308;
+    --color-accent-red: #ef4444;
+    --color-accent-blue: #3b82f6;
+    --color-surface: #f7f7f7;
+    --color-text-muted: #888888;
+    --color-divider: #eeeeee;
+
+    /* Dimensões de cubo — fluidas com clamp() */
+    --cube-main-size: clamp(120px, 25vw, 200px);
+    --cube-main-half: calc(var(--cube-main-size) / 2);
+    --cube-small-size: clamp(60px, 12vw, 80px);
+    --cube-small-half: calc(var(--cube-small-size) / 2);
+    --cube-mini-size: clamp(30px, 10vw, 40px);
+    --cube-mini-half: calc(var(--cube-mini-size) / 2);
+
+    /* Tipografia */
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+
+    /* Transições */
+    --ease-elastic: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    --transition-fast: 0.3s ease;
+    --transition-normal: 0.5s ease;
+    --transition-slow: 0.8s var(--ease-elastic);
+
+    /* Bordas */
+    --border-thick: 6px solid var(--color-border);
+    --border-thin: 2px solid var(--color-border);
+}
+
+/* --- COMPONENTE CUBO 3D BASE --- */
+.scene {
+    position: absolute;
+    transition: transform var(--transition-slow), opacity var(--transition-normal);
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: transform var(--transition-fast) ease-out;
+}
+
+.face {
+    position: absolute;
+    border: 4px solid var(--color-border);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: var(--color-text);
+    transition: background var(--transition-fast) ease, color var(--transition-fast) ease;
+}
+
+/* Posicionamento das 6 faces (genérico, usa variáveis do módulo) */
+.front  { transform: translateZ(var(--half-size, var(--cube-main-half))); }
+.back   { transform: rotateY(180deg) translateZ(var(--half-size, var(--cube-main-half))); }
+.right  { transform: rotateY(90deg) translateZ(var(--half-size, var(--cube-main-half))); }
+.left   { transform: rotateY(-90deg) translateZ(var(--half-size, var(--cube-main-half))); }
+.top    { transform: rotateX(90deg) translateZ(var(--half-size, var(--cube-main-half))); }
+.bottom { transform: rotateX(-90deg) translateZ(var(--half-size, var(--cube-main-half))); }
+
+/* Animação padrão de rotação */
+@keyframes spin {
+    from { transform: rotateX(0deg) rotateY(0deg); }
+    to   { transform: rotateX(360deg) rotateY(720deg); }
+}
+
+/* --- ACESSIBILIDADE --- */
+
+/* Foco visível para navegação por teclado */
+:focus-visible {
+    outline: 3px solid var(--color-border);
+    outline-offset: 3px;
+}
+
+/* Redução de movimento para usuários com sensibilidade vestibular */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* --- UTILITÁRIOS DE ACESSIBILIDADE --- */
+
+/* Classe para conteúdo visível apenas para leitores de tela */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

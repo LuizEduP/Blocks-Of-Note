@@ -1,0 +1,227 @@
+/* ============================================
+   taskboard.css — Board de Tarefas
+   ============================================ */
+
+:root {
+    --taskboard-bg: #fff;
+    --taskboard-text: #000;
+    --taskboard-border: 3px solid #000;
+    --taskboard-card-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+}
+
+body {
+    margin: 0;
+    background: var(--taskboard-bg);
+    color: var(--taskboard-text);
+    font-family: 'Courier New', Courier, monospace;
+    min-height: 100vh;
+}
+
+/* Cabeçalho */
+.taskboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: var(--taskboard-border);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.taskboard-header h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn-header {
+    background: #fff;
+    color: #000;
+    border: var(--taskboard-border);
+    padding: 8px 16px;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-header:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* Controles */
+.taskboard-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 30px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    border: var(--taskboard-border);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    outline: none;
+}
+
+.filter-select {
+    padding: 10px 14px;
+    border: var(--taskboard-border);
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+}
+
+.stats {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: bold;
+}
+
+/* Grid de tarefas */
+.taskboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+    padding: 20px 30px;
+}
+
+/* Card de tarefa */
+.task-card {
+    border: var(--taskboard-border);
+    padding: 20px;
+    background: #fff;
+    box-shadow: var(--taskboard-card-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.task-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.15);
+}
+
+.task-card .card-urgency {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+}
+
+.task-card.urgency-low .card-urgency { background: #22c55e; }
+.task-card.urgency-medium .card-urgency { background: #eab308; }
+.task-card.urgency-high .card-urgency { background: #ef4444; }
+.task-card.urgency-extra .card-urgency { background: #3b82f6; }
+
+.task-card .card-body {
+    margin-left: 6px;
+    padding-left: 16px;
+}
+
+.task-card .card-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin: 0 0 8px 0;
+    word-break: break-word;
+}
+
+.task-card .card-meta {
+    font-size: 0.75rem;
+    color: #888;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.task-card .card-desc {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #444;
+    margin-bottom: 12px;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.task-card .card-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-card {
+    padding: 6px 14px;
+    border: 2px solid #000;
+    background: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-card:hover {
+    background: #000;
+    color: #fff;
+}
+
+.btn-card.btn-delete:hover {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+}
+
+/* Estado vazio */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    border: var(--taskboard-border);
+    border-style: dashed;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0 0 16px 0;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .taskboard-header {
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .taskboard-controls {
+        padding: 12px 16px;
+    }
+
+    .taskboard-grid {
+        grid-template-columns: 1fr;
+        padding: 12px 16px;
+    }
+
+    .search-input {
+        min-width: 150px;
+    }
+}
