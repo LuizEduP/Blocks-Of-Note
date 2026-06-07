@@ -3,10 +3,12 @@
 // Servidor estático mínimo (sem dependências)
 // ============================================
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = __dirname;
 
@@ -25,13 +27,11 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-    // Normaliza a URL
     let url = req.url.split('?')[0];
     if (url === '/') url = '/index.html';
 
     const filePath = path.join(PUBLIC_DIR, url);
 
-    // Previne path traversal
     if (!filePath.startsWith(PUBLIC_DIR)) {
         res.writeHead(403);
         res.end('Forbidden');
