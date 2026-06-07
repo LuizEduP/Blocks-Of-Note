@@ -1,0 +1,206 @@
+/* ============================================
+   taskboard.css — Board de Tarefas
+   Notion-inspired database/card view
+   ============================================ */
+
+/* --- LAYOUT --- */
+.board-page {
+    padding: 32px 40px;
+    max-width: 1200px;
+}
+
+/* --- HEADER --- */
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* --- CONTROLS --- */
+.board-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    gap: 16px;
+    flex-wrap: wrap;
+    border-bottom: var(--border);
+    margin-bottom: 24px;
+}
+
+.board-controls-left {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.board-controls-left .input,
+.board-controls-left .select {
+    min-width: 200px;
+}
+
+.board-stats {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* --- GRID --- */
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+/* --- CARD --- */
+.task-card {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.task-card:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+}
+
+.task-card .card-urgency {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.task-card.urgency-low .card-urgency { background: var(--color-success); }
+.task-card.urgency-medium .card-urgency { background: var(--color-warning); }
+.task-card.urgency-high .card-urgency { background: var(--color-error); }
+.task-card.urgency-extra .card-urgency { background: var(--color-info); }
+
+.task-card .card-body {
+    margin-left: 4px;
+    padding-left: 16px;
+}
+
+.task-card .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 6px 0;
+    word-break: break-word;
+    color: var(--color-text);
+}
+
+.task-card .card-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.task-card .card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.task-card .card-desc {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    margin-bottom: 12px;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.task-card .card-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: var(--border);
+}
+
+.task-card .card-actions .btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+}
+
+/* --- ESTADO VAZIO --- */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    border: 2px dashed var(--color-border);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    background: var(--color-bg-secondary);
+}
+
+.empty-state .empty-icon {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.empty-state .empty-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--color-text);
+}
+
+.empty-state .empty-subtitle {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin: 0 0 8px 0;
+    max-width: 400px;
+}
+
+.empty-state .btn {
+    margin-top: 4px;
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 768px) {
+    .board-page {
+        padding: 20px 16px;
+    }
+
+    .board-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .board-controls-left {
+        flex-direction: column;
+    }
+
+    .board-controls-left .input,
+    .board-controls-left .select {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .board-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas - Blocks of Note</title>
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/toast.css">
+    <link rel="stylesheet" href="shared/auth.css">
+    <link rel="stylesheet" href="paginanot.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" role="navigation" aria-label="Navegação principal">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">B</div>
+            <span class="sidebar-logo-text">BLOCKS</span>
+        </div>
+        <!-- Google Login -->
+        <div id="auth-container" class="auth-container"></div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Navegação</div>
+            <a href="index.html" class="sidebar-link">
+                <span class="sidebar-link-icon">🏠</span>
+                Início
+            </a>
+            <a href="paginanot.html" class="sidebar-link active">
+                <span class="sidebar-link-icon">📝</span>
+                Notas
+            </a>
+            <a href="paginatask.html" class="sidebar-link">
+                <span class="sidebar-link-icon">✅</span>
+                Nova Tarefa
+            </a>
+            <a href="taskboard/taskboard.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📋</span>
+                Task Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            Blocks of Note &copy; 2026
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-with-sidebar notes-page" role="application" aria-label="Gerenciador de Notas">
+
+        <header class="page-header">
+            <h1 class="page-title">📝 Notas</h1>
+            <div class="page-actions">
+                <button id="btn-create" class="btn btn-primary" aria-label="Criar nova nota">+ Nova Nota</button>
+                <button id="btn-remove" class="btn btn-danger" aria-label="Alternar modo de remoção">Remover</button>
+                <button id="btn-export" class="btn" aria-label="Exportar notas">Exportar</button>
+            </div>
+        </header>
+
+        <div class="notes-controls">
+            <div class="notes-search-wrapper">
+                <span class="notes-search-icon">🔍</span>
+                <input type="text" id="notes-search-input" class="input notes-search-input" placeholder="Buscar notas por título ou conteúdo..." aria-label="Buscar notas pelo título ou conteúdo">
+            </div>
+            <span id="notes-stats" class="notes-stats" aria-live="polite">0 notas</span>
+        </div>
+
+        <!-- Anúncio de resultados para leitores de tela -->
+        <div id="search-announce" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+        <div id="notes-grid" class="notes-grid" role="list" aria-label="Lista de notas">
+            <!-- Renderizado via JS -->
+        </div>
+
+    </div>
+
+    <!-- Modal de edição (Obsidian-inspired) -->
+    <div id="note-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Editor de nota">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-header-top">
+                    <input type="text" id="note-title-input" placeholder="Sem título" maxlength="200" aria-label="Título da nota" class="modal-title-input">
+                    <button id="btn-modal-close" class="modal-close-btn" aria-label="Fechar editor">✕</button>
+                </div>
+                <div class="modal-header-meta">
+                    <span class="modal-date">Criado em: <span id="note-date-display">--/--</span></span>
+                    <span class="modal-char-count" id="note-char-count">0 caracteres</span>
+                </div>
+            </div>
+
+            <div class="divider" aria-hidden="true"></div>
+
+            <textarea id="note-text" placeholder="Comece a escrever sua ideia... Use **negrito**, *itálico* e listas normalmente." maxlength="5000" aria-label="Conteúdo da nota" class="modal-textarea"></textarea>
+
+            <div class="modal-footer">
+                <div class="modal-footer-left">
+                    <span class="modal-tip">Dica: Enter para nova linha · Esc para fechar</span>
+                </div>
+                <div class="modal-footer-right">
+                    <button id="btn-cancel" class="btn" aria-label="Descartar alterações">Descartar</button>
+                    <button id="btn-save" class="btn btn-primary" aria-label="Salvar nota">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="shared/toast.js"></script>
+    <script src="shared/storage.js"></script>
+    <script src="shared/utils.js"></script>
+    <script src="shared/notes-storage.js"></script>
+    <script src="shared/auth.js"></script>
+    <script src="paginanot.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Auth.init();
+            Auth.renderButton('auth-container');
+        });
+    </script>
+</body>
+</html>

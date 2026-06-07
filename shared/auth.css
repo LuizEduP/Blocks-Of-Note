@@ -1,0 +1,118 @@
+/* ============================================
+   auth.css — Estilos do Google Login
+   ============================================ */
+
+/* --- Container de autenticação na sidebar --- */
+.auth-container {
+    padding: 12px 12px 8px;
+    border-bottom: var(--border);
+}
+
+/* --- Botão Google --- */
+.auth-google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--color-bg);
+    border: var(--border);
+    border-radius: var(--border-radius-sm);
+    font-family: var(--font-sans);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.auth-google-btn:hover {
+    background: var(--color-surface);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+.auth-google-btn:active {
+    transform: scale(0.98);
+}
+
+.auth-google-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* --- Usuário logado --- */
+.auth-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 4px;
+}
+
+.auth-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    object-fit: cover;
+    border: 2px solid var(--color-border);
+}
+
+.auth-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.auth-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.auth-email {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.auth-logout-btn {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    background: transparent;
+    border: var(--border);
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.auth-logout-btn:hover {
+    background: var(--color-error-bg);
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* --- Responsivo --- */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 8px 16px;
+        border-bottom: var(--border);
+    }
+
+    .auth-user {
+        padding: 2px 0;
+    }
+}

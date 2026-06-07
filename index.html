@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocks of Note</title>
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" role="navigation" aria-label="Navegação principal">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">B</div>
+            <span class="sidebar-logo-text">BLOCKS</span>
+        </div>
+        <!-- Google Login -->
+        <div id="auth-container" class="auth-container"></div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Navegação</div>
+            <a href="index.html" class="sidebar-link active">
+                <span class="sidebar-link-icon">🏠</span>
+                Início
+            </a>
+            <a href="paginanot.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📝</span>
+                Notas
+            </a>
+            <a href="paginatask.html" class="sidebar-link">
+                <span class="sidebar-link-icon">✅</span>
+                Nova Tarefa
+            </a>
+            <a href="taskboard/taskboard.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📋</span>
+                Task Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            Blocks of Note &copy; 2026
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-with-sidebar home" role="main">
+        <header class="home-header">
+            <h1 class="home-title">Blocks of Note</h1>
+            <p class="home-subtitle">Anotações e tarefas, do seu jeito.</p>
+        </header>
+
+        <div class="home-cards">
+            <a href="paginanot.html" class="home-card" id="card-notes">
+                <div class="home-card-icon">📝</div>
+                <div class="home-card-body">
+                    <h2 class="home-card-title">Notas</h2>
+                    <p class="home-card-desc">Crie e organize suas ideias com um editor limpo e rápido.</p>
+                </div>
+                <span class="home-card-arrow">→</span>
+            </a>
+
+            <a href="paginatask.html" class="home-card" id="card-tasks">
+                <div class="home-card-icon">✅</div>
+                <div class="home-card-body">
+                    <h2 class="home-card-title">Nova Tarefa</h2>
+                    <p class="home-card-desc">Adicione tarefas com data, local e nível de urgência.</p>
+                </div>
+                <span class="home-card-arrow">→</span>
+            </a>
+
+            <a href="taskboard/taskboard.html" class="home-card" id="card-board">
+                <div class="home-card-icon">📋</div>
+                <div class="home-card-body">
+                    <h2 class="home-card-title">Task Board</h2>
+                    <p class="home-card-desc">Visualize e gerencie todas as suas tarefas em um board.</p>
+                </div>
+                <span class="home-card-arrow">→</span>
+            </a>
+        </div>
+
+        <!-- Recent Activity -->
+        <section class="home-recent" aria-label="Atividade recente">
+            <h2 class="home-recent-title">Atividade Recente</h2>
+            <div id="recent-activity" class="recent-list">
+                <!-- Renderizado via JS -->
+            </div>
+        </section>
+    </main>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="shared/storage.js"></script>
+    <script src="shared/utils.js"></script>
+    <script src="shared/notes-storage.js"></script>
+    <script src="shared/tasks-storage.js"></script>
+    <script src="shared/auth.js"></script>
+    <script src="homepage.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Auth.init();
+            Auth.renderButton('auth-container');
+        });
+    </script>
+</body>
+</html>

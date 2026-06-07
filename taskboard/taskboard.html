@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Board - Blocks of Note</title>
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="taskboard.css">
+</head>
+<body>
+
+    <aside class="sidebar" role="navigation" aria-label="Navegação principal">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">B</div>
+            <span class="sidebar-logo-text">BLOCKS</span>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Navegação</div>
+            <a href="../index.html" class="sidebar-link">
+                <span class="sidebar-link-icon">🏠</span>
+                Início
+            </a>
+            <a href="../paginanot.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📝</span>
+                Notas
+            </a>
+            <a href="../paginatask.html" class="sidebar-link">
+                <span class="sidebar-link-icon">✅</span>
+                Nova Tarefa
+            </a>
+            <a href="taskboard.html" class="sidebar-link active">
+                <span class="sidebar-link-icon">📋</span>
+                Task Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            Blocks of Note &copy; 2026
+        </div>
+    </aside>
+
+    <div class="main-with-sidebar board-page" role="main" aria-label="Task Board">
+
+        <header class="page-header">
+            <h1 class="page-title">📋 Task Board</h1>
+            <div class="page-actions">
+                <a href="../paginatask.html" class="btn btn-primary" aria-label="Criar nova tarefa">+ Nova</a>
+            </div>
+        </header>
+
+        <div class="board-controls" role="search" aria-label="Filtrar tarefas">
+            <div class="board-controls-left">
+                <input type="text" id="board-search" class="input" placeholder="🔍 Buscar tarefas..." aria-label="Buscar tarefas por título, descrição ou local">
+                <select id="board-filter" class="input select" aria-label="Filtrar por urgência">
+                    <option value="all">Todas urgências</option>
+                    <option value="low">I — Baixa</option>
+                    <option value="medium">II — Média</option>
+                    <option value="high">III — Alta</option>
+                    <option value="extra">IV — Extra</option>
+                </select>
+            </div>
+            <span id="board-stats" class="board-stats" aria-live="polite">0 tarefas</span>
+        </div>
+
+        <div id="board-grid" class="board-grid" role="list" aria-label="Lista de tarefas">
+            <!-- Renderizado via JS -->
+        </div>
+
+    </div>
+
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/utils.js"></script>
+    <script src="../shared/tasks-storage.js"></script>
+    <script src="taskboard.js"></script>
+</body>
+</html>

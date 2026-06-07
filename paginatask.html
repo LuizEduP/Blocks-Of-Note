@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Tarefa - Blocks of Note</title>
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/toast.css">
+    <link rel="stylesheet" href="shared/auth.css">
+    <link rel="stylesheet" href="paginatask.css">
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" role="navigation" aria-label="Navegação principal">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">B</div>
+            <span class="sidebar-logo-text">BLOCKS</span>
+        </div>
+        <!-- Google Login -->
+        <div id="auth-container" class="auth-container"></div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Navegação</div>
+            <a href="index.html" class="sidebar-link">
+                <span class="sidebar-link-icon">🏠</span>
+                Início
+            </a>
+            <a href="paginanot.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📝</span>
+                Notas
+            </a>
+            <a href="paginatask.html" class="sidebar-link active">
+                <span class="sidebar-link-icon">✅</span>
+                Nova Tarefa
+            </a>
+            <a href="taskboard/taskboard.html" class="sidebar-link">
+                <span class="sidebar-link-icon">📋</span>
+                Task Board
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            Blocks of Note &copy; 2026
+        </div>
+    </aside>
+
+    <div class="main-with-sidebar task-page" role="main" aria-label="Criação de tarefas">
+
+        <header class="page-header">
+            <h1 class="page-title">✅ Nova Tarefa</h1>
+            <div class="page-actions">
+                <a href="taskboard/taskboard.html" class="btn" aria-label="Visualizar board de tarefas">📋 Board</a>
+            </div>
+        </header>
+
+        <div class="task-container">
+            <div class="task-form">
+                <input type="text" id="task-title" class="input task-input-title" placeholder="Título da tarefa" maxlength="200" aria-label="Título da tarefa">
+
+                <div class="task-meta">
+                    <div class="meta-row">
+                        <span class="meta-label">📅 Data</span>
+                        <input type="date" id="task-date" class="input" aria-label="Data da tarefa">
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">⏰ Hora</span>
+                        <input type="time" id="task-time" class="input" aria-label="Hora da tarefa">
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">📍 Local</span>
+                        <input type="text" id="task-location" class="input" placeholder="Adicionar local" maxlength="200" aria-label="Local da tarefa">
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">🏷 Urgência</span>
+                        <select id="urgencySelect" class="input select" aria-label="Selecionar grau de urgência">
+                            <option value="low">I — Baixa</option>
+                            <option value="medium" selected>II — Média</option>
+                            <option value="high">III — Alta</option>
+                            <option value="extra">IV — Extra</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="divider" aria-hidden="true"></div>
+
+                <div class="task-textarea-wrapper">
+                    <textarea id="task-desc" class="input task-textarea" placeholder="Adicione detalhes sobre esta tarefa..." maxlength="1000" aria-label="Descrição da tarefa"></textarea>
+                    <span id="task-char-count" class="task-char-count" aria-live="polite">0/1000</span>
+                </div>
+
+                <div class="task-footer">
+                    <button id="btn-save-task" class="btn btn-primary" aria-label="Salvar tarefa">Salvar Tarefa</button>
+                </div>
+            </div>
+
+            <div class="task-preview">
+                <div class="urgency-indicator" id="urgency-indicator">
+                    <span class="urgency-dot" id="urgency-dot"></span>
+                    <span class="urgency-text" id="urgency-text">II — Média</span>
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item"><span class="dot" style="background: var(--color-success);"></span> I — Baixa</div>
+                    <div class="legend-item"><span class="dot" style="background: var(--color-warning);"></span> II — Média</div>
+                    <div class="legend-item"><span class="dot" style="background: var(--color-error);"></span> III — Alta</div>
+                    <div class="legend-item"><span class="dot" style="background: var(--color-info);"></span> IV — Extra</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="shared/toast.js"></script>
+    <script src="shared/storage.js"></script>
+    <script src="shared/utils.js"></script>
+    <script src="shared/tasks-storage.js"></script>
+    <script src="shared/auth.js"></script>
+    <script src="paginatask.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Auth.init();
+            Auth.renderButton('auth-container');
+        });
+    </script>
+</body>
+</html>

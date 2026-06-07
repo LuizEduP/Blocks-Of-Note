@@ -1,0 +1,406 @@
+/* ============================================
+   paginanot.css — Página de Notas
+   Obsidian + Notion inspired design
+   ============================================ */
+
+/* --- CONTROLS --- */
+.notes-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.notes-search-wrapper {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.notes-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.notes-search-input {
+    padding-left: 36px !important;
+}
+
+.notes-stats {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* --- GRID DE NOTAS --- */
+.notes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+/* --- CARD DE NOTA (Notion-like) --- */
+.note-card {
+    border: var(--border);
+    border-radius: var(--border-radius);
+    padding: 16px 20px;
+    background: var(--color-bg);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    min-height: 100px;
+    animation: cardIn 0.3s ease-out both;
+}
+
+.note-card:nth-child(1) { animation-delay: 0.00s; }
+.note-card:nth-child(2) { animation-delay: 0.03s; }
+.note-card:nth-child(3) { animation-delay: 0.06s; }
+.note-card:nth-child(4) { animation-delay: 0.09s; }
+.note-card:nth-child(5) { animation-delay: 0.12s; }
+.note-card:nth-child(6) { animation-delay: 0.15s; }
+.note-card:nth-child(7) { animation-delay: 0.18s; }
+.note-card:nth-child(8) { animation-delay: 0.21s; }
+.note-card:nth-child(9) { animation-delay: 0.24s; }
+.note-card:nth-child(10) { animation-delay: 0.27s; }
+
+.note-card:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+}
+
+.note-card:active {
+    transform: scale(0.99);
+}
+
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.note-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.3;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: var(--color-text);
+}
+
+.note-card-preview {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.note-card-date {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+/* --- MODO REMOÇÃO --- */
+.removing .note-card {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+    animation: shake 0.3s infinite;
+}
+
+.removing .note-card:hover {
+    background: #fdd;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Animação de saída */
+.note-card.removing-animation {
+    transform: scale(0.9) !important;
+    opacity: 0 !important;
+    transition: transform 0.25s ease, opacity 0.25s ease !important;
+    pointer-events: none;
+}
+
+/* --- ESTADO VAZIO --- */
+.empty-notes {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--border-radius);
+}
+
+.empty-notes p {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+    color: var(--color-text-secondary);
+}
+
+/* --- MODAL (Obsidian-inspired) --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.modal-overlay.modal-open {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--color-bg);
+    border: var(--border);
+    border-radius: var(--border-radius-lg);
+    padding: 32px;
+    width: 720px;
+    max-width: 100%;
+    height: 80vh;
+    max-height: 700px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-xl);
+    animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.modal-header-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.modal-title-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: var(--font-sans);
+    outline: none;
+    width: 100%;
+    padding: 0;
+    color: var(--color-text);
+}
+
+.modal-title-input::placeholder {
+    color: var(--color-text-muted);
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    transition: all var(--transition-fast);
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.modal-close-btn:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.modal-header-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-date {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.modal-char-count {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.modal-textarea {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    outline: none;
+    resize: none;
+    color: var(--color-text);
+}
+
+.modal-textarea::placeholder {
+    color: var(--color-text-muted);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: var(--border);
+    margin-top: 8px;
+}
+
+.modal-footer-left {
+    flex: 1;
+}
+
+.modal-tip {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+}
+
+.modal-footer-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Loading state do botão salvar */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: btnSpinner 0.6s linear infinite;
+}
+
+@keyframes btnSpinner {
+    to { transform: rotate(360deg); }
+}
+
+/* Scrollbar personalizada do textarea */
+.modal-textarea::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-textarea::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 3px;
+}
+
+/* --- RESPONSIVO --- */
+@media (max-width: 768px) {
+    .notes-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .notes-search-wrapper {
+        max-width: 100%;
+    }
+
+    .notes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        padding: 24px;
+        height: 90vh;
+        max-height: none;
+        border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+        width: 100%;
+    }
+
+    .modal-title-input {
+        font-size: 1.3rem;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .modal-footer-left {
+        text-align: center;
+    }
+
+    .modal-footer-right {
+        justify-content: center;
+    }
+}
