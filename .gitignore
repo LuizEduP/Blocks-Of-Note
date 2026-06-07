@@ -40,3 +40,6 @@ Thumbs.db
 
 # Arquivos temporários
 c
+
+# Google Cloud credentials (contém client_secret)
+client_secret_*.json

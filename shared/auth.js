@@ -12,7 +12,8 @@
    4. Copie o Client ID para GOOGLE_CLIENT_ID abaixo
    ============================================ */
 
-const GOOGLE_CLIENT_ID = ''; // ← Coloque seu Client ID aqui
+const GOOGLE_CLIENT_ID = '264095391579-ok60k94lad3ejjao85te2apg90o1tq73.apps.googleusercontent.com';
+
 
 const Auth = (() => {
     'use strict';
