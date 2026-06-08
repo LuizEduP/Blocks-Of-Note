@@ -3,7 +3,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 
 # Git
 .git/
@@ -33,13 +32,16 @@ Thumbs.db
 .idea/
 *.sublime-*
 
-# Railway
+# Railway - env files (configure variables in Railway dashboard)
 .env
 .env.local
 .env.production
 
-# Arquivos temporários
-c
-
 # Google Cloud credentials (contém client_secret)
 client_secret_*.json
+
+# Arquivos temporários / testes locais
+c
+test-pages.ps1
+ANALISE_MELHORIAS.md
+plans/

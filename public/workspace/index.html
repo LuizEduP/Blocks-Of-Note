@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Colaborativo — Blocks of Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="../shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a class="navbar-logo" href="../"><span class="navbar-wordmark">&#9670; Blocks of Note</span></a>
+                <div class="navbar-links">
+                    <a href="../notes/" class="nav-link">Notas</a>
+                    <a href="../tasks/" class="nav-link">Tarefas</a>
+                    <a href="../taskboard/" class="nav-link">Taskboard</a>
+                    <a href="../workspace/" class="nav-link active">Workspace</a>
+                    <a href="../chat/" class="nav-link">Chat</a>
+                </div>
+            </div>
+            <div class="navbar-right"><div id="auth-google" class="navbar-auth"></div></div>
+        </div>
+    </nav>
+
+    <!-- LOBBY -->
+    <div class="ws-section" id="lobby-screen">
+        <div class="ws-lobby">
+            <div class="ws-lobby-box">
+                <div class="ws-lobby-icon">🎨</div>
+                <h1 class="ws-lobby-title">Workspace Colaborativo</h1>
+                <p class="ws-lobby-desc">Documento, desenho e chat em tempo real.<br>Crie ou entre com um código de 6 caracteres.</p>
+                <div class="ws-lobby-section">
+                    <label class="ws-lobby-label" for="room-code-input">Entrar em uma sala</label>
+                    <div class="ws-lobby-input-row">
+                        <input type="text" id="room-code-input" class="input ws-room-code-input" placeholder="Ex: ABC123" maxlength="6" autocomplete="off" spellcheck="false">
+                        <button id="btn-join-room" class="btn btn-primary">Entrar</button>
+                    </div>
+                </div>
+                <div class="ws-lobby-divider"><span>ou</span></div>
+                <div class="ws-lobby-section">
+                    <button id="btn-create-room" class="btn btn-create-room">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                        Criar Nova Sala
+                    </button>
+                </div>
+                <div class="ws-lobby-section">
+                    <label class="ws-lobby-label" for="user-name-input">Seu nome (opcional)</label>
+                    <input type="text" id="user-name-input" class="input" placeholder="Anônimo" maxlength="30">
+                </div>
+
+                <div class="ws-saved-section">
+                    <div class="ws-saved-header">
+                        <h2 class="ws-saved-title">📂 Meus Workspaces</h2>
+                        <button id="btn-refresh-saved" class="btn btn-sm" title="Atualizar lista">↻</button>
+                    </div>
+                    <div id="saved-workspaces-list" class="ws-saved-list">
+                        <div class="ws-saved-empty">Nenhum workspace salvo ainda.<br>Crie ou entre em uma sala para salvá-la.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="ws-section" id="room-screen" style="display:none">
+        <div class="ws-topbar">
+            <div class="ws-topbar-left">
+                <button id="btn-leave-room" class="btn btn-sm" title="Sair">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <input type="text" id="doc-title-input" class="ws-doc-title-input" value="Sem título" maxlength="60">
+            </div>
+            <div class="ws-topbar-right">
+                <span id="room-users-count" class="ws-users-count">0 online</span>
+                <button id="btn-copy-code" class="btn btn-sm" title="Copiar código">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+                <button id="btn-save-workspace" class="btn btn-sm" title="Salvar workspace na lista">💾 Salvar</button>
+                <span class="ws-code-badge" id="room-code-display"></span>
+            </div>
+        </div>
+
+        <div class="ws-body">
+            <div class="ws-tabs">
+                <button class="ws-tab active" data-tab="doc">📝 Documento</button>
+                <button class="ws-tab" data-tab="draw">✏️ Desenho</button>
+                <button class="ws-tab" data-tab="chat">💬 Chat</button>
+            </div>
+
+            <div class="ws-content">
+                <!-- DOCUMENTO -->
+                <div class="ws-panel active" id="panel-doc">
+                    <textarea id="doc-textarea" class="ws-doc-textarea" placeholder="Escreva aqui..."></textarea>
+                    <div class="ws-doc-images" id="doc-images"></div>
+                    <div class="ws-doc-actions">
+                        <label class="btn btn-sm btn-upload">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            Adicionar Imagem
+                            <input type="file" id="image-upload" accept="image/*" hidden>
+                        </label>
+                        <span class="ws-doc-status" id="doc-status">Sincronizado ✓</span>
+                    </div>
+                </div>
+
+                <!-- DESENHO -->
+                <div class="ws-panel" id="panel-draw">
+                    <div class="ws-draw-toolbar">
+                        <button id="draw-undo" class="btn btn-sm">↩ Desfazer</button>
+                        <button id="draw-clear" class="btn btn-sm">🗑 Limpar</button>
+                        <div class="ws-draw-sep"></div>
+                        <label class="ws-draw-label">Cor</label>
+                        <input type="color" id="draw-color" class="ws-draw-color" value="#000000">
+                        <label class="ws-draw-label">Tam</label>
+                        <input type="range" id="draw-size" class="ws-draw-range" min="1" max="20" value="3">
+                        <span id="draw-size-label" class="ws-draw-size-label">3px</span>
+                        <div class="ws-draw-sep"></div>
+                        <div class="ws-zoom-group">
+                            <button id="draw-zoom-out" class="btn btn-sm ws-zoom-btn" title="Zoom out">−</button>
+                            <span id="draw-zoom-label" class="ws-zoom-label">100%</span>
+                            <button id="draw-zoom-in" class="btn btn-sm ws-zoom-btn" title="Zoom in">+</button>
+                            <button id="draw-zoom-reset" class="btn btn-sm ws-zoom-reset" title="Redefinir zoom">⟲</button>
+                        </div>
+                    </div>
+                    <div class="ws-canvas-wrap">
+                        <canvas id="draw-canvas" class="ws-canvas"></canvas>
+                    </div>
+                </div>
+
+                <!-- CHAT -->
+                <div class="ws-panel" id="panel-chat">
+                    <div id="chat-messages" class="ws-chat-messages"></div>
+                    <div class="ws-chat-input">
+                        <input type="text" id="chat-input" class="input ws-chat-input-field" placeholder="Digite sua mensagem..." maxlength="500">
+                        <button id="btn-send" class="btn btn-primary ws-chat-send">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="confirm-modal" class="ws-modal" style="display:none">
+        <div class="ws-modal-overlay"></div>
+        <div class="ws-modal-box">
+            <div class="ws-modal-icon" id="confirm-icon"></div>
+            <p class="ws-modal-text" id="confirm-text">Remover esta imagem?</p>
+            <div class="ws-modal-actions">
+                <button id="confirm-cancel" class="btn btn-sm">Cancelar</button>
+                <button id="confirm-ok" class="btn btn-sm btn-danger">Remover</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div id="lightbox" class="ws-lightbox" style="display:none">
+        <span id="lightbox-close" class="ws-lightbox-close">&times;</span>
+        <div class="ws-lightbox-content">
+            <img id="lightbox-img" class="ws-lightbox-img" src="" alt="Imagem ampliada">
+            <div class="ws-lightbox-zoom-hint">Role o mouse para dar zoom</div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/utils.js"></script>
+    <script src="../shared/supabase.js"></script>
+    <script src="../shared/auth-supabase.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var navbar = document.getElementById('navbar');
+            if (navbar) navbar.classList.add('visible');
+            Auth.init();
+            Auth.renderButton('auth-google');
+        });
+    </script>
+</body>
+</html>

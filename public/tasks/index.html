@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarefas — Blocks of Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="../shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NAVEGAÇÃO SUPERIOR -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a class="navbar-logo" href="../">
+                    <span class="navbar-wordmark">&#9670; Blocks of Note</span>
+                </a>
+                <div class="navbar-links">
+                    <a href="../notes/" class="nav-link">Notas</a>
+                    <a href="../tasks/" class="nav-link active">Tarefas</a>
+                    <a href="../taskboard/" class="nav-link">Taskboard</a>
+                    <a href="../workspace/" class="nav-link">Workspace</a>
+                    <a href="../chat/" class="nav-link">Chat</a>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div id="auth-google" class="navbar-auth"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN -->
+    <div class="tk-section">
+        <div class="tk-inner">
+
+            <!-- HEADER -->
+            <header class="tk-header">
+                <div class="tk-header-left">
+                    <h1 class="tk-title">Tarefas</h1>
+                    <span class="tk-stats" id="tk-stats">0 tarefas</span>
+                </div>
+                <div class="tk-header-right">
+                    <a href="../taskboard/" class="btn btn-sm" title="Ver Board">📋 Board</a>
+                </div>
+            </header>
+
+            <!-- FILTROS -->
+            <div class="tk-filters" id="tk-filters">
+                <button class="tk-filter active" data-filter="all">Todas</button>
+                <button class="tk-filter" data-filter="today">Hoje</button>
+                <button class="tk-filter" data-filter="upcoming">Próximas</button>
+                <button class="tk-filter" data-filter="done">Concluídas</button>
+            </div>
+
+            <!-- QUICK ADD BAR -->
+            <div class="tk-quick-add" id="tk-quick-add">
+                <input type="text" id="tk-quick-input" class="tk-quick-input" placeholder="Adicionar tarefa... Pressione Enter" maxlength="200" autocomplete="off">
+                <div class="tk-quick-urgency">
+                    <button class="tk-urgency-btn" data-urgency="low" title="I — Baixa">●</button>
+                    <button class="tk-urgency-btn active" data-urgency="medium" title="II — Média">●</button>
+                    <button class="tk-urgency-btn" data-urgency="high" title="III — Alta">●</button>
+                    <button class="tk-urgency-btn" data-urgency="extra" title="IV — Extra">●</button>
+                </div>
+                <button id="tk-quick-btn" class="btn btn-primary" title="Adicionar tarefa">+</button>
+            </div>
+
+            <!-- EXPANDED FORM (details) -->
+            <div class="tk-expanded" id="tk-expanded" style="display:none">
+                <div class="tk-expanded-row">
+                    <div class="tk-field">
+                        <label class="tk-label">📅 Data</label>
+                        <input type="date" id="tk-date" class="input">
+                    </div>
+                    <div class="tk-field">
+                        <label class="tk-label">⏰ Hora</label>
+                        <input type="time" id="tk-time" class="input">
+                    </div>
+                    <div class="tk-field">
+                        <label class="tk-label">📍 Local</label>
+                        <input type="text" id="tk-location" class="input" placeholder="Adicionar local" maxlength="200">
+                    </div>
+                </div>
+                <div class="tk-field">
+                    <label class="tk-label">📝 Descrição</label>
+                    <textarea id="tk-desc" class="input tk-desc-input" placeholder="Adicione detalhes..." maxlength="1000" rows="2"></textarea>
+                </div>
+                <div class="tk-expanded-actions">
+                    <span id="tk-details-toggle" class="tk-toggle-link">👇 Mais detalhes</span>
+                </div>
+            </div>
+
+            <!-- TASK LIST -->
+            <div class="tk-list" id="tk-list"></div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/utils.js"></script>
+    <script src="../shared/supabase.js"></script>
+    <script src="../shared/auth-supabase.js"></script>
+    <script src="../shared/tasks-storage-supabase.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var navbar = document.getElementById('navbar');
+            if (navbar) navbar.classList.add('visible');
+            Auth.init();
+            Auth.renderButton('auth-google');
+            if (typeof TasksStorage?.init === 'function') TasksStorage.init();
+        });
+    </script>
+</body>
+</html>

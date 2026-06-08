@@ -1,8 +1,7 @@
 // ============================================
-// MODULE: Notes
-// Arquivo: paginanot.js
-// Versão simplificada — grid de cards
-// Data Layer extraída para shared/notes-storage.js
+// notes/app.js — Notes Application
+// Grid de cards com editor modal
+// Data Layer: shared/notes-storage.js
 // ============================================
 
 const NotesApp = (() => {
@@ -29,16 +28,14 @@ const NotesApp = (() => {
         dateDisplay: document.getElementById('note-date-display'),
         btnSave: document.getElementById('btn-save'),
         btnCancel: document.getElementById('btn-cancel'),
+        btnModalClose: document.getElementById('btn-modal-close'),
     };
 
-    // Data Layer agora em NotesStorage (shared/notes-storage.js)
     const { getNotes, createNote, updateNote, deleteNoteById, getNoteById } = NotesStorage;
 
     // ==========================================
     // UI LAYER
     // ==========================================
-
-    // Agora usa Utils.escapeHtml e Utils.formatDate de shared/utils.js
 
     function renderCard(note) {
         const card = document.createElement('div');
@@ -96,7 +93,6 @@ const NotesApp = (() => {
     // MODAL / EDITOR
     // ==========================================
 
-    // Focus trap: elementos focáveis dentro do modal
     function getFocusableElements() {
         return elements.modal.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
@@ -156,7 +152,6 @@ const NotesApp = (() => {
         Toast.show('Nova nota criada', { type: 'success', duration: 2000 });
     }
 
-    // Exposta para o onclick no empty state
     function createAndRender() {
         handleCreate();
     }
@@ -194,11 +189,9 @@ const NotesApp = (() => {
 
         if (!validateNote(title, content)) return;
 
-        // Loading state
         elements.btnSave.classList.add('btn-loading');
         elements.btnSave.disabled = true;
 
-        // Simula um pequeno delay para feedback visual
         setTimeout(() => {
             const saved = updateNote(state.currentNoteId, { title, content });
             closeEditor();
@@ -233,7 +226,6 @@ const NotesApp = (() => {
 
         render(notes);
 
-        // Anúncio para leitores de tela
         const announce = document.getElementById('search-announce');
         if (announce) {
             const msg = query
@@ -283,10 +275,12 @@ const NotesApp = (() => {
         elements.btnExport.addEventListener('click', handleExport);
         elements.btnSave.addEventListener('click', handleSave);
         elements.btnCancel.addEventListener('click', handleCancel);
+        if (elements.btnModalClose) {
+            elements.btnModalClose.addEventListener('click', handleCancel);
+        }
         elements.searchInput.addEventListener('input', handleSearch);
         document.addEventListener('click', handleOutsideClick);
 
-        // Fechar modal com Escape
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && elements.modal.classList.contains('modal-open')) {
                 closeEditor();

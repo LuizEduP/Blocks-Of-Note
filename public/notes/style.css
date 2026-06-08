@@ -1,5 +1,5 @@
 /* ============================================
-   paginanot.css — Página de Notas
+   notes/style.css — Página de Notas
    Obsidian + Notion inspired design
    ============================================ */
 
@@ -142,7 +142,6 @@
     75% { transform: translateX(2px); }
 }
 
-/* Animação de saída */
 .note-card.removing-animation {
     transform: scale(0.9) !important;
     opacity: 0 !important;
@@ -321,7 +320,6 @@
     align-items: center;
 }
 
-/* Loading state do botão salvar */
 .btn-loading {
     position: relative;
     pointer-events: none;
@@ -344,7 +342,6 @@
     to { transform: rotate(360deg); }
 }
 
-/* Scrollbar personalizada do textarea */
 .modal-textarea::-webkit-scrollbar {
     width: 6px;
 }

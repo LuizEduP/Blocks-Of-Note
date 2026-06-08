@@ -1,6 +1,7 @@
 // ============================================
-// taskboard.js — Board de Tarefas
-// Data Layer extraída para shared/tasks-storage.js
+// taskboard/app.js — Task Board
+// Board de tarefas com busca e filtro
+// Data Layer: shared/tasks-storage.js
 // ============================================
 
 const TaskBoard = (() => {
@@ -13,7 +14,6 @@ const TaskBoard = (() => {
         stats: document.getElementById('board-stats'),
     };
 
-    // Data Layer agora em TasksStorage (shared/tasks-storage.js)
     const { getTasks, deleteTaskById } = TasksStorage;
 
     // ==========================================
@@ -74,7 +74,7 @@ const TaskBoard = (() => {
                     <div class="empty-icon" aria-hidden="true">📋</div>
                     <h2 class="empty-title">Nenhuma Tarefa</h2>
                     <p class="empty-subtitle">Você ainda não criou nenhuma tarefa. Vá para a página de tarefas e comece agora.</p>
-                    <a href="../paginatask.html" class="btn btn-primary">CRIAR NOVA TAREFA</a>
+                    <a href="../tasks/" class="btn btn-primary">CRIAR NOVA TAREFA</a>
                 </div>
             `;
             elements.stats.textContent = '0 tarefas';

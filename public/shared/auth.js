@@ -1,14 +1,14 @@
 /* ============================================
    auth.js — Google Sign-In via Identity Services
    Uso: Auth.renderButton('#login-container')
-        Auth.isLoggedIn() => boolean
-        Auth.getUser()    => { name, email, picture } | null
-        Auth.logout()
+         Auth.isLoggedIn() => boolean
+         Auth.getUser()    => { name, email, picture } | null
+         Auth.logout()
    ============================================
    CONFIGURAÇÃO:
    1. Acesse https://console.cloud.google.com/apis/credentials
    2. Crie um OAuth 2.0 Client ID (tipo: Aplicativo Web)
-   3. Adicione a origem autorizada (ex: http://localhost:5500)
+   3. Adicione a origem autorizada (ex: http://localhost:3000)
    4. Copie o Client ID para GOOGLE_CLIENT_ID abaixo
    ============================================ */
 

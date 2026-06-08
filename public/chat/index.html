@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat — Blocks of Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="../shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a class="navbar-logo" href="../"><span class="navbar-wordmark">&#9670; Blocks of Note</span></a>
+                <div class="navbar-links">
+                    <a href="../notes/" class="nav-link">Notas</a>
+                    <a href="../tasks/" class="nav-link">Tarefas</a>
+                    <a href="../taskboard/" class="nav-link">Taskboard</a>
+                    <a href="../workspace/" class="nav-link">Workspace</a>
+                    <a href="../chat/" class="nav-link active">Chat</a>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div id="auth-google" class="navbar-auth"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="chat-section">
+        <div class="chat-inner">
+            <header class="page-header">
+                <h1 class="page-title">Chat Local</h1>
+                <div class="page-actions">
+                    <button id="btn-clear-chat" class="btn btn-danger" aria-label="Limpar histórico">Limpar</button>
+                </div>
+            </header>
+
+            <div class="chat-container">
+                <div id="chat-messages" class="chat-messages" role="log" aria-label="Mensagens do chat">
+                    <!-- Renderizado via JS -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" class="input chat-input-field" placeholder="Digite sua mensagem..." maxlength="500" aria-label="Mensagem">
+                    <button id="btn-send-chat" class="btn btn-primary" aria-label="Enviar mensagem">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/utils.js"></script>
+    <script src="../shared/supabase.js"></script>
+    <script src="../shared/auth-supabase.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var navbar = document.getElementById('navbar');
+            if (navbar) navbar.classList.add('visible');
+            Auth.init();
+            Auth.renderButton('auth-google');
+        });
+    </script>
+</body>
+</html>

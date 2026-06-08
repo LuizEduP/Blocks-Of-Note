@@ -24,6 +24,7 @@ const TasksStorage = (() => {
             location: data.location || '',
             description: data.description || '',
             urgency: data.urgency || 'medium',
+            done: data.done || false,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };

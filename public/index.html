@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blocks of Note — Anotações Inteligentes</title>
+    <meta name="description" content="Aplicativo de anotações com workspace colaborativo, task board e notas inteligentes.">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Blocks of Note">
+    <meta property="og:description" content="Anotações inteligentes com workspace colaborativo">
+    <meta property="og:type" content="website">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="shared/base.css">
+    <link rel="stylesheet" href="shared/toast.css">
+    <link rel="stylesheet" href="shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase SDK -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Scripts -->
+    <script defer src="shared/storage.js"></script>
+    <script defer src="shared/toast.js"></script>
+    <script defer src="shared/utils.js"></script>
+    <script defer src="shared/supabase.js"></script>
+    <script defer src="shared/auth-supabase.js"></script>
+    <script defer src="shared/notes-storage-supabase.js"></script>
+    <script defer src="shared/tasks-storage-supabase.js"></script>
+    <script defer src="homepage.js"></script>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Navegação principal">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a href="/" class="navbar-logo" aria-label="Ir para início">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1" />
+                        <rect x="14" y="3" width="7" height="7" rx="1" />
+                        <rect x="3" y="14" width="7" height="7" rx="1" />
+                        <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                    <span class="navbar-wordmark">Blocks of Note</span>
+                </a>
+                <div class="navbar-links">
+                    <a href="/" class="nav-link active">Início</a>
+                    <a href="notes/" class="nav-link">Notas</a>
+                    <a href="tasks/" class="nav-link">Tarefas</a>
+                    <a href="taskboard/" class="nav-link">Task Board</a>
+                    <a href="workspace/" class="nav-link">Workspace</a>
+                    <a href="chat/" class="nav-link">Chat</a>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div class="navbar-auth" id="navbar-auth"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge">Open Source</div>
+            <h1 class="hero-title">Blocks of Note</h1>
+            <p class="hero-subtitle">Anotações inteligentes, task board colaborativo e workspace em tempo real.</p>
+            <div class="hero-actions">
+                <a href="notes/" class="hero-btn hero-btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Criar Nota
+                </a>
+                <a href="workspace/" class="hero-btn hero-btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Workspace Colaborativo
+                </a>
+                <a href="chat/" class="hero-btn hero-btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                    Chat
+                </a>
+            </div>
+        </div>
+
+        <!-- Ilustração / preview blocks -->
+        <div class="hero-visual">
+            <div class="hero-block hero-block-1">
+                <div class="hero-block-dot"></div>
+                <div class="hero-block-line"></div>
+                <div class="hero-block-line"></div>
+            </div>
+            <div class="hero-block hero-block-2">
+                <div class="hero-block-dot"></div>
+                <div class="hero-block-line"></div>
+                <div class="hero-block-line hero-block-line-short"></div>
+            </div>
+            <div class="hero-block hero-block-3">
+                <div class="hero-block-dot"></div>
+                <div class="hero-block-line"></div>
+                <div class="hero-block-line"></div>
+                <div class="hero-block-line hero-block-line-short"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES GRID -->
+    <section class="features" id="features">
+        <div class="features-header">
+            <h2 class="features-title">Tudo que você precisa</h2>
+            <p class="features-subtitle">Ferramentas integradas para produtividade e colaboração.</p>
+        </div>
+
+        <div class="features-grid">
+            <!-- Notas -->
+            <a href="notes/" class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Notas</h3>
+                <p class="feature-card-desc">Crie, edite e organize suas anotações com editor de texto completo.</p>
+            </a>
+
+            <!-- Tarefas -->
+            <a href="tasks/" class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Tarefas</h3>
+                <p class="feature-card-desc">Gerencie tarefas com urgencia, datas e organizacao completa.</p>
+            </a>
+
+            <!-- Task Board -->
+            <a href="taskboard/" class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Task Board</h3>
+                <p class="feature-card-desc">Quadro Kanban para visualizar e mover tarefas entre colunas.</p>
+            </a>
+
+            <!-- Workspace Colaborativo -->
+            <a href="workspace/" class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Workspace</h3>
+                <p class="feature-card-desc">Documento colaborativo em tempo real com desenho e chat.</p>
+            </a>
+
+            <!-- Chat -->
+            <a href="chat/" class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Chat</h3>
+                <p class="feature-card-desc">Chat local com armazenamento de historico de conversas.</p>
+            </a>
+
+            <!-- Open Source -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3 class="feature-card-title">Open Source</h3>
+                <p class="feature-card-desc">Codigo aberto no GitHub. Contribuicoes sao bem-vindas!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-left">
+                <a href="/" class="footer-logo">Blocks of Note</a>
+                <span class="footer-sep">•</span>
+                <span class="footer-version">v1.0</span>
+                <span class="footer-sep">•</span>
+                <a href="https://github.com/LuizEduP/Blocks-Of-Note" target="_blank" rel="noopener noreferrer" class="footer-link">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+            <div class="footer-right">
+                <span>Feito com dedicação.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Auth.init();
+            Auth.renderButton('navbar-auth');
+            // Inicia sync automático para notas e tarefas
+            if (typeof NotesStorage?.init === 'function') NotesStorage.init();
+            if (typeof TasksStorage?.init === 'function') TasksStorage.init();
+        });
+    </script>
+</body>
+</html>

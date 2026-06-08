@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Board — Blocks of Note</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="../shared/auth.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .board-page-section {
+            padding-top: 56px;
+            min-height: 100vh;
+        }
+        .board-page-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVEGAÇÃO SUPERIOR -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-inner">
+            <div class="navbar-left">
+                <a class="navbar-logo" href="../">
+                    <span class="navbar-wordmark">&#9670; Blocks of Note</span>
+                </a>
+                <div class="navbar-links">
+                    <a href="../notes/" class="nav-link">Notas</a>
+                    <a href="../tasks/" class="nav-link">Tarefas</a>
+                    <a href="../taskboard/" class="nav-link active">Taskboard</a>
+                    <a href="../workspace/" class="nav-link">Workspace</a>
+                    <a href="../chat/" class="nav-link">Chat</a>
+                </div>
+            </div>
+            <div class="navbar-right">
+                <div id="auth-google" class="navbar-auth"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="board-page-section" role="main" aria-label="Task Board">
+        <div class="board-page-inner">
+
+            <header class="page-header">
+                <h1 class="page-title">Task Board</h1>
+                <div class="page-actions">
+                    <a href="../tasks/" class="btn btn-primary" aria-label="Criar nova tarefa">+ Nova</a>
+                </div>
+            </header>
+
+            <div class="board-controls" role="search" aria-label="Filtrar tarefas">
+                <div class="board-controls-left">
+                    <input type="text" id="board-search" class="input" placeholder="🔍 Buscar tarefas..." aria-label="Buscar tarefas por título, descrição ou local">
+                    <select id="board-filter" class="input select" aria-label="Filtrar por urgência">
+                        <option value="all">Todas urgências</option>
+                        <option value="low">I — Baixa</option>
+                        <option value="medium">II — Média</option>
+                        <option value="high">III — Alta</option>
+                        <option value="extra">IV — Extra</option>
+                    </select>
+                </div>
+                <span id="board-stats" class="board-stats" aria-live="polite">0 tarefas</span>
+            </div>
+
+            <div id="board-grid" class="board-grid" role="list" aria-label="Lista de tarefas">
+                <!-- Renderizado via JS -->
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/storage.js"></script>
+    <script src="../shared/toast.js"></script>
+    <script src="../shared/utils.js"></script>
+    <script src="../shared/supabase.js"></script>
+    <script src="../shared/auth-supabase.js"></script>
+    <script src="../shared/tasks-storage-supabase.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            var navbar = document.getElementById('navbar');
+            if (navbar) navbar.classList.add('visible');
+            Auth.init();
+            Auth.renderButton('auth-google');
+            if (typeof TasksStorage?.init === 'function') TasksStorage.init();
+        });
+    </script>
+</body>
+</html>
