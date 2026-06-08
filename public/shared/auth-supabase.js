@@ -39,6 +39,18 @@ const Auth = (() => {
         } catch (e) { /* ignore */ }
     }
 
+    // --- Helpers de perfil ---
+
+    function buildProfile(user) {
+        const meta = user.user_metadata || {};
+        return {
+            name: meta.full_name || meta.name || user.email?.split('@')[0] || 'Usuário',
+            email: user.email || '',
+            picture: meta.avatar_url || meta.picture || '',
+            sub: user.id,
+        };
+    }
+
     // --- Callbacks ---
 
     function notifyChange() {
@@ -54,6 +66,16 @@ const Auth = (() => {
         };
     }
 
+    function onSignedIn(user) {
+        const profile = buildProfile(user);
+        const wasLogged = !!_user;
+        saveSession(profile);
+        notifyChange();
+        if (!wasLogged) {
+            Toast.show(`Bem-vindo, ${profile.name}!`, { type: 'success', duration: 2500 });
+        }
+    }
+
     // --- Supabase Auth ---
 
     async function login() {
@@ -64,7 +86,7 @@ const Auth = (() => {
         }
 
         try {
-            const { data, error } = await sb.auth.signInWithOAuth({
+            const { error } = await sb.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: window.location.origin,
@@ -75,68 +97,10 @@ const Auth = (() => {
                 console.error('Supabase Auth error:', error);
                 Toast.show('Erro ao fazer login', { type: 'error', duration: 3000 });
             }
-            // Redirect happens automatically
         } catch (err) {
             console.error('Auth login error:', err);
             Toast.show('Erro ao conectar com serviço de autenticação', { type: 'error', duration: 3000 });
         }
-    }
-
-    async function handleSession() {
-        const sb = SupabaseClient?.getClient();
-        if (!sb) return;
-
-        try {
-            const { data: { session } } = await sb.auth.getSession();
-
-            if (session?.user) {
-                const user = session.user;
-                const profile = {
-                    name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-                    email: user.email || '',
-                    picture: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
-                    sub: user.id,
-                };
-                saveSession(profile);
-                notifyChange();
-                return profile;
-            } else {
-                // Check if there's a hash with access_token (OAuth redirect)
-                const hash = window.location.hash;
-                if (hash && hash.includes('access_token')) {
-                    const { data, error } = await sb.auth.setSession({
-                        access_token: new URLSearchParams(hash.substring(1)).get('access_token') || '',
-                        refresh_token: new URLSearchParams(hash.substring(1)).get('refresh_token') || '',
-                    });
-
-                    if (error) {
-                        console.error('Session setup error:', error);
-                    }
-
-                    // Clean URL
-                    window.history.replaceState(null, '', window.location.pathname);
-                }
-
-                // Try again after setting session
-                const { data: { session: retrySession } } = await sb.auth.getSession();
-                if (retrySession?.user) {
-                    const user = retrySession.user;
-                    const profile = {
-                        name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-                        email: user.email || '',
-                        picture: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
-                        sub: user.id,
-                    };
-                    saveSession(profile);
-                    notifyChange();
-                    return profile;
-                }
-            }
-        } catch (e) {
-            console.warn('Session check error:', e);
-        }
-
-        return null;
     }
 
     async function logout() {
@@ -160,62 +124,86 @@ const Auth = (() => {
         return _user ? { ..._user } : null;
     }
 
+    /**
+     * init() — deve ser chamado uma vez no DOMContentLoaded.
+     *
+     * PROBLEMA RESOLVIDO:
+     * O Supabase SDK processa o hash da URL (após redirect OAuth)
+     * durante createClient() e dispara SIGNED_IN SYNCHRONOUSLY.
+     * Se só registrarmos o listener depois de createClient(),
+     * perdemos o evento e a UI nunca é atualizada.
+     *
+     * SOLUÇÃO:
+     * 1. Criamos o client
+     * 2. Registramos o listener IMEDIATAMENTE
+     * 3. Depois verificamos manualmente getSession()
+     *    (que pega o resultado do hash processado)
+     * 4. Fallback: se getSession() não retornar nada mas o hash
+     *    estiver na URL, fazemos setSession() manual
+     */
     async function init() {
         if (_initialized) return;
         _initialized = true;
 
-        // Carrega sessão salva localmente
+        const sb = SupabaseClient?.getClient();
+
+        // 1. REGISTRA LISTENER ANTES DE TUDO
+        if (sb) {
+            sb.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session?.user) {
+                    onSignedIn(session.user);
+                } else if (event === 'SIGNED_OUT') {
+                    clearSession();
+                    notifyChange();
+                } else if (event === 'TOKEN_REFRESHED' && session?.user && !_user) {
+                    onSignedIn(session.user);
+                }
+            });
+        }
+
+        // 2. CARREGA SESSÃO CACHEADA (rápido, UI instantânea)
         loadSession();
-
-        // Tenta obter sessão do Supabase
-        try {
-            const sessionProfile = await handleSession();
-            if (sessionProfile) {
-                // Já foi salvo e notificado pelo handleSession
-            }
-        } catch (e) {
-            console.warn('Supabase init error:', e);
-        }
-
-        // Escuta mudanças de auth em tempo real (logout, refresh, etc.)
-        try {
-            const sb = SupabaseClient?.getClient();
-            if (sb) {
-                sb.auth.onAuthStateChange((event, session) => {
-                    if (event === 'SIGNED_IN' && session?.user) {
-                        const user = session.user;
-                        const profile = {
-                            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-                            email: user.email || '',
-                            picture: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
-                            sub: user.id,
-                        };
-                        saveSession(profile);
-                        notifyChange();
-                    } else if (event === 'SIGNED_OUT') {
-                        clearSession();
-                        notifyChange();
-                    } else if (event === 'TOKEN_REFRESHED' && session?.user && !_user) {
-                        // Recupera sessão após refresh
-                        const user = session.user;
-                        const profile = {
-                            name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
-                            email: user.email || '',
-                            picture: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
-                            sub: user.id,
-                        };
-                        saveSession(profile);
-                        notifyChange();
-                    }
-                });
-            }
-        } catch (e) {
-            console.warn('Auth state listener error:', e);
-        }
-
-        // Se já logado, notifica
         if (_user) {
             setTimeout(() => notifyChange(), 0);
+        }
+
+        // 3. RECUPERA SESSÃO DO SUPABASE
+        //    (getSession() lê o resultado do hash já processado)
+        if (sb) {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (session?.user) {
+                    onSignedIn(session.user);
+                    return;
+                }
+
+                // 4. FALLBACK: hash na URL (caso o SDK não tenha processado)
+                const hash = window.location.hash;
+                if (hash && hash.includes('access_token')) {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const { error } = await sb.auth.setSession({
+                        access_token: params.get('access_token') || '',
+                        refresh_token: params.get('refresh_token') || '',
+                    });
+
+                    if (!error) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                        const { data: { session: retry } } = await sb.auth.getSession();
+                        if (retry?.user) {
+                            onSignedIn(retry.user);
+                            return;
+                        }
+                    }
+                }
+
+                // 5. NADA ENCONTRADO: limpa sessão obsoleta
+                if (!_user) {
+                    clearSession();
+                    notifyChange();
+                }
+            } catch (e) {
+                console.warn('Session recovery error:', e);
+            }
         }
     }
 
