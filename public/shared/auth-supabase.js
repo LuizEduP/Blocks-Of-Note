@@ -85,11 +85,15 @@ const Auth = (() => {
             return;
         }
 
+        // Pega a URL base atual (funciona tanto em localhost quanto no Railway)
+        // Ex: "https://blocks-of-note-production.up.railway.app" ou "http://localhost:3000"
+        const baseUrl = window.location.origin;
+
         try {
             const { error } = await sb.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: window.location.origin,
+                    redirectTo: baseUrl,
                 },
             });
 
