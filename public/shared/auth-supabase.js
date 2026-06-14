@@ -161,21 +161,43 @@ const Auth = (() => {
         // Isso acontece quando o Site URL no Supabase Dashboard não está
         // configurado com a URL completa do Railway.
         //
-        // A solução abaixo detecta esse caso e redireciona para a URL
-        // correta do Railway preservando o hash com o token.
+        // SOLUÇÃO: decodificar o JWT do hash, salvar o perfil no localStorage
+        // e redirecionar para a URL correta do Railway (sem hash).
         // ──────────────────────────────────────────────────────────────
         (function fixRedirect() {
             const currentHost = window.location.hostname;
             // Se estamos no domínio do Supabase (e não no Railway/localhost)
             if (currentHost.includes('supabase.co')) {
-                // O path contém o domínio de destino extraído do caminho
-                // Ex: "/blocks-of-note-production.up.railway.app"
-                const path = window.location.pathname.replace(/^\//, ''); // tira a barra inicial
-                // Verifica se parece um domínio (contém ponto)
+                const path = window.location.pathname.replace(/^\//, '');
+                // Verifica se o path parece um domínio (contém ponto)
                 if (path && path.includes('.')) {
                     const hash = window.location.hash;
-                    const targetUrl = 'https://' + path + hash;
-                    console.log('[Auth] Redirect malformado detectado! Redirecionando para:', targetUrl);
+                    // Tenta extrair o perfil do JWT antes de redirecionar
+                    if (hash && hash.includes('access_token')) {
+                        try {
+                            const params = new URLSearchParams(hash.substring(1));
+                            const accessToken = params.get('access_token');
+                            if (accessToken) {
+                                // Decodifica o payload do JWT
+                                const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                                const meta = payload.user_metadata || {};
+                                const profile = {
+                                    name: meta.full_name || meta.name || payload.email?.split('@')[0] || 'Usuário',
+                                    email: payload.email || '',
+                                    picture: meta.avatar_url || meta.picture || '',
+                                    sub: payload.sub,
+                                };
+                                // Salva no localStorage ANTES de redirecionar
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile }));
+                                console.log('[Auth] Perfil salvo no localStorage durante redirect fix:', profile.name);
+                            }
+                        } catch (e) {
+                            console.warn('[Auth] Erro ao decodificar token durante redirect fix:', e);
+                        }
+                    }
+                    // Redireciona para a URL correta (sem o hash — já salvamos o token)
+                    const targetUrl = 'https://' + path;
+                    console.log('[Auth] Redirect malformado! Indo para:', targetUrl);
                     window.location.replace(targetUrl);
                     return; // interrompe init — a página vai recarregar
                 }
