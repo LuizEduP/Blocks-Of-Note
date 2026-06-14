@@ -6,7 +6,12 @@
 const Auth = (() => {
     'use strict';
 
-    const STORAGE_KEY = 'blocks_of_note_supabase_auth';
+    // IMPORTANTE: usa chave DIFERENTE da usada pelo Supabase SDK.
+    // O Supabase SDK salva a sessão completa em 'blocks_of_note_supabase_auth'.
+    // Nós salvamos APENAS o perfil do usuário em 'blocks_of_note_user_profile'
+    // para evitar que o SDK sobrescreva nossos dados.
+    const PROFILE_KEY = 'blocks_of_note_user_profile';
+    const SUPABASE_SESSION_KEY = 'blocks_of_note_supabase_auth';
     let _initialized = false;
     let _user = null;
     let _onChangeCallbacks = [];
@@ -15,11 +20,25 @@ const Auth = (() => {
 
     function loadSession() {
         try {
-            const saved = localStorage.getItem(STORAGE_KEY);
+            // 1. Tenta ler nosso perfil salvo (chave separada)
+            const saved = localStorage.getItem(PROFILE_KEY);
             if (saved) {
                 const parsed = JSON.parse(saved);
                 if (parsed && parsed.profile) {
                     _user = parsed.profile;
+                    return;
+                }
+            }
+
+            // 2. Fallback: tenta extrair perfil da sessão do Supabase SDK
+            //    (caso ele tenha salvo antes de nós)
+            const supabaseSession = localStorage.getItem(SUPABASE_SESSION_KEY);
+            if (supabaseSession) {
+                const parsed = JSON.parse(supabaseSession);
+                if (parsed && parsed.user) {
+                    _user = buildProfile(parsed.user);
+                    // Salva na nossa chave separada para uso futuro
+                    localStorage.setItem(PROFILE_KEY, JSON.stringify({ profile: _user }));
                 }
             }
         } catch (e) { /* ignore */ }
@@ -28,14 +47,14 @@ const Auth = (() => {
     function saveSession(profile) {
         _user = profile;
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile }));
+            localStorage.setItem(PROFILE_KEY, JSON.stringify({ profile }));
         } catch (e) { /* ignore */ }
     }
 
     function clearSession() {
         _user = null;
         try {
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(PROFILE_KEY);
         } catch (e) { /* ignore */ }
     }
 
