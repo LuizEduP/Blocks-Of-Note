@@ -145,11 +145,15 @@ const Auth = (() => {
         if (_initialized) return;
         _initialized = true;
 
+        console.log('[Auth] init()');
+
         const sb = SupabaseClient?.getClient();
 
         // 1. REGISTRA LISTENER ANTES DE TUDO
         if (sb) {
+            console.log('[Auth] registrando onAuthStateChange');
             sb.auth.onAuthStateChange((event, session) => {
+                console.log('[Auth] onAuthStateChange event:', event, session?.user?.email);
                 if (event === 'SIGNED_IN' && session?.user) {
                     onSignedIn(session.user);
                 } else if (event === 'SIGNED_OUT') {
@@ -163,6 +167,7 @@ const Auth = (() => {
 
         // 2. CARREGA SESSÃO CACHEADA (rápido, UI instantânea)
         loadSession();
+        console.log('[Auth] after loadSession, _user:', _user?.name);
         if (_user) {
             setTimeout(() => notifyChange(), 0);
         }
@@ -171,7 +176,10 @@ const Auth = (() => {
         //    (getSession() lê o resultado do hash já processado)
         if (sb) {
             try {
+                console.log('[Auth] chamando getSession()');
+                console.log('[Auth] current URL hash:', window.location.hash);
                 const { data: { session } } = await sb.auth.getSession();
+                console.log('[Auth] getSession result:', session?.user?.email || 'null');
                 if (session?.user) {
                     onSignedIn(session.user);
                     return;
@@ -179,7 +187,9 @@ const Auth = (() => {
 
                 // 4. FALLBACK: hash na URL (caso o SDK não tenha processado)
                 const hash = window.location.hash;
+                console.log('[Auth] fallback - hash:', hash);
                 if (hash && hash.includes('access_token')) {
+                    console.log('[Auth] tentando setSession com hash');
                     const params = new URLSearchParams(hash.substring(1));
                     const { error } = await sb.auth.setSession({
                         access_token: params.get('access_token') || '',
@@ -193,6 +203,8 @@ const Auth = (() => {
                             onSignedIn(retry.user);
                             return;
                         }
+                    } else {
+                        console.log('[Auth] setSession error:', error);
                     }
                 }
 
@@ -205,6 +217,7 @@ const Auth = (() => {
                 console.warn('Session recovery error:', e);
             }
         }
+        console.log('[Auth] init() finished, _user:', _user?.name || 'null');
     }
 
     // --- Profile Dropdown ---
