@@ -151,6 +151,37 @@ const Auth = (() => {
 
         console.log('[Auth] init()');
 
+        // ──────────────────────────────────────────────────────────────
+        // FIX: Detecção de redirect malformado do Supabase OAuth
+        //
+        // O problema: após login com Google, o Supabase às vezes redireciona
+        // para uma URL como:
+        //   https://pnlucbugvswehculgziu.supabase.co/blocks-of-note-production.up.railway.app#access_token=...
+        //
+        // Isso acontece quando o Site URL no Supabase Dashboard não está
+        // configurado com a URL completa do Railway.
+        //
+        // A solução abaixo detecta esse caso e redireciona para a URL
+        // correta do Railway preservando o hash com o token.
+        // ──────────────────────────────────────────────────────────────
+        (function fixRedirect() {
+            const currentHost = window.location.hostname;
+            // Se estamos no domínio do Supabase (e não no Railway/localhost)
+            if (currentHost.includes('supabase.co')) {
+                // O path contém o domínio de destino extraído do caminho
+                // Ex: "/blocks-of-note-production.up.railway.app"
+                const path = window.location.pathname.replace(/^\//, ''); // tira a barra inicial
+                // Verifica se parece um domínio (contém ponto)
+                if (path && path.includes('.')) {
+                    const hash = window.location.hash;
+                    const targetUrl = 'https://' + path + hash;
+                    console.log('[Auth] Redirect malformado detectado! Redirecionando para:', targetUrl);
+                    window.location.replace(targetUrl);
+                    return; // interrompe init — a página vai recarregar
+                }
+            }
+        })();
+
         const sb = SupabaseClient?.getClient();
 
         // 1. REGISTRA LISTENER ANTES DE TUDO
