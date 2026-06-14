@@ -482,18 +482,7 @@ const Friends = (() => {
 
         loadFriends();
 
-        // Create toggle button in navbar
-        const toggleContainer = document.getElementById('theme-toggle-container');
-        if (toggleContainer) {
-            const friendsBtn = document.createElement('button');
-            friendsBtn.className = 'friends-toggle-btn';
-            friendsBtn.id = 'friends-toggle-btn';
-            friendsBtn.setAttribute('aria-label', 'Abrir amigos');
-            friendsBtn.innerHTML = '👥';
-            friendsBtn.title = 'Amigos';
-            friendsBtn.addEventListener('click', toggle);
-            toggleContainer.parentNode.insertBefore(friendsBtn, toggleContainer);
-        }
+        // Botão 👥 removido — o perfil+amigos abre pelo clique no avatar
     }
 
     return {
