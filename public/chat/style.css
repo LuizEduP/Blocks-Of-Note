@@ -54,7 +54,7 @@
 
 .chat-msg:nth-child(even) {
     align-self: flex-end;
-    background: #000;
+    background: var(--color-brand-dark);
     color: #fff;
 }
 
@@ -135,8 +135,8 @@
 }
 
 .chat-input-field:focus {
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-accent-bg);
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(39, 138, 108, 0.15);
     background: var(--color-bg);
 }
 

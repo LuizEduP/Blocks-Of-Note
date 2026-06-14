@@ -25,7 +25,7 @@
                     <a href="../chat/" class="nav-link">Chat</a>
                 </div>
             </div>
-            <div class="navbar-right"><div id="auth-google" class="navbar-auth"></div></div>
+            <div class="navbar-right"><div id="theme-toggle-container" class="navbar-auth"></div><div id="auth-google" class="navbar-auth"></div></div>
         </div>
     </nav>
 
@@ -172,6 +172,8 @@
     <div id="toast-container" class="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/theme.js"></script>
+    <script src="../shared/friends.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/toast.js"></script>
     <script src="../shared/utils.js"></script>
@@ -183,6 +185,8 @@
             var navbar = document.getElementById('navbar');
             if (navbar) navbar.classList.add('visible');
             Auth.init();
+            Theme.init();
+            Friends.init();
             Auth.renderButton('auth-google');
         });
     </script>

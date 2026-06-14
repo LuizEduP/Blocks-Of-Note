@@ -26,7 +26,9 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Scripts -->
+    <script defer src="shared/theme.js"></script>
     <script defer src="shared/storage.js"></script>
+    <script defer src="shared/friends.js"></script>
     <script defer src="shared/toast.js"></script>
     <script defer src="shared/utils.js"></script>
     <script defer src="shared/supabase.js"></script>
@@ -59,6 +61,7 @@
                 </div>
             </div>
             <div class="navbar-right">
+                <div id="theme-toggle-container" class="navbar-auth"></div>
                 <div class="navbar-auth" id="navbar-auth"></div>
             </div>
         </div>
@@ -217,7 +220,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             Auth.init();
             Auth.renderButton('navbar-auth');
+            Friends.init();
             // Inicia sync automático para notas e tarefas
+            Theme.init();
             if (typeof NotesStorage?.init === 'function') NotesStorage.init();
             if (typeof TasksStorage?.init === 'function') TasksStorage.init();
         });

@@ -1,5 +1,5 @@
 /* ============================================
-   auth.css — Estilos do Google Login
+   auth.css — Estilos do Google Login + Dropdown
    ============================================ */
 
 /* --- Container de autenticação no navbar --- */
@@ -51,67 +51,163 @@
     gap: 8px;
 }
 
-.auth-avatar {
-    width: 28px;
-    height: 28px;
+.auth-avatar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    flex-shrink: 0;
+    border: 2px solid var(--color-border);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.auth-avatar-btn:hover {
+    border-color: var(--color-brand-primary);
+    box-shadow: 0 0 0 2px rgba(39, 138, 108, 0.2);
+}
+
+.auth-avatar-btn:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+.auth-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
     object-fit: cover;
+    display: block;
+}
+
+/* --- Profile Dropdown --- */
+.auth-dropdown {
+    position: fixed;
+    z-index: 9999;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    min-width: 240px;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    pointer-events: none;
+}
+
+.auth-dropdown.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.auth-dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 12px;
+}
+
+.auth-dropdown-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
     border: 2px solid var(--color-border);
 }
 
-.auth-info {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
+.auth-dropdown-info {
+    flex: 1;
     min-width: 0;
-    max-width: 140px;
 }
 
-.auth-name {
-    font-size: 0.78rem;
+.auth-dropdown-name {
+    display: block;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2;
 }
 
-.auth-email {
-    font-size: 0.62rem;
+.auth-dropdown-email {
+    display: block;
+    font-size: 0.72rem;
     color: var(--color-text-muted);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1.2;
 }
 
-.auth-logout-btn {
-    padding: 4px 10px;
-    font-size: 0.7rem;
-    font-family: var(--font-sans);
-    font-weight: 500;
+.auth-dropdown-divider {
+    height: 1px;
+    background: var(--color-divider);
+    margin: 0 8px;
+}
+
+.auth-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 16px;
+    border: none;
     background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    color: var(--color-text-secondary);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
     cursor: pointer;
-    transition: all 0.12s;
-    flex-shrink: 0;
-    line-height: 1;
+    transition: background 0.12s;
+    border-radius: 0 0 12px 12px;
 }
 
-.auth-logout-btn:hover {
-    background: #fef2f2;
-    border-color: #fca5a5;
-    color: #dc2626;
+.auth-dropdown-item:hover {
+    background: var(--color-surface);
+}
+
+.auth-dropdown-item svg {
+    flex-shrink: 0;
+}
+
+.auth-dropdown-logout {
+    color: var(--color-error);
+}
+
+.auth-dropdown-logout:hover {
+    background: var(--color-error-bg);
 }
 
 /* --- Container sidebar (legado) --- */
 .auth-container {
     padding: 12px 12px 8px;
     border-bottom: 1px solid var(--color-border);
+}
+
+/* --- Dark Mode --- */
+[data-theme="dark"] .auth-dropdown {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+}
+
+[data-theme="dark"] .auth-google-btn {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+}
+
+[data-theme="dark"] .auth-google-btn:hover {
+    background: var(--color-surface-hover);
+}
+
+[data-theme="dark"] .auth-avatar-btn {
+    border-color: var(--color-border-strong);
 }
 
 /* --- Responsivo --- */

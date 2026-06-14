@@ -86,12 +86,12 @@
 }
 
 .hero-btn-primary {
-    background: #000;
+    background: var(--color-brand-dark);
     color: white;
 }
 
 .hero-btn-primary:hover {
-    background: #222;
+    background: var(--color-accent-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -150,7 +150,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #000;
+    background: var(--color-brand-dark);
     flex-shrink: 0;
 }
 

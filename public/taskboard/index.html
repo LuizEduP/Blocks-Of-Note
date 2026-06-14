@@ -41,6 +41,7 @@
                 </div>
             </div>
             <div class="navbar-right">
+                <div id="theme-toggle-container" class="navbar-auth"></div>
                 <div id="auth-google" class="navbar-auth"></div>
             </div>
         </div>
@@ -79,6 +80,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../shared/theme.js"></script>
+    <script src="../shared/friends.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/toast.js"></script>
     <script src="../shared/utils.js"></script>
@@ -91,6 +94,8 @@
             var navbar = document.getElementById('navbar');
             if (navbar) navbar.classList.add('visible');
             Auth.init();
+            Theme.init();
+            Friends.init();
             Auth.renderButton('auth-google');
             if (typeof TasksStorage?.init === 'function') TasksStorage.init();
         });

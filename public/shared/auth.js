@@ -142,6 +142,83 @@ const Auth = (() => {
         }
     }
 
+    // --- Profile Dropdown ---
+
+    let _dropdownEl = null;
+    let _dropdownCleanup = null;
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function createDropdown(user) {
+        // Remove dropdown anterior
+        closeDropdown();
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'auth-dropdown';
+        dropdown.id = 'auth-dropdown';
+        dropdown.innerHTML = `
+            <div class="auth-dropdown-header">
+                <img class="auth-dropdown-avatar" src="${user.picture || ''}" alt="${escapeHtml(user.name)}" onerror="this.style.display='none'">
+                <div class="auth-dropdown-info">
+                    <span class="auth-dropdown-name">${escapeHtml(user.name)}</span>
+                    <span class="auth-dropdown-email">${escapeHtml(user.email)}</span>
+                </div>
+            </div>
+            <div class="auth-dropdown-divider"></div>
+            <button class="auth-dropdown-item auth-dropdown-logout" id="auth-dropdown-logout">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sair da conta
+            </button>
+        `;
+
+        // Logout handler
+        dropdown.querySelector('#auth-dropdown-logout').addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeDropdown();
+            logout();
+        });
+
+        document.body.appendChild(dropdown);
+        _dropdownEl = dropdown;
+
+        // Posiciona abaixo do avatar
+        const avatarEl = document.querySelector('.auth-avatar');
+        if (avatarEl) {
+            const rect = avatarEl.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + 6) + 'px';
+            dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+        }
+
+        // Mostra com animação
+        requestAnimationFrame(() => {
+            dropdown.classList.add('open');
+        });
+
+        // Fecha ao clicar fora
+        _dropdownCleanup = (e) => {
+            if (!dropdown.contains(e.target) && !e.target.closest('.auth-avatar') && !e.target.closest('.auth-user')) {
+                closeDropdown();
+            }
+        };
+        setTimeout(() => document.addEventListener('click', _dropdownCleanup), 0);
+    }
+
+    function closeDropdown() {
+        if (_dropdownEl) {
+            _dropdownEl.classList.remove('open');
+            _dropdownEl.remove();
+            _dropdownEl = null;
+        }
+        if (_dropdownCleanup) {
+            document.removeEventListener('click', _dropdownCleanup);
+            _dropdownCleanup = null;
+        }
+    }
+
     // --- Render ---
 
     function renderButton(containerId) {
@@ -151,42 +228,32 @@ const Auth = (() => {
         function render() {
             container.innerHTML = '';
             if (_user) {
-                // Avatar do usuário
+                // Avatar clicável do usuário
                 const wrapper = document.createElement('div');
                 wrapper.className = 'auth-user';
+
+                const avatarBtn = document.createElement('button');
+                avatarBtn.className = 'auth-avatar-btn';
+                avatarBtn.setAttribute('aria-label', 'Perfil do usuário');
+                avatarBtn.setAttribute('title', 'Perfil e conta');
 
                 const avatar = document.createElement('img');
                 avatar.className = 'auth-avatar';
                 avatar.src = _user.picture || '';
                 avatar.alt = _user.name;
-                avatar.onerror = () => { avatar.style.display = 'none'; };
+                avatar.onerror = function() { this.style.display = 'none'; };
 
-                const info = document.createElement('div');
-                info.className = 'auth-info';
-
-                const nameEl = document.createElement('span');
-                nameEl.className = 'auth-name';
-                nameEl.textContent = _user.name;
-
-                const emailEl = document.createElement('span');
-                emailEl.className = 'auth-email';
-                emailEl.textContent = _user.email;
-
-                info.appendChild(nameEl);
-                info.appendChild(emailEl);
-
-                const logoutBtn = document.createElement('button');
-                logoutBtn.className = 'auth-logout-btn';
-                logoutBtn.textContent = 'Sair';
-                logoutBtn.setAttribute('aria-label', 'Sair da conta');
-                logoutBtn.addEventListener('click', (e) => {
+                avatarBtn.appendChild(avatar);
+                avatarBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    logout();
+                    if (_dropdownEl && _dropdownEl.classList.contains('open')) {
+                        closeDropdown();
+                    } else {
+                        createDropdown(_user);
+                    }
                 });
 
-                wrapper.appendChild(avatar);
-                wrapper.appendChild(info);
-                wrapper.appendChild(logoutBtn);
+                wrapper.appendChild(avatarBtn);
                 container.appendChild(wrapper);
             } else {
                 // Botão de login Google
@@ -219,10 +286,16 @@ const Auth = (() => {
         render();
 
         // Re-renderiza quando o estado muda
-        const unsubscribe = onChange(() => render());
+        const unsubscribe = onChange(() => {
+            closeDropdown();
+            render();
+        });
 
         // Cleanup se o container for removido
-        return unsubscribe;
+        return () => {
+            closeDropdown();
+            unsubscribe();
+        };
     }
 
     return {

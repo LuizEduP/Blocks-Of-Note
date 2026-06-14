@@ -133,7 +133,7 @@
 }
 
 .removing .note-card:hover {
-    background: #fdd;
+    background: var(--color-error-bg);
 }
 
 @keyframes shake {

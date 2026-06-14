@@ -97,8 +97,8 @@
 }
 
 .tk-quick-add:focus-within {
-    border-color: #000;
-    box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+    border-color: var(--color-brand-dark);
+    box-shadow: 0 0 0 4px rgba(34, 40, 49, 0.08);
 }
 
 .tk-quick-input {
@@ -212,8 +212,8 @@
 }
 
 .tk-field .input:focus {
-    border-color: #000;
-    box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+    border-color: var(--color-brand-dark);
+    box-shadow: 0 0 0 3px rgba(34, 40, 49, 0.08);
 }
 
 .tk-desc-input {
@@ -321,12 +321,12 @@
 }
 
 .tk-check:hover {
-    border-color: #000;
+    border-color: var(--color-brand-dark);
 }
 
 .tk-card.done .tk-check {
-    background: #000;
-    border-color: #000;
+    background: var(--color-brand-dark);
+    border-color: var(--color-brand-dark);
     color: #fff;
 }
 
@@ -430,7 +430,7 @@
 }
 
 .tk-card-delete:hover {
-    color: #e00;
+    color: var(--color-error);
     background: rgba(224,0,0,0.06);
 }
 
