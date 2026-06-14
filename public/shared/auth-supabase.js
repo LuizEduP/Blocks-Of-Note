@@ -394,7 +394,9 @@ const Auth = (() => {
                 avatarBtn.appendChild(avatar);
                 avatarBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (_dropdownEl && _dropdownEl.classList.contains('open')) {
+                    if (typeof Friends !== 'undefined' && Friends.toggleProfilePanel) {
+                        Friends.toggleProfilePanel(_user);
+                    } else if (_dropdownEl && _dropdownEl.classList.contains('open')) {
                         closeDropdown();
                     } else {
                         createDropdown(_user);

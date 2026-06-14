@@ -126,91 +126,287 @@ const Friends = (() => {
 
     // --- UI ---
 
-    function createPanel() {
-        if (_panelEl) return _panelEl;
+    let _profilePanelEl = null;
+
+    /**
+     * Cria o painel combinado de Perfil + Amigos
+     */
+    function createProfilePanel(user) {
+        // Se já existe, só reabre
+        if (_profilePanelEl && document.body.contains(_profilePanelEl)) {
+            openProfilePanel();
+            return _profilePanelEl;
+        }
+
+        closeProfilePanel(); // limpa qualquer residual
 
         const overlay = document.createElement('div');
-        overlay.className = 'friends-overlay';
+        overlay.className = 'profile-overlay';
         overlay.setAttribute('aria-hidden', 'true');
 
         const panel = document.createElement('aside');
-        panel.className = 'friends-panel';
-        panel.id = 'friends-panel';
+        panel.className = 'profile-panel';
+        panel.id = 'profile-panel';
         panel.setAttribute('role', 'complementary');
-        panel.setAttribute('aria-label', 'Lista de amigos');
+        panel.setAttribute('aria-label', 'Perfil e amigos');
+
+        const picture = (user && user.picture) ? user.picture : '';
+        const name = (user && user.name) ? user.name : 'Usuário';
+        const email = (user && user.email) ? user.email : '';
+
         panel.innerHTML = `
-            <div class="friends-header">
-                <h2 class="friends-title">👥 Amigos</h2>
-                <button class="friends-close-btn" id="friends-close-btn" aria-label="Fechar amigos">&times;</button>
-            </div>
-            <div class="friends-search">
-                <input type="text" id="friends-search-input" class="input friends-search-input" placeholder="Adicionar por nome ou e-mail..." maxlength="100">
-                <button id="friends-add-btn" class="btn btn-sm btn-primary" aria-label="Adicionar">+</button>
-            </div>
-            <div class="friends-requests" id="friends-requests-section" style="display:none">
-                <h3 class="friends-subtitle">Solicitações</h3>
-                <div id="friends-requests-list" class="friends-requests-list"></div>
-            </div>
-            <div class="friends-list-wrap">
-                <h3 class="friends-subtitle">Meus Amigos</h3>
-                <div id="friends-list" class="friends-list">
-                    <div class="friends-empty">Nenhum amigo adicionado ainda.</div>
+            <!-- Header: Perfil -->
+            <div class="profile-header">
+                <div class="profile-avatar-wrap">
+                    <img class="profile-avatar" src="${picture}" alt="${escapeHtml(name)}" onerror="this.style.display='none'">
+                    <div class="profile-avatar-fallback" style="${picture ? 'display:none' : ''}">${escapeHtml(name.charAt(0).toUpperCase())}</div>
                 </div>
+                <div class="profile-info">
+                    <span class="profile-name">${escapeHtml(name)}</span>
+                    <span class="profile-email">${escapeHtml(email)}</span>
+                </div>
+                <button class="profile-close-btn" id="profile-close-btn" aria-label="Fechar">&times;</button>
+            </div>
+
+            <!-- Ações: Adicionar amigo + Enviar mensagem -->
+            <div class="profile-actions">
+                <div class="profile-add-friend">
+                    <input type="text" id="profile-add-input" class="input profile-add-input" placeholder="Adicionar amigo por nome ou e-mail..." maxlength="100">
+                    <button id="profile-add-btn" class="btn btn-sm btn-primary" aria-label="Adicionar amigo">+</button>
+                </div>
+                <div class="profile-send-msg">
+                    <input type="text" id="profile-msg-input" class="input profile-msg-input" placeholder="Enviar mensagem para..." maxlength="200">
+                    <button id="profile-send-btn" class="btn btn-sm btn-primary" aria-label="Enviar mensagem">✉</button>
+                </div>
+            </div>
+
+            <!-- Solicitações -->
+            <div class="profile-requests" id="profile-requests-section" style="display:none">
+                <h3 class="profile-subtitle">Solicitações</h3>
+                <div id="profile-requests-list" class="profile-requests-list"></div>
+            </div>
+
+            <!-- Amigos -->
+            <div class="profile-friends-wrap">
+                <h3 class="profile-subtitle">Amigos</h3>
+                <div id="profile-friends-list" class="profile-friends-list">
+                    <div class="profile-friends-empty">Nenhum amigo adicionado ainda.</div>
+                </div>
+            </div>
+
+            <!-- Footer: Logout -->
+            <div class="profile-footer">
+                <button class="profile-logout-btn" id="profile-logout-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sair da conta
+                </button>
             </div>
         `;
 
         document.body.appendChild(overlay);
         document.body.appendChild(panel);
 
-        _panelEl = panel;
+        _profilePanelEl = panel;
 
-        // Overlay click to close
-        overlay.addEventListener('click', close);
+        // ─── Eventos ───
 
-        // Close button
-        const closeBtn = panel.querySelector('#friends-close-btn');
-        closeBtn.addEventListener('click', close);
+        // Overlay fecha
+        overlay.addEventListener('click', closeProfilePanel);
 
-        // Add button
-        const addBtn = panel.querySelector('#friends-add-btn');
-        const searchInput = panel.querySelector('#friends-search-input');
-        addBtn.addEventListener('click', () => {
-            addFriend(searchInput.value);
-            searchInput.value = '';
+        // Botão fechar
+        panel.querySelector('#profile-close-btn').addEventListener('click', closeProfilePanel);
+
+        // Logout
+        panel.querySelector('#profile-logout-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeProfilePanel();
+            Auth.logout();
         });
-        searchInput.addEventListener('keydown', (e) => {
+
+        // Adicionar amigo
+        const addInput = panel.querySelector('#profile-add-input');
+        const addBtn = panel.querySelector('#profile-add-btn');
+        addBtn.addEventListener('click', () => {
+            addFriend(addInput.value);
+            addInput.value = '';
+        });
+        addInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                addFriend(searchInput.value);
-                searchInput.value = '';
+                addFriend(addInput.value);
+                addInput.value = '';
             }
         });
+
+        // Enviar mensagem (navega para o chat)
+        const msgInput = panel.querySelector('#profile-msg-input');
+        const sendBtn = panel.querySelector('#profile-send-btn');
+        sendBtn.addEventListener('click', () => {
+            const friendName = msgInput.value.trim();
+            if (friendName) {
+                closeProfilePanel();
+                // Navega para o chat
+                window.location.href = '/chat/?friend=' + encodeURIComponent(friendName);
+            } else {
+                Toast.show('Digite o nome de um amigo', { type: 'warning', duration: 2000 });
+            }
+        });
+        msgInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+
+        // Abre com animação
+        requestAnimationFrame(() => {
+            panel.classList.add('open');
+            overlay.classList.add('visible');
+        });
+        document.body.style.overflow = 'hidden';
+
+        renderProfileFriends();
 
         return panel;
     }
 
-    function open() {
-        const panel = createPanel();
-        const overlay = document.querySelector('.friends-overlay');
+    function openProfilePanel() {
+        const panel = _profilePanelEl;
+        const overlay = document.querySelector('.profile-overlay');
         if (!panel) return;
         panel.classList.add('open');
         if (overlay) overlay.classList.add('visible');
         document.body.style.overflow = 'hidden';
-        render();
+        renderProfileFriends();
+    }
+
+    function closeProfilePanel() {
+        const panel = _profilePanelEl;
+        const overlay = document.querySelector('.profile-overlay');
+        if (panel) {
+            panel.classList.remove('open');
+        }
+        if (overlay) {
+            overlay.classList.remove('visible');
+        }
+        document.body.style.overflow = '';
+        // Remove after transition
+        if (panel) {
+            setTimeout(() => {
+                if (panel && !panel.classList.contains('open')) {
+                    panel.remove();
+                    if (overlay) overlay.remove();
+                    _profilePanelEl = null;
+                }
+            }, 300);
+        } else {
+            if (overlay) overlay.remove();
+        }
+    }
+
+    function toggleProfilePanel(user) {
+        const panel = _profilePanelEl;
+        const overlay = document.querySelector('.profile-overlay');
+        if (panel && overlay && (panel.classList.contains('open') || overlay.classList.contains('visible'))) {
+            closeProfilePanel();
+        } else {
+            createProfilePanel(user);
+        }
+    }
+
+    /**
+     * Renderiza a lista de amigos DENTRO do profile panel
+     */
+    function renderProfileFriends() {
+        const requestsList = document.getElementById('profile-requests-list');
+        const friendsList = document.getElementById('profile-friends-list');
+        const requestsSection = document.getElementById('profile-requests-section');
+
+        if (!friendsList) return;
+
+        // Requests
+        if (requestsList && requestsSection) {
+            if (_requests.length > 0) {
+                requestsSection.style.display = '';
+                requestsList.innerHTML = _requests.map(r => `
+                    <div class="profile-request-item">
+                        <div class="profile-request-avatar">${escapeHtml(r.name.charAt(0).toUpperCase())}</div>
+                        <div class="profile-request-info">
+                            <span class="profile-request-name">${escapeHtml(r.name)}</span>
+                            <span class="profile-request-meta">Solicitação pendente</span>
+                        </div>
+                        <div class="profile-request-actions">
+                            <button class="profile-req-accept" data-id="${escapeHtml(r.id)}" aria-label="Aceitar">✓</button>
+                            <button class="profile-req-reject" data-id="${escapeHtml(r.id)}" aria-label="Recusar">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                requestsList.querySelectorAll('.profile-req-accept').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        acceptRequest(btn.dataset.id);
+                        renderProfileFriends();
+                    });
+                });
+                requestsList.querySelectorAll('.profile-req-reject').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        rejectRequest(btn.dataset.id);
+                        renderProfileFriends();
+                    });
+                });
+            } else {
+                requestsSection.style.display = 'none';
+            }
+        }
+
+        // Friends list
+        if (_friends.length === 0) {
+            friendsList.innerHTML = '<div class="profile-friends-empty">Nenhum amigo ainda.</div>';
+        } else {
+            friendsList.innerHTML = _friends.map(f => `
+                <div class="profile-friend-item">
+                    <div class="profile-friend-avatar">${escapeHtml(f.name.charAt(0).toUpperCase())}</div>
+                    <div class="profile-friend-info">
+                        <span class="profile-friend-name">${escapeHtml(f.name)}</span>
+                        <span class="profile-friend-meta">${escapeHtml(f.email || 'Amigo')}</span>
+                    </div>
+                    <button class="profile-friend-remove" data-id="${escapeHtml(f.id)}" aria-label="Remover amigo">✕</button>
+                </div>
+            `).join('');
+
+            friendsList.querySelectorAll('.profile-friend-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    removeFriend(btn.dataset.id);
+                    renderProfileFriends();
+                });
+            });
+        }
+    }
+
+    function open() {
+        // Legacy - se não tem user, abre friends panel normal
+        const user = Auth.getUser && Auth.getUser();
+        if (user) {
+            toggleProfilePanel(user);
+        } else {
+            // Fallback: friends panel antigo
+            _openLegacy();
+        }
+    }
+
+    function _openLegacy() {
+        // Mantém compatibilidade (não usado)
     }
 
     function close() {
-        const panel = _panelEl;
-        const overlay = document.querySelector('.friends-overlay');
-        if (panel) panel.classList.remove('open');
-        if (overlay) overlay.classList.remove('visible');
-        document.body.style.overflow = '';
+        closeProfilePanel();
     }
 
     function toggle() {
-        if (_panelEl && _panelEl.classList.contains('open')) {
-            close();
+        const user = Auth.getUser && Auth.getUser();
+        if (user) {
+            toggleProfilePanel(user);
         } else {
-            open();
+            // Se não logado, não abre
+            Toast.show('Faça login para ver seu perfil', { type: 'info', duration: 2000 });
         }
     }
 

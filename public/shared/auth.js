@@ -246,10 +246,15 @@ const Auth = (() => {
                 avatarBtn.appendChild(avatar);
                 avatarBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (_dropdownEl && _dropdownEl.classList.contains('open')) {
-                        closeDropdown();
+                    if (typeof Friends !== 'undefined' && Friends.toggleProfilePanel) {
+                        Friends.toggleProfilePanel(_user);
                     } else {
-                        createDropdown(_user);
+                        // fallback: dropdown antigo
+                        if (_dropdownEl && _dropdownEl.classList.contains('open')) {
+                            closeDropdown();
+                        } else {
+                            createDropdown(_user);
+                        }
                     }
                 });
 

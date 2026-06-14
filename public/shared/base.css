@@ -1005,6 +1005,417 @@ h1, h2, h3, h4 {
     background: var(--color-bg-tertiary);
 }
 
+/* ============================================
+   PROFILE PANEL — Sidebar de perfil + amigos
+   ============================================ */
+
+/* Overlay */
+.profile-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.profile-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Panel */
+.profile-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 90vw;
+    z-index: 9999;
+    background: var(--color-bg);
+    border-left: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xl);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+}
+
+.profile-panel.open {
+    transform: translateX(0);
+}
+
+/* Header — Perfil */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.profile-avatar-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-brand-primary);
+}
+
+.profile-avatar-fallback {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-brand-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.profile-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-name {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-email {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all var(--transition-fast);
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.profile-close-btn:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+/* Actions */
+.profile-actions {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.profile-add-friend,
+.profile-send-msg {
+    display: flex;
+    gap: 8px;
+}
+
+.profile-add-input,
+.profile-msg-input {
+    flex: 1;
+    font-size: 0.8rem;
+}
+
+/* Requests */
+.profile-requests {
+    border-bottom: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.profile-subtitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    padding: 12px 20px 8px;
+    margin: 0;
+}
+
+.profile-requests-list {
+    padding: 0 12px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-request-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--border-radius-sm);
+    background: var(--color-accent-bg);
+}
+
+.profile-request-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-brand-secondary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.profile-request-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-request-name {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-request-meta {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+}
+
+.profile-request-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.profile-req-accept,
+.profile-req-reject {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    padding: 0;
+}
+
+.profile-req-accept {
+    background: var(--color-success);
+    color: #fff;
+}
+
+.profile-req-accept:hover {
+    background: #0a6b33;
+}
+
+.profile-req-reject {
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+}
+
+.profile-req-reject:hover {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+/* Friends list */
+.profile-friends-wrap {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 12px;
+}
+
+.profile-friends-list {
+    padding: 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.profile-friends-empty {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 24px 20px;
+    line-height: 1.6;
+}
+
+.profile-friend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--border-radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.profile-friend-item:hover {
+    background: var(--color-surface);
+}
+
+.profile-friend-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-brand-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.profile-friend-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-friend-name {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-friend-meta {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+}
+
+.profile-friend-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: 4px;
+    opacity: 0;
+    transition: all var(--transition-fast);
+    padding: 0;
+}
+
+.profile-friend-item:hover .profile-friend-remove {
+    opacity: 1;
+}
+
+.profile-friend-remove:hover {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+/* Footer */
+.profile-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+}
+
+.profile-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-error);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.profile-logout-btn:hover {
+    background: var(--color-error-bg);
+    border-color: var(--color-error);
+}
+
+.profile-logout-btn svg {
+    flex-shrink: 0;
+}
+
+/* Dark mode */
+[data-theme="dark"] .profile-panel {
+    border-left-color: var(--color-border-strong);
+}
+
+[data-theme="dark"] .profile-request-item {
+    background: rgba(56, 199, 156, 0.1);
+}
+
+[data-theme="dark"] .profile-friend-item:hover {
+    background: var(--color-bg-tertiary);
+}
+
+[data-theme="dark"] .profile-friend-avatar {
+    background: var(--color-brand-primary);
+}
+
+/* Responsivo profile */
+@media (max-width: 768px) {
+    .profile-panel {
+        width: 100%;
+        max-width: 100vw;
+    }
+}
+
 /* --- REDUÇÃO DE MOVIMENTO --- */
 
 @media (prefers-reduced-motion: reduce) {
