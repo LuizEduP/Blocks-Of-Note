@@ -149,15 +149,10 @@ const Auth = (() => {
         if (_initialized) return;
         _initialized = true;
 
-        console.log('[Auth] init() — hash atual:', window.location.hash);
+        console.log('[Auth] init() — hash:', window.location.hash);
 
         // ──────────────────────────────────────────────────────────────
-        // FIX 1: Detecção de redirect malformado do Supabase OAuth.
-        //
-        // Caso o Supabase redirecione para uma URL como:
-        //   https://pnlucbugvswehculgziu.supabase.co/meu-app.railway.app#access_token=...
-        //
-        // Redirecionamos para a URL correta (Railway) preservando o hash.
+        // FIX 1: Se estiver numa URL malformada do Supabase, redireciona
         // ──────────────────────────────────────────────────────────────
         (function fixRedirect() {
             const host = window.location.hostname;
@@ -171,18 +166,50 @@ const Auth = (() => {
             }
         })();
 
+        // ──────────────────────────────────────────────────────────────
+        // FIX 2: Decodifica o JWT do hash da URL IMEDIATAMENTE,
+        //         ANTES de criar o cliente Supabase.
+        //
+        // Isso garante que mesmo que o SDK não dispare SIGNED_IN
+        // (por exemplo, se o evento ocorreu antes do listener ser registrado),
+        // o perfil já estará salvo e loadSession() vai encontrá-lo.
+        //
+        // IMPORTANTE: não limpamos o hash aqui — o SDK ainda precisa dele.
+        // ──────────────────────────────────────────────────────────────
+        (function decodeProfileFromHash() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                try {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const accessToken = params.get('access_token');
+                    if (accessToken) {
+                        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                        const meta = payload.user_metadata || {};
+                        const profile = {
+                            name: meta.full_name || meta.name || payload.email?.split('@')[0] || 'Usuário',
+                            email: payload.email || '',
+                            picture: meta.avatar_url || meta.picture || '',
+                            sub: payload.sub,
+                        };
+                        saveSession(profile);
+                        console.log('[Auth] Perfil decodificado do hash:', profile.name);
+                    }
+                } catch (e) {
+                    console.warn('[Auth] Erro ao decodificar JWT:', e);
+                }
+            }
+        })();
+
         const sb = SupabaseClient?.getClient();
 
         // ──────────────────────────────────────────────────────────────
-        // 1. Registra o listener de auth state change.
-        //    Isso captura eventos SIGNED_IN/SIGNED_OUT futuros.
+        // 1. Registra listener de auth state change (SIGNED_IN, SIGNED_OUT)
         // ──────────────────────────────────────────────────────────────
         if (sb) {
             sb.auth.onAuthStateChange((event, session) => {
                 console.log('[Auth] onAuthStateChange:', event, session?.user?.email);
                 if (event === 'SIGNED_IN' && session?.user) {
                     onSignedIn(session.user);
-                    // Limpa o hash da URL após SIGNED_IN ser processado
                     if (window.location.hash) {
                         window.history.replaceState(null, '', window.location.pathname);
                     }
@@ -196,17 +223,16 @@ const Auth = (() => {
         }
 
         // ──────────────────────────────────────────────────────────────
-        // 2. Carrega sessão cacheada (UI instantânea, não espera a rede).
+        // 2. Carrega sessão cacheada (ou recém-decodificada do hash)
         // ──────────────────────────────────────────────────────────────
         loadSession();
         if (_user) {
+            console.log('[Auth] Usuário já disponível via cache/hash:', _user.name);
             setTimeout(() => notifyChange(), 0);
         }
 
         // ──────────────────────────────────────────────────────────────
-        // 3. Tenta recuperar a sessão do Supabase.
-        //    getSession() lê o resultado do hash (#access_token=...)
-        //    que o SDK já processou durante createClient().
+        // 3. Tenta recuperar sessão via Supabase SDK
         // ──────────────────────────────────────────────────────────────
         if (sb) {
             try {
@@ -217,12 +243,11 @@ const Auth = (() => {
                 }
 
                 // ──────────────────────────────────────────────────────────
-                // 4. Fallback: se getSession() não retornou nada, mas
-                //    ainda há hash na URL, usamos setSession() manual.
+                // 4. Fallback: setSession manual se ainda houver hash
                 // ──────────────────────────────────────────────────────────
                 const hash = window.location.hash;
                 if (hash && hash.includes('access_token')) {
-                    console.log('[Auth] Fallback: setSession manual com hash');
+                    console.log('[Auth] Fallback: setSession manual');
                     const params = new URLSearchParams(hash.substring(1));
                     const { error } = await sb.auth.setSession({
                         access_token: params.get('access_token') || '',
@@ -232,17 +257,14 @@ const Auth = (() => {
                     if (!error) {
                         window.history.replaceState(null, '', window.location.pathname);
                         const { data: { session: retry } } = await sb.auth.getSession();
-                        if (retry?.user) {
-                            onSignedIn(retry.user);
-                            return;
-                        }
+                        if (retry?.user) onSignedIn(retry.user);
                     } else {
                         console.log('[Auth] setSession error:', error);
                     }
                 }
 
                 // ──────────────────────────────────────────────────────────
-                // 5. Nada encontrado: limpa sessão obsoleta.
+                // 5. Nada encontrado
                 // ──────────────────────────────────────────────────────────
                 if (!_user) {
                     clearSession();
