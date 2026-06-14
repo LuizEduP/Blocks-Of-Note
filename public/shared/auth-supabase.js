@@ -152,54 +152,63 @@ const Auth = (() => {
         console.log('[Auth] init()');
 
         // ──────────────────────────────────────────────────────────────
-        // FIX: Detecção de redirect malformado do Supabase OAuth
+        // FIX 1: Detecção de redirect malformado do Supabase OAuth
         //
-        // O problema: após login com Google, o Supabase às vezes redireciona
-        // para uma URL como:
+        // Após login com Google, o Supabase às vezes redireciona para:
         //   https://pnlucbugvswehculgziu.supabase.co/blocks-of-note-production.up.railway.app#access_token=...
         //
-        // Isso acontece quando o Site URL no Supabase Dashboard não está
-        // configurado com a URL completa do Railway.
+        // Em vez de redirecionar corretamente para:
+        //   https://blocks-of-note-production.up.railway.app#access_token=...
         //
-        // SOLUÇÃO: decodificar o JWT do hash, salvar o perfil no localStorage
-        // e redirecionar para a URL correta do Railway (sem hash).
+        // SOLUÇÃO: decodificar o JWT e repassar o profile via URL (query param)
         // ──────────────────────────────────────────────────────────────
         (function fixRedirect() {
             const currentHost = window.location.hostname;
-            // Se estamos no domínio do Supabase (e não no Railway/localhost)
             if (currentHost.includes('supabase.co')) {
                 const path = window.location.pathname.replace(/^\//, '');
-                // Verifica se o path parece um domínio (contém ponto)
                 if (path && path.includes('.')) {
                     const hash = window.location.hash;
-                    // Tenta extrair o perfil do JWT antes de redirecionar
-                    if (hash && hash.includes('access_token')) {
-                        try {
-                            const params = new URLSearchParams(hash.substring(1));
-                            const accessToken = params.get('access_token');
-                            if (accessToken) {
-                                // Decodifica o payload do JWT
-                                const payload = JSON.parse(atob(accessToken.split('.')[1]));
-                                const meta = payload.user_metadata || {};
-                                const profile = {
-                                    name: meta.full_name || meta.name || payload.email?.split('@')[0] || 'Usuário',
-                                    email: payload.email || '',
-                                    picture: meta.avatar_url || meta.picture || '',
-                                    sub: payload.sub,
-                                };
-                                // Salva no localStorage ANTES de redirecionar
-                                localStorage.setItem(STORAGE_KEY, JSON.stringify({ profile }));
-                                console.log('[Auth] Perfil salvo no localStorage durante redirect fix:', profile.name);
-                            }
-                        } catch (e) {
-                            console.warn('[Auth] Erro ao decodificar token durante redirect fix:', e);
-                        }
-                    }
-                    // Redireciona para a URL correta (sem o hash — já salvamos o token)
-                    const targetUrl = 'https://' + path;
+                    // Repassa o hash inteiro para a URL correta
+                    const targetUrl = 'https://' + path + hash;
                     console.log('[Auth] Redirect malformado! Indo para:', targetUrl);
                     window.location.replace(targetUrl);
-                    return; // interrompe init — a página vai recarregar
+                    return;
+                }
+            }
+        })();
+
+        // ──────────────────────────────────────────────────────────────
+        // FIX 2: Decodificação direta do JWT no hash da URL.
+        //
+        // Quando chegamos aqui (no Railway ou localhost) com um hash
+        // do tipo #access_token=... na URL, significa que acabamos de
+        // voltar do fluxo OAuth. Decodificamos o JWT manualmente para
+        // extrair o perfil e salvar no localStorage, garantindo que a UI
+        // mostre o avatar mesmo que o Supabase SDK não dispare SIGNED_IN.
+        // ──────────────────────────────────────────────────────────────
+        (function decodeJwtFromUrl() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                try {
+                    const params = new URLSearchParams(hash.substring(1));
+                    const accessToken = params.get('access_token');
+                    if (accessToken) {
+                        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+                        const meta = payload.user_metadata || {};
+                        const profile = {
+                            name: meta.full_name || meta.name || payload.email?.split('@')[0] || 'Usuário',
+                            email: payload.email || '',
+                            picture: meta.avatar_url || meta.picture || '',
+                            sub: payload.sub,
+                        };
+                        saveSession(profile);
+                        console.log('[Auth] Perfil decodificado do hash e salvo:', profile.name);
+
+                        // Limpa o hash da URL imediatamente
+                        window.history.replaceState(null, '', window.location.pathname);
+                    }
+                } catch (e) {
+                    console.warn('[Auth] Erro ao decodificar JWT do hash:', e);
                 }
             }
         })();
