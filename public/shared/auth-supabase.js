@@ -149,79 +149,43 @@ const Auth = (() => {
         if (_initialized) return;
         _initialized = true;
 
-        console.log('[Auth] init()');
+        console.log('[Auth] init() — hash atual:', window.location.hash);
 
         // ──────────────────────────────────────────────────────────────
-        // FIX 1: Detecção de redirect malformado do Supabase OAuth
+        // FIX 1: Detecção de redirect malformado do Supabase OAuth.
         //
-        // Após login com Google, o Supabase às vezes redireciona para:
-        //   https://pnlucbugvswehculgziu.supabase.co/blocks-of-note-production.up.railway.app#access_token=...
+        // Caso o Supabase redirecione para uma URL como:
+        //   https://pnlucbugvswehculgziu.supabase.co/meu-app.railway.app#access_token=...
         //
-        // Em vez de redirecionar corretamente para:
-        //   https://blocks-of-note-production.up.railway.app#access_token=...
-        //
-        // SOLUÇÃO: decodificar o JWT e repassar o profile via URL (query param)
+        // Redirecionamos para a URL correta (Railway) preservando o hash.
         // ──────────────────────────────────────────────────────────────
         (function fixRedirect() {
-            const currentHost = window.location.hostname;
-            if (currentHost.includes('supabase.co')) {
+            const host = window.location.hostname;
+            if (host.includes('supabase.co')) {
                 const path = window.location.pathname.replace(/^\//, '');
                 if (path && path.includes('.')) {
-                    const hash = window.location.hash;
-                    // Repassa o hash inteiro para a URL correta
-                    const targetUrl = 'https://' + path + hash;
-                    console.log('[Auth] Redirect malformado! Indo para:', targetUrl);
+                    const targetUrl = 'https://' + path + window.location.hash;
+                    console.log('[Auth] Redirect malformado →', targetUrl);
                     window.location.replace(targetUrl);
-                    return;
-                }
-            }
-        })();
-
-        // ──────────────────────────────────────────────────────────────
-        // FIX 2: Decodificação direta do JWT no hash da URL.
-        //
-        // Quando chegamos aqui (no Railway ou localhost) com um hash
-        // do tipo #access_token=... na URL, significa que acabamos de
-        // voltar do fluxo OAuth. Decodificamos o JWT manualmente para
-        // extrair o perfil e salvar no localStorage, garantindo que a UI
-        // mostre o avatar mesmo que o Supabase SDK não dispare SIGNED_IN.
-        // ──────────────────────────────────────────────────────────────
-        (function decodeJwtFromUrl() {
-            const hash = window.location.hash;
-            if (hash && hash.includes('access_token')) {
-                try {
-                    const params = new URLSearchParams(hash.substring(1));
-                    const accessToken = params.get('access_token');
-                    if (accessToken) {
-                        const payload = JSON.parse(atob(accessToken.split('.')[1]));
-                        const meta = payload.user_metadata || {};
-                        const profile = {
-                            name: meta.full_name || meta.name || payload.email?.split('@')[0] || 'Usuário',
-                            email: payload.email || '',
-                            picture: meta.avatar_url || meta.picture || '',
-                            sub: payload.sub,
-                        };
-                        saveSession(profile);
-                        console.log('[Auth] Perfil decodificado do hash e salvo:', profile.name);
-
-                        // Limpa o hash da URL imediatamente
-                        window.history.replaceState(null, '', window.location.pathname);
-                    }
-                } catch (e) {
-                    console.warn('[Auth] Erro ao decodificar JWT do hash:', e);
                 }
             }
         })();
 
         const sb = SupabaseClient?.getClient();
 
-        // 1. REGISTRA LISTENER ANTES DE TUDO
+        // ──────────────────────────────────────────────────────────────
+        // 1. Registra o listener de auth state change.
+        //    Isso captura eventos SIGNED_IN/SIGNED_OUT futuros.
+        // ──────────────────────────────────────────────────────────────
         if (sb) {
-            console.log('[Auth] registrando onAuthStateChange');
             sb.auth.onAuthStateChange((event, session) => {
-                console.log('[Auth] onAuthStateChange event:', event, session?.user?.email);
+                console.log('[Auth] onAuthStateChange:', event, session?.user?.email);
                 if (event === 'SIGNED_IN' && session?.user) {
                     onSignedIn(session.user);
+                    // Limpa o hash da URL após SIGNED_IN ser processado
+                    if (window.location.hash) {
+                        window.history.replaceState(null, '', window.location.pathname);
+                    }
                 } else if (event === 'SIGNED_OUT') {
                     clearSession();
                     notifyChange();
@@ -231,31 +195,34 @@ const Auth = (() => {
             });
         }
 
-        // 2. CARREGA SESSÃO CACHEADA (rápido, UI instantânea)
+        // ──────────────────────────────────────────────────────────────
+        // 2. Carrega sessão cacheada (UI instantânea, não espera a rede).
+        // ──────────────────────────────────────────────────────────────
         loadSession();
-        console.log('[Auth] after loadSession, _user:', _user?.name);
         if (_user) {
             setTimeout(() => notifyChange(), 0);
         }
 
-        // 3. RECUPERA SESSÃO DO SUPABASE
-        //    (getSession() lê o resultado do hash já processado)
+        // ──────────────────────────────────────────────────────────────
+        // 3. Tenta recuperar a sessão do Supabase.
+        //    getSession() lê o resultado do hash (#access_token=...)
+        //    que o SDK já processou durante createClient().
+        // ──────────────────────────────────────────────────────────────
         if (sb) {
             try {
-                console.log('[Auth] chamando getSession()');
-                console.log('[Auth] current URL hash:', window.location.hash);
                 const { data: { session } } = await sb.auth.getSession();
-                console.log('[Auth] getSession result:', session?.user?.email || 'null');
                 if (session?.user) {
                     onSignedIn(session.user);
                     return;
                 }
 
-                // 4. FALLBACK: hash na URL (caso o SDK não tenha processado)
+                // ──────────────────────────────────────────────────────────
+                // 4. Fallback: se getSession() não retornou nada, mas
+                //    ainda há hash na URL, usamos setSession() manual.
+                // ──────────────────────────────────────────────────────────
                 const hash = window.location.hash;
-                console.log('[Auth] fallback - hash:', hash);
                 if (hash && hash.includes('access_token')) {
-                    console.log('[Auth] tentando setSession com hash');
+                    console.log('[Auth] Fallback: setSession manual com hash');
                     const params = new URLSearchParams(hash.substring(1));
                     const { error } = await sb.auth.setSession({
                         access_token: params.get('access_token') || '',
@@ -274,7 +241,9 @@ const Auth = (() => {
                     }
                 }
 
-                // 5. NADA ENCONTRADO: limpa sessão obsoleta
+                // ──────────────────────────────────────────────────────────
+                // 5. Nada encontrado: limpa sessão obsoleta.
+                // ──────────────────────────────────────────────────────────
                 if (!_user) {
                     clearSession();
                     notifyChange();
@@ -283,7 +252,6 @@ const Auth = (() => {
                 console.warn('Session recovery error:', e);
             }
         }
-        console.log('[Auth] init() finished, _user:', _user?.name || 'null');
     }
 
     // --- Profile Dropdown ---
