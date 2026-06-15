@@ -54,14 +54,14 @@ const Friends = (() => {
         return [..._requests];
     }
 
-    function addFriend(nameOrEmail) {
+    async function addFriend(nameOrEmail) {
         const trimmed = nameOrEmail.trim();
         if (!trimmed) {
             Toast.show('Digite um nome ou e-mail', { type: 'warning', duration: 2000 });
             return;
         }
 
-        // Verifica se já existe
+        // Verifica se já existe na lista local
         const exists = _friends.some(f => f.name.toLowerCase() === trimmed.toLowerCase() || f.email.toLowerCase() === trimmed.toLowerCase());
         if (exists) {
             Toast.show('Este amigo já está na sua lista', { type: 'warning', duration: 2000 });
@@ -75,7 +75,38 @@ const Friends = (() => {
             return;
         }
 
-        // Adiciona como solicitação pendente
+        // Busca o usuário no Supabase (profiles)
+        let foundUser = null;
+        try {
+            if (typeof ProfilesSync?.searchUsers === 'function') {
+                const results = await ProfilesSync.searchUsers(trimmed, 5);
+                // Procura match exato (pelo nome ou email)
+                foundUser = results.find(r =>
+                    r.name?.toLowerCase() === trimmed.toLowerCase() ||
+                    r.email?.toLowerCase() === trimmed.toLowerCase()
+                );
+            }
+        } catch (e) {
+            console.warn('[Friends] Erro ao buscar usuário:', e);
+        }
+
+        if (foundUser) {
+            // Usuário encontrado no Supabase — adiciona direto com o UUID real
+            const friend = {
+                id: foundUser.id,              // UUID real do Supabase!
+                name: foundUser.name,
+                email: foundUser.email,
+                picture: foundUser.picture || '',
+                addedAt: Date.now(),
+            };
+            _friends.push(friend);
+            saveFriends();
+            Toast.show(`${friend.name} adicionado(a) aos amigos!`, { type: 'success', duration: 2500 });
+            renderProfileFriends();
+            return;
+        }
+
+        // Não encontrou no Supabase — salva como solicitação local
         const request = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
             name: trimmed,
@@ -87,7 +118,7 @@ const Friends = (() => {
         _requests.push(request);
         saveFriends();
         Toast.show(`Solicitação enviada para ${trimmed}`, { type: 'success', duration: 2000 });
-        render();
+        renderProfileFriends();
     }
 
     function acceptRequest(id) {

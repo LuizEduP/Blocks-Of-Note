@@ -154,3 +154,29 @@ CREATE POLICY "Users can send messages"
 
 CREATE INDEX IF NOT EXISTS idx_dm_participants ON direct_messages(sender_id, recipient_id);
 CREATE INDEX IF NOT EXISTS idx_dm_created_at ON direct_messages(created_at DESC);
+
+-- ==================== PROFILES (para busca de amigos) ====================
+
+CREATE TABLE IF NOT EXISTS profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    name TEXT NOT NULL DEFAULT '',
+    email TEXT NOT NULL DEFAULT '',
+    picture TEXT DEFAULT '',
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Qualquer um logado pode ver perfis (para buscar amigos)
+CREATE POLICY "Users can view all profiles"
+    ON profiles FOR SELECT
+    USING (auth.role() = 'authenticated');
+
+-- O próprio usuário pode inserir/atualizar seu perfil
+CREATE POLICY "Users can upsert their own profile"
+    ON profiles FOR INSERT
+    WITH CHECK (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile"
+    ON profiles FOR UPDATE
+    USING (auth.uid() = id);

@@ -180,6 +180,7 @@
     <script src="../shared/supabase.js"></script>
     <script src="../shared/auth-supabase.js"></script>
     <script src="../shared/chat-storage-supabase.js"></script>
+    <script src="../shared/profiles-sync.js"></script>
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -190,6 +191,7 @@
             Friends.init();
             ChatWidget.init();
             Auth.renderButton('auth-google');
+            ProfilesSync.syncMyProfile();
         });
     </script>
 </body>

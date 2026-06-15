@@ -112,6 +112,7 @@
     <script src="../shared/auth-supabase.js"></script>
     <script src="../shared/tasks-storage-supabase.js"></script>
     <script src="../shared/chat-storage-supabase.js"></script>
+    <script src="../shared/profiles-sync.js"></script>
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -122,6 +123,7 @@
             Friends.init();
             Auth.renderButton('auth-google');
             if (typeof TasksStorage?.init === 'function') TasksStorage.init();
+            ProfilesSync.syncMyProfile();
         });
     </script>
 </body>

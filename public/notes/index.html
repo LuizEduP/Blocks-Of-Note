@@ -117,6 +117,7 @@
     <script src="../shared/auth-supabase.js"></script>
     <script src="../shared/notes-storage-supabase.js"></script>
     <script src="../shared/chat-storage-supabase.js"></script>
+    <script src="../shared/profiles-sync.js"></script>
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -128,6 +129,7 @@
             ChatWidget.init();
             Auth.renderButton('auth-google');
             if (typeof NotesStorage?.init === 'function') NotesStorage.init();
+            ProfilesSync.syncMyProfile();
         });
     </script>
 </body>
