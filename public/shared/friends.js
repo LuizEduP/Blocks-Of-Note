@@ -490,6 +490,7 @@ const Friends = (() => {
         open,
         close,
         toggle,
+        toggleProfilePanel,
         getFriends,
         getRequests,
         addFriend,
