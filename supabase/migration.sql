@@ -127,3 +127,30 @@ CREATE TRIGGER tasks_updated_at BEFORE UPDATE ON tasks
 
 CREATE TRIGGER workspaces_updated_at BEFORE UPDATE ON workspaces
     FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ==================== DIRECT MESSAGES ====================
+
+CREATE TABLE IF NOT EXISTS direct_messages (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sender_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    sender_name TEXT NOT NULL DEFAULT 'Anônimo',
+    recipient_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    recipient_name TEXT NOT NULL DEFAULT 'Anônimo',
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
+
+-- Usuários podem ver mensagens onde são sender ou recipient
+CREATE POLICY "Users can see their own messages"
+    ON direct_messages FOR SELECT
+    USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
+
+-- Usuários autenticados podem enviar mensagens
+CREATE POLICY "Users can send messages"
+    ON direct_messages FOR INSERT
+    WITH CHECK (auth.uid() = sender_id);
+
+CREATE INDEX IF NOT EXISTS idx_dm_participants ON direct_messages(sender_id, recipient_id);
+CREATE INDEX IF NOT EXISTS idx_dm_created_at ON direct_messages(created_at DESC);
