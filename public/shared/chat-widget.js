@@ -1,45 +1,53 @@
 // ============================================
 // chat-widget.js — Widget de Chat Flutuante
-// Estilo Facebook Messenger, canto inferior esquerdo
+// Suporte a conversas globais e por amigo
 // ============================================
 
 const ChatWidget = (() => {
     'use strict';
 
-    const STORAGE_KEY = 'blocks_chat_messages';
     const MAX_VISIBLE_MSGS = 20;
 
     let _initialized = false;
     let _bubbleEl = null;
     let _popupEl = null;
     let _open = false;
+    let _currentFriend = null; // null = chat global
 
     // ==========================================
     // DATA
     // ==========================================
 
-    function getMessages() {
-        return Storage.safeGet(STORAGE_KEY, []);
+    function getStorageKey(friendName) {
+        if (friendName) {
+            const key = friendName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+            return `blocks_chat_friend_${key}`;
+        }
+        return 'blocks_chat_messages';
     }
 
-    function saveMessages(messages) {
-        return Storage.safeSet(STORAGE_KEY, messages);
+    function getMessages(friendName) {
+        return Storage.safeGet(getStorageKey(friendName), []);
     }
 
-    function addMessage(text) {
-        const messages = getMessages();
+    function saveMessages(messages, friendName) {
+        return Storage.safeSet(getStorageKey(friendName), messages);
+    }
+
+    function addMessage(text, friendName) {
+        const messages = getMessages(friendName);
         const msg = {
             id: Date.now(),
             text: text.trim().substring(0, 500),
             timestamp: new Date().toISOString(),
         };
         messages.push(msg);
-        saveMessages(messages);
+        saveMessages(messages, friendName);
         return msg;
     }
 
-    function clearMessages() {
-        saveMessages([]);
+    function clearMessages(friendName) {
+        saveMessages([], friendName);
     }
 
     // ==========================================
@@ -120,7 +128,7 @@ const ChatWidget = (() => {
     function handleSend(input) {
         const text = input.value.trim();
         if (!text) return;
-        addMessage(text);
+        addMessage(text, _currentFriend);
         input.value = '';
         renderMessages();
     }
@@ -129,7 +137,7 @@ const ChatWidget = (() => {
         const container = document.getElementById('chat-widget-messages');
         if (!container) return;
 
-        const messages = getMessages();
+        const messages = getMessages(_currentFriend);
         const recent = messages.slice(-MAX_VISIBLE_MSGS);
 
         if (recent.length === 0) {
@@ -155,6 +163,13 @@ const ChatWidget = (() => {
         container.scrollTop = container.scrollHeight;
     }
 
+    function updateTitle() {
+        const titleEl = _popupEl ? _popupEl.querySelector('.chat-widget-title') : null;
+        if (titleEl) {
+            titleEl.textContent = _currentFriend ? `✉️ ${_currentFriend}` : 'Chat';
+        }
+    }
+
     function formatTime(isoString) {
         try {
             return new Date(isoString).toLocaleTimeString('pt-BR', {
@@ -173,7 +188,7 @@ const ChatWidget = (() => {
     }
 
     // ==========================================
-    // TOGGLE / OPEN / CLOSE
+    // OPEN / CLOSE / TOGGLE
     // ==========================================
 
     function toggle() {
@@ -181,12 +196,20 @@ const ChatWidget = (() => {
         else open();
     }
 
-    function open() {
+    /**
+     * Abre o chat widget. Se friendName for passado, abre conversa com aquela pessoa.
+     */
+    function open(friendName) {
         if (!_popupEl || !_bubbleEl) return;
+
+        _currentFriend = friendName || null;
         _popupEl.classList.add('open');
         _bubbleEl.classList.add('active');
         _open = true;
+
+        updateTitle();
         renderMessages();
+
         setTimeout(() => {
             const input = document.getElementById('chat-widget-input');
             if (input) input.focus();
@@ -198,6 +221,7 @@ const ChatWidget = (() => {
         _popupEl.classList.remove('open');
         _bubbleEl.classList.remove('active');
         _open = false;
+        _currentFriend = null;
     }
 
     // ==========================================
@@ -209,11 +233,6 @@ const ChatWidget = (() => {
         _initialized = true;
 
         createWidget();
-
-        // Abre o chat se veio com parametro ?chat=open
-        if (window.location.search.includes('chat=open')) {
-            setTimeout(open, 500);
-        }
     }
 
     return {
@@ -221,5 +240,10 @@ const ChatWidget = (() => {
         open,
         close,
         toggle,
+        getMessages,
+        addMessage,
+        clearMessages,
+        renderMessages,
+        updateTitle,
     };
 })();

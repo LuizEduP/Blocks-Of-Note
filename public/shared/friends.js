@@ -356,7 +356,8 @@ const Friends = (() => {
                 btn.addEventListener('click', () => {
                     const name = btn.dataset.name;
                     closeProfilePanel();
-                    window.location.href = '/chat/?friend=' + encodeURIComponent(name);
+                    // Abre o chat widget flutuante já com a conversa da pessoa
+                    ChatWidget.open(name);
                 });
             });
 
