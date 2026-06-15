@@ -28,9 +28,10 @@
     <!-- Scripts -->
     <script defer src="shared/theme.js"></script>
     <script defer src="shared/storage.js"></script>
-    <script defer src="shared/friends.js"></script>
     <script defer src="shared/toast.js"></script>
     <script defer src="shared/utils.js"></script>
+    <script defer src="shared/friends.js"></script>
+    <script defer src="shared/chat-widget.js"></script>
     <script defer src="shared/supabase.js"></script>
     <script defer src="shared/auth-supabase.js"></script>
     <script defer src="shared/notes-storage-supabase.js"></script>
@@ -57,7 +58,6 @@
                     <a href="tasks/" class="nav-link">Tarefas</a>
                     <a href="taskboard/" class="nav-link">Task Board</a>
                     <a href="workspace/" class="nav-link">Workspace</a>
-                    <a href="chat/" class="nav-link">Chat</a>
                 </div>
             </div>
             <div class="navbar-right">
@@ -221,6 +221,7 @@
             Auth.init();
             Auth.renderButton('navbar-auth');
             Friends.init();
+            ChatWidget.init();
             // Inicia sync automático para notas e tarefas
             Theme.init();
             if (typeof NotesStorage?.init === 'function') NotesStorage.init();

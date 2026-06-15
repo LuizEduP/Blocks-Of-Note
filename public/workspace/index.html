@@ -22,7 +22,6 @@
                     <a href="../tasks/" class="nav-link">Tarefas</a>
                     <a href="../taskboard/" class="nav-link">Taskboard</a>
                     <a href="../workspace/" class="nav-link active">Workspace</a>
-                    <a href="../chat/" class="nav-link">Chat</a>
                 </div>
             </div>
             <div class="navbar-right"><div id="theme-toggle-container" class="navbar-auth"></div><div id="auth-google" class="navbar-auth"></div></div>
@@ -174,6 +173,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../shared/theme.js"></script>
     <script src="../shared/friends.js"></script>
+    <script src="../shared/chat-widget.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/toast.js"></script>
     <script src="../shared/utils.js"></script>
@@ -187,6 +187,7 @@
             Auth.init();
             Theme.init();
             Friends.init();
+            ChatWidget.init();
             Auth.renderButton('auth-google');
         });
     </script>
