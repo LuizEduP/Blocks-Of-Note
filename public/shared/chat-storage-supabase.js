@@ -41,25 +41,42 @@ const ChatStorage = (() => {
     }
 
     /**
-     * Busca o UUID real de um amigo pelo nome na tabela profiles
+     * Busca o UUID real de um amigo pelo nome ou email na tabela profiles
      */
-    async function resolveFriendId(friendName) {
+    async function resolveFriendId(friendNameOrEmail) {
         // Primeiro, tenta na lista local de amigos
         const friends = Friends.getFriends?.() || [];
         const localFriend = friends.find(f =>
-            f.name?.toLowerCase() === friendName?.toLowerCase()
+            f.name?.toLowerCase() === friendNameOrEmail?.toLowerCase() ||
+            f.email?.toLowerCase() === friendNameOrEmail?.toLowerCase()
         );
         if (localFriend && isValidUUID(localFriend.id)) {
             return localFriend.id;
         }
 
+        // Pega o email do amigo na lista local (se entrou como email)
+        const localEmail = localFriend?.email || '';
+
         // Se não achou UUID válido localmente, busca no Supabase
         try {
             if (typeof ProfilesSync?.searchUsers === 'function') {
-                const results = await ProfilesSync.searchUsers(friendName, 3);
-                const match = results.find(r =>
-                    r.name?.toLowerCase() === friendName?.toLowerCase()
+                const results = await ProfilesSync.searchUsers(friendNameOrEmail, 5);
+                // Tenta match por nome
+                let match = results.find(r =>
+                    r.name?.toLowerCase() === friendNameOrEmail?.toLowerCase()
                 );
+                // Se não achou por nome, tenta por email
+                if (!match) {
+                    match = results.find(r =>
+                        r.email?.toLowerCase() === friendNameOrEmail?.toLowerCase()
+                    );
+                }
+                // Se ainda não achou, tenta pelo email salvo localmente
+                if (!match && localEmail) {
+                    match = results.find(r =>
+                        r.email?.toLowerCase() === localEmail?.toLowerCase()
+                    );
+                }
                 if (match && match.id) {
                     return match.id;
                 }
