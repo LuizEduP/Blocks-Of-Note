@@ -34,6 +34,44 @@ const ChatStorage = (() => {
     // ─── API ───
 
     /**
+     * Verifica se uma string é um UUID válido (versão 4)
+     */
+    function isValidUUID(str) {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+    }
+
+    /**
+     * Busca o UUID real de um amigo pelo nome na tabela profiles
+     */
+    async function resolveFriendId(friendName) {
+        // Primeiro, tenta na lista local de amigos
+        const friends = Friends.getFriends?.() || [];
+        const localFriend = friends.find(f =>
+            f.name?.toLowerCase() === friendName?.toLowerCase()
+        );
+        if (localFriend && isValidUUID(localFriend.id)) {
+            return localFriend.id;
+        }
+
+        // Se não achou UUID válido localmente, busca no Supabase
+        try {
+            if (typeof ProfilesSync?.searchUsers === 'function') {
+                const results = await ProfilesSync.searchUsers(friendName, 3);
+                const match = results.find(r =>
+                    r.name?.toLowerCase() === friendName?.toLowerCase()
+                );
+                if (match && match.id) {
+                    return match.id;
+                }
+            }
+        } catch (e) {
+            console.warn('[ChatStorage] Erro ao buscar amigo no Supabase:', e);
+        }
+
+        return null;
+    }
+
+    /**
      * Envia uma mensagem para outro usuário
      * @param {string} recipientId - ID do destinatário
      * @param {string} recipientName - Nome do destinatário
@@ -52,12 +90,34 @@ const ChatStorage = (() => {
             throw new Error('Faça login para enviar mensagens');
         }
 
+        // Valida se o recipientId é um UUID válido
+        let resolvedId = recipientId;
+        if (!isValidUUID(recipientId)) {
+            // Tenta resolver o UUID real pelo nome
+            const realId = await resolveFriendId(recipientName);
+            if (realId) {
+                resolvedId = realId;
+                // Atualiza o amigo na lista local com o UUID real
+                const friends = Friends.getFriends?.() || [];
+                const idx = friends.findIndex(f =>
+                    f.name?.toLowerCase() === recipientName?.toLowerCase()
+                );
+                if (idx >= 0) {
+                    friends[idx].id = realId;
+                    // Se Friends tem save, salva
+                    try { Friends.removeFriend?.(friends[idx].id); } catch (e) {}
+                }
+            } else {
+                throw new Error(`Amigo "${recipientName}" não encontrado no Supabase. Peça para ele fazer login com Google primeiro.`);
+            }
+        }
+
         const { data, error } = await sb
             .from(TABLE)
             .insert({
                 sender_id: senderId,
                 sender_name: senderName,
-                recipient_id: recipientId,
+                recipient_id: resolvedId,
                 recipient_name: recipientName,
                 content: content.trim().substring(0, 500),
             })
