@@ -129,6 +129,11 @@ const ChatStorage = (() => {
             }
         }
 
+        // VALIDAÇÃO: não permite enviar para si mesmo
+        if (resolvedId === senderId) {
+            throw new Error('Você não pode enviar mensagem para si mesmo');
+        }
+
         const { data, error } = await sb
             .from(TABLE)
             .insert({

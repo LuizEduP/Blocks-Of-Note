@@ -48,10 +48,23 @@ const ChatWidget = (() => {
                 _currentFriend.name,
                 text
             );
-            _messages.push(msg);
+            // Se conseguiu enviar, atualiza a mensagem otimista com os dados reais
+            // ou substitui a última mensagem (a otimista) pelos dados vindos do servidor
+            const lastIdx = _messages.length - 1;
+            if (lastIdx >= 0 && _messages[lastIdx].id && _messages[lastIdx].id.startsWith('opt-')) {
+                // Substitui a mensagem otimista pela real
+                _messages[lastIdx] = msg;
+            } else {
+                // Se não tinha otimista, adiciona normal
+                _messages.push(msg);
+            }
             renderMessages();
             return msg;
         } catch (e) {
+            console.error('[ChatWidget] Erro ao enviar:', e);
+            // Remove a mensagem otimista se deu erro
+            _messages = _messages.filter(m => !(m.id && m.id.startsWith('opt-')));
+            renderMessages();
             Toast.show('Erro ao enviar mensagem: ' + (e.message || 'desconhecido'), { type: 'error', duration: 3000 });
         }
     }

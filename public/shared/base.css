@@ -1577,22 +1577,30 @@ h1, h2, h3, h4 {
     color: var(--color-text-muted);
 }
 
-/* Message bubble */
+/* Message bubble — default: other person's messages (left) */
 .chat-widget-msg {
     padding: 8px 12px;
     background: var(--color-bg);
     border-radius: 12px;
     border: 1px solid var(--color-border);
-    max-width: 90%;
+    max-width: 88%;
     align-self: flex-start;
     animation: widgetMsgIn 0.15s ease-out;
 }
 
-.chat-widget-msg:nth-child(even) {
+/* My messages (right side) */
+.chat-widget-msg-mine {
     align-self: flex-end;
     background: var(--color-brand-primary);
     color: #fff;
     border-color: var(--color-brand-primary);
+}
+
+.chat-widget-msg-sender {
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+    opacity: 0.7;
 }
 
 @keyframes widgetMsgIn {
@@ -1613,8 +1621,9 @@ h1, h2, h3, h4 {
     text-align: right;
 }
 
-.chat-widget-msg:nth-child(even) .chat-widget-msg-time {
-    color: rgba(255,255,255,0.5);
+/* Time text on my messages - white with opacity */
+.chat-widget-msg-mine .chat-widget-msg-time {
+    color: rgba(255,255,255,0.6);
 }
 
 /* Input area */
