@@ -42,31 +42,52 @@ const ChatWidget = (() => {
             return;
         }
 
+        // Adiciona mensagem otimista (aparece imediatamente)
+        const optId = 'opt-' + Date.now();
+        const optimisticMsg = {
+            id: optId,
+            sender_id: ChatStorage.getUserId(),
+            sender_name: ChatStorage.getUserName(),
+            recipient_id: _currentFriend.id,
+            recipient_name: _currentFriend.name,
+            content: text,
+            created_at: new Date().toISOString(),
+        };
+        _messages.push(optimisticMsg);
+        renderOnce();
+
         try {
             const msg = await ChatStorage.sendMessage(
                 _currentFriend.id,
                 _currentFriend.name,
                 text
             );
-            // Se conseguiu enviar, atualiza a mensagem otimista com os dados reais
-            // ou substitui a última mensagem (a otimista) pelos dados vindos do servidor
-            const lastIdx = _messages.length - 1;
-            if (lastIdx >= 0 && _messages[lastIdx].id && _messages[lastIdx].id.startsWith('opt-')) {
-                // Substitui a mensagem otimista pela real
-                _messages[lastIdx] = msg;
+            // Substitui a otimista pela real (sem refazer o DOM inteiro)
+            const idx = _messages.findIndex(m => m.id === optId);
+            if (idx >= 0) {
+                _messages[idx] = msg;
             } else {
-                // Se não tinha otimista, adiciona normal
-                _messages.push(msg);
+                if (!_messages.some(m => m.id === msg.id)) {
+                    _messages.push(msg);
+                }
             }
-            renderMessages();
+            renderOnce();
             return msg;
         } catch (e) {
             console.error('[ChatWidget] Erro ao enviar:', e);
-            // Remove a mensagem otimista se deu erro
-            _messages = _messages.filter(m => !(m.id && m.id.startsWith('opt-')));
-            renderMessages();
+            _messages = _messages.filter(m => m.id !== optId);
+            renderOnce();
             Toast.show('Erro ao enviar mensagem: ' + (e.message || 'desconhecido'), { type: 'error', duration: 3000 });
         }
+    }
+
+    let _renderTimeout = null;
+    function renderOnce() {
+        if (_renderTimeout) return;
+        _renderTimeout = requestAnimationFrame(() => {
+            _renderTimeout = null;
+            renderMessages();
+        });
     }
 
     function handleRealtimeMessage(msg) {
@@ -178,25 +199,13 @@ const ChatWidget = (() => {
         if (!text) return;
         input.value = '';
 
-        // Se não está conversando com ninguém, mostra opção
         if (!_currentFriend || !_currentFriend.id) {
             Toast.show('Clique em 💬 ao lado de um amigo no painel de perfil para conversar', { type: 'info', duration: 3000 });
             return;
         }
 
-        // Adiciona otimisticamente
-        const optimisticMsg = {
-            id: 'opt-' + Date.now(),
-            sender_id: ChatStorage.getUserId(),
-            sender_name: ChatStorage.getUserName(),
-            recipient_id: _currentFriend.id,
-            recipient_name: _currentFriend.name,
-            content: text,
-            created_at: new Date().toISOString(),
-        };
-        _messages.push(optimisticMsg);
-        renderMessages();
-
+        // Delega para sendMessage que cuida do otimista + real
+        input.focus();
         await sendMessage(text);
     }
 
