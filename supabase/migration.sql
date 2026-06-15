@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS notes (
 
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own notes"
+CREATE POLICY IF NOT EXISTS "Users can manage their own notes"
     ON notes FOR ALL
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can manage their own tasks"
+CREATE POLICY IF NOT EXISTS "Users can manage their own tasks"
     ON tasks FOR ALL
     USING (auth.uid() = user_id)
     WITH CHECK (auth.uid() = user_id);
@@ -68,21 +68,21 @@ CREATE TABLE IF NOT EXISTS workspaces (
 ALTER TABLE workspaces ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read workspaces (to join by code)
-CREATE POLICY "Anyone can read workspaces"
+CREATE POLICY IF NOT EXISTS "Anyone can read workspaces"
     ON workspaces FOR SELECT
     USING (true);
 
 -- Authenticated users can create workspaces
-CREATE POLICY "Authenticated users can create workspaces"
+CREATE POLICY IF NOT EXISTS "Authenticated users can create workspaces"
     ON workspaces FOR INSERT
     WITH CHECK (auth.role() = 'authenticated');
 
 -- Only creator can update/delete
-CREATE POLICY "Creator can update workspace"
+CREATE POLICY IF NOT EXISTS "Creator can update workspace"
     ON workspaces FOR UPDATE
     USING (auth.uid() = created_by);
 
-CREATE POLICY "Creator can delete workspace"
+CREATE POLICY IF NOT EXISTS "Creator can delete workspace"
     ON workspaces FOR DELETE
     USING (auth.uid() = created_by);
 
@@ -98,11 +98,11 @@ CREATE TABLE IF NOT EXISTS workspace_messages (
 
 ALTER TABLE workspace_messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can read messages"
+CREATE POLICY IF NOT EXISTS "Anyone can read messages"
     ON workspace_messages FOR SELECT
     USING (true);
 
-CREATE POLICY "Anyone can insert messages"
+CREATE POLICY IF NOT EXISTS "Anyone can insert messages"
     ON workspace_messages FOR INSERT
     WITH CHECK (true);
 
@@ -143,12 +143,12 @@ CREATE TABLE IF NOT EXISTS direct_messages (
 ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
 
 -- Usuários podem ver mensagens onde são sender ou recipient
-CREATE POLICY "Users can see their own messages"
+CREATE POLICY IF NOT EXISTS "Users can see their own messages"
     ON direct_messages FOR SELECT
     USING (auth.uid() = sender_id OR auth.uid() = recipient_id);
 
 -- Usuários autenticados podem enviar mensagens
-CREATE POLICY "Users can send messages"
+CREATE POLICY IF NOT EXISTS "Users can send messages"
     ON direct_messages FOR INSERT
     WITH CHECK (auth.uid() = sender_id);
 
@@ -168,15 +168,15 @@ CREATE TABLE IF NOT EXISTS profiles (
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
 -- Qualquer um logado pode ver perfis (para buscar amigos)
-CREATE POLICY "Users can view all profiles"
+CREATE POLICY IF NOT EXISTS "Users can view all profiles"
     ON profiles FOR SELECT
     USING (auth.role() = 'authenticated');
 
 -- O próprio usuário pode inserir/atualizar seu perfil
-CREATE POLICY "Users can upsert their own profile"
+CREATE POLICY IF NOT EXISTS "Users can upsert their own profile"
     ON profiles FOR INSERT
     WITH CHECK (auth.uid() = id);
 
-CREATE POLICY "Users can update their own profile"
+CREATE POLICY IF NOT EXISTS "Users can update their own profile"
     ON profiles FOR UPDATE
     USING (auth.uid() = id);
