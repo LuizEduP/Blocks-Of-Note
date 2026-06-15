@@ -54,7 +54,9 @@ const ChatWidget = (() => {
             created_at: new Date().toISOString(),
         };
         _messages.push(optimisticMsg);
-        renderOnce();
+        // Render síncrono direto — sem RAF debounce, sem risco de bloquear o segundo render
+        renderMessages();
+        scrollMessages();
 
         try {
             const msg = await ChatStorage.sendMessage(
@@ -62,32 +64,28 @@ const ChatWidget = (() => {
                 _currentFriend.name,
                 text
             );
-            // Substitui a otimista pela real (sem refazer o DOM inteiro)
+            // Substitui a otimista pela real
             const idx = _messages.findIndex(m => m.id === optId);
             if (idx >= 0) {
                 _messages[idx] = msg;
-            } else {
-                if (!_messages.some(m => m.id === msg.id)) {
-                    _messages.push(msg);
-                }
+                // Renderiza de novo agora que temos os dados reais
+                renderMessages();
+                scrollMessages();
             }
-            renderOnce();
             return msg;
         } catch (e) {
             console.error('[ChatWidget] Erro ao enviar:', e);
             _messages = _messages.filter(m => m.id !== optId);
-            renderOnce();
-            Toast.show('Erro ao enviar mensagem: ' + (e.message || 'desconhecido'), { type: 'error', duration: 3000 });
+            renderMessages();
+            Toast.show('Erro: ' + (e.message || 'desconhecido'), { type: 'error', duration: 3000 });
         }
     }
 
-    let _renderTimeout = null;
-    function renderOnce() {
-        if (_renderTimeout) return;
-        _renderTimeout = requestAnimationFrame(() => {
-            _renderTimeout = null;
-            renderMessages();
-        });
+    function scrollMessages() {
+        const container = document.getElementById('chat-widget-messages');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     function handleRealtimeMessage(msg) {
