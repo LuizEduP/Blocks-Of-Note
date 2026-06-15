@@ -168,15 +168,11 @@ const Friends = (() => {
                 <button class="profile-close-btn" id="profile-close-btn" aria-label="Fechar">&times;</button>
             </div>
 
-            <!-- Ações: Adicionar amigo + Enviar mensagem -->
+            <!-- Ações: Adicionar amigo -->
             <div class="profile-actions">
                 <div class="profile-add-friend">
                     <input type="text" id="profile-add-input" class="input profile-add-input" placeholder="Adicionar amigo por nome ou e-mail..." maxlength="100">
                     <button id="profile-add-btn" class="btn btn-sm btn-primary" aria-label="Adicionar amigo">+</button>
-                </div>
-                <div class="profile-send-msg">
-                    <input type="text" id="profile-msg-input" class="input profile-msg-input" placeholder="Enviar mensagem para..." maxlength="200">
-                    <button id="profile-send-btn" class="btn btn-sm btn-primary" aria-label="Enviar mensagem">✉</button>
                 </div>
             </div>
 
@@ -234,25 +230,6 @@ const Friends = (() => {
             if (e.key === 'Enter') {
                 addFriend(addInput.value);
                 addInput.value = '';
-            }
-        });
-
-        // Enviar mensagem (navega para o chat)
-        const msgInput = panel.querySelector('#profile-msg-input');
-        const sendBtn = panel.querySelector('#profile-send-btn');
-        sendBtn.addEventListener('click', () => {
-            const friendName = msgInput.value.trim();
-            if (friendName) {
-                closeProfilePanel();
-                // Navega para o chat
-                window.location.href = '/chat/?friend=' + encodeURIComponent(friendName);
-            } else {
-                Toast.show('Digite o nome de um amigo', { type: 'warning', duration: 2000 });
-            }
-        });
-        msgInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                sendBtn.click();
             }
         });
 
@@ -368,9 +345,20 @@ const Friends = (() => {
                         <span class="profile-friend-name">${escapeHtml(f.name)}</span>
                         <span class="profile-friend-meta">${escapeHtml(f.email || 'Amigo')}</span>
                     </div>
-                    <button class="profile-friend-remove" data-id="${escapeHtml(f.id)}" aria-label="Remover amigo">✕</button>
+                    <div class="profile-friend-actions">
+                        <button class="profile-friend-chat" data-name="${escapeHtml(f.name)}" aria-label="Conversar com ${escapeHtml(f.name)}" title="Conversar">💬</button>
+                        <button class="profile-friend-remove" data-id="${escapeHtml(f.id)}" aria-label="Remover amigo" title="Remover">✕</button>
+                    </div>
                 </div>
             `).join('');
+
+            friendsList.querySelectorAll('.profile-friend-chat').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const name = btn.dataset.name;
+                    closeProfilePanel();
+                    window.location.href = '/chat/?friend=' + encodeURIComponent(name);
+                });
+            });
 
             friendsList.querySelectorAll('.profile-friend-remove').forEach(btn => {
                 btn.addEventListener('click', () => {

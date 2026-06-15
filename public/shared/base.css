@@ -1141,14 +1141,12 @@ h1, h2, h3, h4 {
     flex-shrink: 0;
 }
 
-.profile-add-friend,
-.profile-send-msg {
+.profile-add-friend {
     display: flex;
     gap: 8px;
 }
 
-.profile-add-input,
-.profile-msg-input {
+.profile-add-input {
     flex: 1;
     font-size: 0.8rem;
 }
@@ -1332,16 +1330,23 @@ h1, h2, h3, h4 {
     color: var(--color-text-muted);
 }
 
+.profile-friend-actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.profile-friend-chat,
 .profile-friend-remove {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border: none;
     background: transparent;
     color: var(--color-text-muted);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     cursor: pointer;
     border-radius: 4px;
     opacity: 0;
@@ -1349,8 +1354,14 @@ h1, h2, h3, h4 {
     padding: 0;
 }
 
+.profile-friend-item:hover .profile-friend-chat,
 .profile-friend-item:hover .profile-friend-remove {
     opacity: 1;
+}
+
+.profile-friend-chat:hover {
+    background: var(--color-accent-bg);
+    color: var(--color-brand-primary);
 }
 
 .profile-friend-remove:hover {
