@@ -164,7 +164,7 @@
     user-select: none;
     min-width: 60px;
     min-height: 40px;
-    overflow: hidden;
+    overflow: visible;
     transition: box-shadow 0.15s ease, border-color 0.15s ease;
     z-index: 1;
 }

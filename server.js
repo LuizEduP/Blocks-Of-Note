@@ -59,6 +59,13 @@ const server = http.createServer((req, res) => {
     const method = req.method;
     let url = req.url.split('?')[0];
 
+    // ---- Redirects (merged pages) ----
+    if (url === '/taskboard' || url === '/taskboard/' || url === '/taskboard/index.html') {
+        res.writeHead(301, { 'Location': '/tasks/' });
+        res.end();
+        return;
+    }
+
     // ---- API routes ----
     if (url === '/api/workspaces' && method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });

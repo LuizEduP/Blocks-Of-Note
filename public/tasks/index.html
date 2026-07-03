@@ -24,9 +24,7 @@
                 <div class="navbar-links">
                     <a href="../notes/" class="nav-link">Notas</a>
                     <a href="../tasks/" class="nav-link active">Tarefas</a>
-                    <a href="../taskboard/" class="nav-link">Taskboard</a>
                     <a href="../workspace/" class="nav-link">Workspace</a>
-                    <a href="../chat/" class="nav-link">Chat</a>
                 </div>
             </div>
             <div class="navbar-right">
@@ -46,9 +44,6 @@
                     <h1 class="tk-title">Tarefas</h1>
                     <span class="tk-stats" id="tk-stats">0 tarefas</span>
                 </div>
-                <div class="tk-header-right">
-                    <a href="../taskboard/" class="btn btn-sm" title="Ver Board">📋 Board</a>
-                </div>
             </header>
 
             <!-- FILTROS -->
@@ -57,6 +52,18 @@
                 <button class="tk-filter" data-filter="today">Hoje</button>
                 <button class="tk-filter" data-filter="upcoming">Próximas</button>
                 <button class="tk-filter" data-filter="done">Concluídas</button>
+            </div>
+
+            <!-- SEARCH + URGENCY FILTER -->
+            <div class="tk-search-row">
+                <input type="text" id="tk-search" class="input tk-search-input" placeholder="🔍 Buscar tarefas..." aria-label="Buscar tarefas por título, descrição ou local">
+                <select id="tk-urgency-filter" class="input select tk-urgency-select" aria-label="Filtrar por urgência">
+                    <option value="all">Todas urgências</option>
+                    <option value="low">I — Baixa</option>
+                    <option value="medium">II — Média</option>
+                    <option value="high">III — Alta</option>
+                    <option value="extra">IV — Extra</option>
+                </select>
             </div>
 
             <!-- QUICK ADD BAR -->

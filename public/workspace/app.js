@@ -95,6 +95,9 @@ class Workspace {
         this.renderChat();
         this.renderAllBlocks();
         this.updateBoardHint();
+        // Canvas must be initialized AFTER room is visible (display:flex),
+        // otherwise clientWidth/clientHeight are 0 and buffer is never sized
+        this.resizeCanvas();
     }
 
     // ======================== WEBSOCKET ========================
@@ -621,12 +624,13 @@ class Workspace {
         if (!canvas) return;
         var wrap = canvas.parentElement;
         if (!wrap) return;
-        var rect = wrap.getBoundingClientRect();
-        if (rect.width > 0 && rect.height > 0) {
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            canvas.style.width = rect.width + 'px';
-            canvas.style.height = rect.height + 'px';
+        // clientWidth/Height are integers; canvas.width/height MUST match the CSS
+        // display size exactly, otherwise _clientToWorld coordinates will be offset
+        var w = wrap.clientWidth;
+        var h = wrap.clientHeight;
+        if (w > 0 && h > 0) {
+            canvas.width = w;
+            canvas.height = h;
         }
     }
 
@@ -669,8 +673,8 @@ class Workspace {
         if (this.activeTool === 'text') {
             if (e.button !== 0) return;
             e.preventDefault();
-            var pos = this._clientToWorld(e.clientX, e.clientY);
-            var block = this.createBlock('text', e.clientX - this.panX, e.clientY - this.panY);
+            // Pass raw client coords — createBlock handles world conversion
+            var block = this.createBlock('text', e.clientX, e.clientY);
             // Focus the new text block for editing
             var self = this;
             setTimeout(function() {
@@ -836,9 +840,6 @@ class Workspace {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Draw grid dots
-        this._drawGrid();
-
         // Apply pan/zoom transform
         this._applyTransform();
 
@@ -858,45 +859,6 @@ class Workspace {
             }
             ctx.stroke();
         }
-    }
-
-    _drawGrid() {
-        if (!this._ctx) return;
-        var canvas = document.getElementById('board-canvas');
-        var ctx = this._ctx;
-        if (!ctx || !canvas) return;
-        if (this.gridSize < 1) return;
-
-        // Grid dots in screen space: calculate visible world area
-        var gs = this.gridSize * this.zoom;
-        // Only draw if dots aren't too dense or too sparse
-        if (gs < 4 || gs > 100) return;
-
-        // Calculate visible range in world coordinates
-        var worldLeft = -this.panX / this.zoom;
-        var worldTop = -this.panY / this.zoom;
-        var worldRight = worldLeft + canvas.width / this.zoom;
-        var worldBottom = worldTop + canvas.height / this.zoom;
-
-        var startX = Math.floor(worldLeft / this.gridSize) * this.gridSize;
-        var startY = Math.floor(worldTop / this.gridSize) * this.gridSize;
-
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        var dotSize = Math.max(1, Math.min(2, gs * 0.12));
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-
-        for (var wx = startX; wx <= worldRight + this.gridSize; wx += this.gridSize) {
-            for (var wy = startY; wy <= worldBottom + this.gridSize; wy += this.gridSize) {
-                var sx = wx * this.zoom + this.panX;
-                var sy = wy * this.zoom + this.panY;
-                ctx.fillRect(sx - dotSize / 2, sy - dotSize / 2, dotSize, dotSize);
-            }
-        }
-
-        ctx.restore();
     }
 
     drawStroke(stroke) {
@@ -919,6 +881,28 @@ class Workspace {
     }
 
     resizeCanvas() {
+        // Lazy context + event bind (once). Must happen when the board
+        // is actually visible so clientWidth/clientHeight are non-zero.
+        var canvas = document.getElementById('board-canvas');
+        if (!canvas) return;
+        if (!this._ctx) {
+            this._ctx = canvas.getContext('2d');
+            var self = this;
+            canvas.addEventListener('mousedown', function(e) { self._onCanvasMouseDown(e); });
+            canvas.addEventListener('mousemove', function(e) { self._onCanvasMouseMove(e); });
+            canvas.addEventListener('mouseup', function(e) { self._onCanvasMouseUp(e); });
+            canvas.addEventListener('mouseleave', function(e) { self._onCanvasMouseUp(e); });
+            canvas.addEventListener('touchstart', function(e) { self._onCanvasTouchStart(e); }, { passive: false });
+            canvas.addEventListener('touchmove', function(e) { self._onCanvasTouchMove(e); }, { passive: false });
+            canvas.addEventListener('touchend', function(e) { self._onCanvasTouchEnd(e); });
+            canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+            canvas.addEventListener('wheel', function(e) {
+                if (!e.ctrlKey && !e.metaKey) return;
+                e.preventDefault();
+                var rect = canvas.getBoundingClientRect();
+                self.setZoom(self.zoom * (e.deltaY > 0 ? 0.9 : 1.1), e.clientX - rect.left, e.clientY - rect.top);
+            }, { passive: false });
+        }
         this._resizeCanvasToWrap();
         this.redrawCanvas();
     }
@@ -1292,17 +1276,6 @@ class Workspace {
             });
         }
 
-        // Grid size
-        var gridSizeInput = document.getElementById('grid-size-input');
-        if (gridSizeInput) {
-            gridSizeInput.addEventListener('input', function() {
-                self.gridSize = parseInt(this.value);
-                var label = document.getElementById('grid-size-label');
-                if (label) label.textContent = self.gridSize + 'px';
-                self.redrawCanvas();
-            });
-        }
-
         // Image upload
         var imageUpload = document.getElementById('image-upload');
         if (imageUpload) {
@@ -1315,8 +1288,8 @@ class Workspace {
                 }
                 var reader = new FileReader();
                 reader.onload = function(ev) {
-                    var px = self._pendingImagePos ? self._pendingImagePos.x - self.panX : 100;
-                    var py = self._pendingImagePos ? self._pendingImagePos.y - self.panY : 100;
+                    var px = self._pendingImagePos ? self._pendingImagePos.x : 100;
+                    var py = self._pendingImagePos ? self._pendingImagePos.y : 100;
                     self.createBlock('image', px, py, { data: ev.target.result, name: file.name });
                     self._pendingImagePos = null;
                 };
@@ -1478,8 +1451,8 @@ class Workspace {
             });
         }
 
-        // Init canvas (deferred to ensure DOM is ready)
-        setTimeout(function() { self.initCanvas(); }, 200);
+        // Canvas is lazily initialized in resizeCanvas() when the board
+        // first becomes visible (on room create/join or tab switch)
 
         window.addEventListener('resize', function() {
             self.resizeCanvas();

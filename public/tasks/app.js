@@ -27,17 +27,22 @@ const TaskApp = (() => {
         list:       document.getElementById('tk-list'),
         stats:      document.getElementById('tk-stats'),
         filters:    document.querySelectorAll('.tk-filter'),
+        searchInput: document.getElementById('tk-search'),
+        urgencyFilter: document.getElementById('tk-urgency-filter'),
     };
 
     let currentFilter = 'all';
     let currentUrgency = 'medium';
     let showDetails = false;
+    let searchQuery = '';
+    let filterUrgency = 'all';
 
     // =========================== FILTERS ===========================
 
     function getFilteredTasks() {
         let tasks = TasksStorage.getTasks() || [];
 
+        // Tab filter
         if (currentFilter === 'today') {
             const today = new Date().toISOString().split('T')[0];
             tasks = tasks.filter(t => t.date === today);
@@ -46,12 +51,24 @@ const TaskApp = (() => {
             tasks = tasks.filter(t => t.date && t.date >= today && !t.done);
         } else if (currentFilter === 'done') {
             tasks = tasks.filter(t => t.done);
-        } else {
-            // 'all' — show undone first, then done
-            tasks = tasks.filter(t => !t.done).concat(tasks.filter(t => t.done));
         }
 
-        // Sort by urgency (low → extra) for undone, done at bottom
+        // Urgency filter (dropdown)
+        if (filterUrgency !== 'all') {
+            tasks = tasks.filter(t => t.urgency === filterUrgency);
+        }
+
+        // Text search
+        if (searchQuery) {
+            const q = searchQuery.toLowerCase();
+            tasks = tasks.filter(t =>
+                t.title.toLowerCase().includes(q) ||
+                (t.description || '').toLowerCase().includes(q) ||
+                (t.location || '').toLowerCase().includes(q)
+            );
+        }
+
+        // Sort: undone first (by urgency, then date), done at bottom
         const undone = tasks.filter(t => !t.done);
         const done = tasks.filter(t => t.done);
 
@@ -61,7 +78,6 @@ const TaskApp = (() => {
             if (a.date && b.date) return a.date.localeCompare(b.date);
             if (a.date) return -1;
             if (b.date) return 1;
-            // createdAt is ISO string; use Date comparison
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
 
@@ -295,6 +311,18 @@ const TaskApp = (() => {
 
         // Toggle details
         elements.detailsToggle.addEventListener('click', toggleDetails);
+
+        // Search input
+        elements.searchInput.addEventListener('input', function() {
+            searchQuery = this.value.trim();
+            render();
+        });
+
+        // Urgency filter dropdown
+        elements.urgencyFilter.addEventListener('change', function() {
+            filterUrgency = this.value;
+            render();
+        });
 
         // Keyboard shortcut: Ctrl+K to focus quick input
         document.addEventListener('keydown', e => {

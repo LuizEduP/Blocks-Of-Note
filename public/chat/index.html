@@ -20,7 +20,6 @@
                 <div class="navbar-links">
                     <a href="../notes/" class="nav-link">Notas</a>
                     <a href="../tasks/" class="nav-link">Tarefas</a>
-                    <a href="../taskboard/" class="nav-link">Taskboard</a>
                     <a href="../workspace/" class="nav-link">Workspace</a>
                 </div>
             </div>
@@ -32,41 +31,61 @@
     </nav>
 
     <div class="chat-section">
-        <div class="chat-inner">
-            <header class="page-header">
-                <h1 class="page-title">Chat Local</h1>
-                <div class="page-actions">
-                    <button id="btn-clear-chat" class="btn btn-danger" aria-label="Limpar histórico">Limpar</button>
+        <div class="chat-layout" id="chat-layout">
+            <!-- Sidebar: Friends -->
+            <aside class="chat-sidebar" id="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h2 class="chat-sidebar-title">Conversas</h2>
                 </div>
-            </header>
+                <div class="chat-friends-list" id="chat-friends-list">
+                    <div class="chat-friends-empty">Nenhum amigo ainda.<br>Adicione amigos no perfil.</div>
+                </div>
+            </aside>
 
-            <div class="chat-container">
-                <div id="chat-messages" class="chat-messages" role="log" aria-label="Mensagens do chat">
-                    <!-- Renderizado via JS -->
+            <!-- Main chat area -->
+            <main class="chat-main" id="chat-main">
+                <div class="chat-main-empty" id="chat-main-empty">
+                    <div class="chat-main-empty-icon">💬</div>
+                    <h2>Selecione uma conversa</h2>
+                    <p>Clique em um amigo para começar a conversar</p>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" class="input chat-input-field" placeholder="Digite sua mensagem..." maxlength="500" aria-label="Mensagem">
-                    <button id="btn-send-chat" class="btn btn-primary" aria-label="Enviar mensagem">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                        </svg>
-                    </button>
+                <div class="chat-main-active" id="chat-main-active" style="display:none">
+                    <div class="chat-main-header">
+                        <button class="chat-main-back" id="chat-main-back" aria-label="Voltar">←</button>
+                        <span class="chat-main-friend-name" id="chat-main-friend-name"></span>
+                    </div>
+                    <div class="chat-main-messages" id="chat-main-messages">
+                        <div class="chat-widget-empty">
+                            <div class="chat-widget-empty-icon">💬</div>
+                            <div class="chat-widget-empty-text">Nenhuma mensagem ainda</div>
+                        </div>
+                    </div>
+                    <div class="chat-main-input-wrap">
+                        <input type="file" id="chat-main-image-input" accept="image/*" hidden>
+                        <button id="chat-main-attach" class="chat-widget-attach" title="Enviar imagem">📎</button>
+                        <input type="text" id="chat-main-input" class="chat-main-input" placeholder="Digite sua mensagem..." maxlength="2000" autocomplete="off">
+                        <button id="chat-main-send" class="chat-main-send" aria-label="Enviar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../shared/theme.js"></script>
-    <script src="../shared/friends.js"></script>
-    <script src="../shared/chat-widget.js"></script>
     <script src="../shared/storage.js"></script>
     <script src="../shared/toast.js"></script>
     <script src="../shared/utils.js"></script>
     <script src="../shared/supabase.js"></script>
     <script src="../shared/auth-supabase.js"></script>
-    <script src="../shared/chat-storage-supabase.js"></script>
+    <script src="../shared/friends.js"></script>
     <script src="../shared/profiles-sync.js"></script>
+    <script src="../shared/chat-storage-supabase.js"></script>
+    <script src="../shared/chat-widget.js"></script>
     <script src="app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
