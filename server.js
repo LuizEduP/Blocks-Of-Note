@@ -414,12 +414,8 @@ wss.on('connection', (ws) => {
         if (currentRoom && rooms.has(currentRoom)) {
             const room = rooms.get(currentRoom);
             room.clients.delete(ws);
-            if (room.clients.size === 0) {
-                rooms.delete(currentRoom);
-                console.log(`🧹 Sala removida: ${currentRoom}`);
-            } else {
-                console.log(`👋 Saiu: ${currentRoom} (${room.clients.size})`);
-            }
+            // Keep room in memory even when empty so saved workspaces can be rejoined
+            console.log(`👋 Saiu: ${currentRoom} (${room.clients.size})`);
         }
     });
 
