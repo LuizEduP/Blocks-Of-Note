@@ -137,6 +137,31 @@
     font-weight: 400;
 }
 
+.tk-quick-date {
+    border: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px 4px;
+    outline: none;
+    color: var(--color-text);
+    cursor: pointer;
+    flex-shrink: 0;
+    border-radius: 6px;
+    transition: background 0.12s;
+}
+
+.tk-quick-date:hover,
+.tk-quick-date:focus {
+    background: var(--color-bg-secondary);
+}
+
+.tk-quick-date::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: var(--calendar-icon-filter, none);
+}
+
 .tk-quick-urgency {
     display: flex;
     gap: 2px;

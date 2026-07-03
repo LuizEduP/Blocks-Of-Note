@@ -136,6 +136,9 @@
     --shadow-md: 0 4px 16px rgba(0,0,0,0.3);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
     --shadow-xl: 0 12px 40px rgba(0,0,0,0.5);
+
+    /* Ícone do calendário visível no fundo escuro */
+    --calendar-icon-filter: invert(1);
 }
 
 /* --- TEMA ESCURO: NAVBAR --- */

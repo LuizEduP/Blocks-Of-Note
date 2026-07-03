@@ -222,9 +222,12 @@ const TaskApp = (() => {
         elements.quickInput.value = '';
         elements.quickInput.focus();
 
+        // Reset date to today for convenience
+        const today = new Date().toISOString().split('T')[0];
+        elements.date.value = today;
+
         // Reset expanded fields if they were shown
         if (showDetails) {
-            elements.date.value = '';
             elements.time.value = '';
             elements.location.value = '';
             elements.desc.value = '';

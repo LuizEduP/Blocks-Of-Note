@@ -69,6 +69,7 @@
             <!-- QUICK ADD BAR -->
             <div class="tk-quick-add" id="tk-quick-add">
                 <input type="text" id="tk-quick-input" class="tk-quick-input" placeholder="Adicionar tarefa... Pressione Enter" maxlength="200" autocomplete="off">
+                <input type="date" id="tk-date" class="tk-quick-date" title="Data da tarefa">
                 <div class="tk-quick-urgency">
                     <button class="tk-urgency-btn" data-urgency="low" title="I — Baixa">●</button>
                     <button class="tk-urgency-btn active" data-urgency="medium" title="II — Média">●</button>
@@ -81,10 +82,6 @@
             <!-- EXPANDED FORM (details) -->
             <div class="tk-expanded" id="tk-expanded" style="display:none">
                 <div class="tk-expanded-row">
-                    <div class="tk-field">
-                        <label class="tk-label">📅 Data</label>
-                        <input type="date" id="tk-date" class="input">
-                    </div>
                     <div class="tk-field">
                         <label class="tk-label">⏰ Hora</label>
                         <input type="time" id="tk-time" class="input">
