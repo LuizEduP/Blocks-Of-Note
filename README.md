@@ -195,5 +195,5 @@ MIT — sinta-se livre para usar, modificar e contribuir.
 ---
 
 <p align="center">
-  <sub>Feito com ❤️ por <a href="https://github.com/LuizEduP">Luiz Eduardo</a></sub>
+  <sub>Feito por <a href="https://github.com/LuizEduP">Luiz Eduardo</a></sub>
 </p>
