@@ -224,8 +224,8 @@
     color: #fff;
 }
 
-[data-theme="dark"] .ws-canvas-wrap {
-    background: #2a2f3a;
+[data-theme="dark"] .ws-board-wrap {
+    background: var(--color-bg-tertiary);
 }
 
 /* --- BOTÃO DE ALTERNÂNCIA DE TEMA --- */

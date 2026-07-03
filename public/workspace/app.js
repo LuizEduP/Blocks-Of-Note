@@ -1,13 +1,18 @@
 /* ============================================
    workspace/app.js — Workspace Colaborativo
-   Documento + Desenho + Chat em tempo real
-   Com servidor WebSocket
+   Board modular (blocos de texto/imagem + desenho) + Chat
+   Com servidor WebSocket e grid invisível com snap
    ============================================ */
 
 const WS_URL = (function() {
     var loc = window.location;
     return (loc.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + loc.host;
 })();
+
+// Grid snap helper
+function snapToGrid(value, gridSize) {
+    return Math.round(value / gridSize) * gridSize;
+}
 
 class Workspace {
     constructor() {
@@ -16,22 +21,53 @@ class Workspace {
         this.userName = '';
         this.userId = 'u-' + Math.random().toString(36).slice(2, 8);
         this.messages = [];
-        this.docContent = '';
         this.docTitle = 'Sem título';
-        this.images = [];
+        this.blocks = [];
         this.strokes = [];
         this.reconnectAttempts = 0;
         this.maxReconnect = 5;
-        this._docTimer = null;
-        this._canvasReady = false;
+
+        // Board state
+        this.activeTool = 'draw';       // 'draw' | 'text' | 'image'
+        this.gridSize = 20;             // pixels per grid cell
+        this.panX = 0;
+        this.panY = 0;
+        this.zoom = 1;
+        this.minZoom = 0.1;
+        this.maxZoom = 10;
+
+        // Drawing state
         this._ctx = null;
-        this._panX = 0;
-        this._panY = 0;
-        this._zoom = 1;
+        this._isDrawing = false;
+        this._currentStroke = null;
+        this._drawColor = '#000000';
+        this._drawSize = 3;
+
+        // Panning
         this._isPanning = false;
         this._panStart = { x: 0, y: 0 };
-        this._minZoom = 0.1;
-        this._maxZoom = 10;
+        this._panStartPan = { x: 0, y: 0 };
+
+        // Dragging blocks
+        this._dragging = null;         // currently dragged block DOM element
+        this._dragStart = { x: 0, y: 0 };
+        this._dragOrigPos = { x: 0, y: 0 };
+        this._dragSnapped = { x: 0, y: 0 };
+
+        // Block resizing
+        this._resizing = null;
+        this._resizeStart = { x: 0, y: 0, w: 0, h: 0 };
+        this._resizeMin = 40;
+
+        // Selected block
+        this._selectedBlockId = null;
+
+        // Text mode pending
+        this._textFontSize = 16;
+
+        // Zoom center tracking
+        this._zoomCx = 0;
+        this._zoomCy = 0;
     }
 
     // ======================== LOBBY ========================
@@ -57,8 +93,8 @@ class Workspace {
         document.getElementById('doc-title-input').value = this.docTitle;
 
         this.renderChat();
-        this.renderImages();
-        this.updateDocTextarea();
+        this.renderAllBlocks();
+        this.updateBoardHint();
     }
 
     // ======================== WEBSOCKET ========================
@@ -120,22 +156,20 @@ class Workspace {
     handleMessage(data) {
         switch (data.type) {
             case 'room-created':
-                this.docContent = (data.doc && data.doc.content) || '';
                 this.docTitle = (data.doc && data.doc.title) || 'Sem título';
+                this.blocks = data.blocks || [];
                 this.strokes = data.strokes || [];
                 this.messages = data.messages || [];
-                this.images = data.images || [];
                 this.showRoom(data.code);
                 this.redrawCanvas();
                 this.addSysMsg('Sala criada! Código: ' + data.code);
                 break;
 
             case 'room-joined':
-                this.docContent = (data.doc && data.doc.content) || '';
                 this.docTitle = (data.doc && data.doc.title) || 'Sem título';
+                this.blocks = data.blocks || [];
                 this.strokes = data.strokes || [];
                 this.messages = data.messages || [];
-                this.images = data.images || [];
                 this.showRoom(data.code);
                 this.redrawCanvas();
                 this.addSysMsg('Você entrou na sala');
@@ -153,29 +187,56 @@ class Workspace {
                 this.updateUsers(data.count);
                 break;
 
-            case 'doc-update':
-                this.docContent = data.content || '';
-                this.updateDocTextarea(true);
-                break;
-
             case 'doc-title':
                 this.docTitle = data.title || 'Sem título';
                 var el = document.getElementById('doc-title-input');
                 if (el) el.value = this.docTitle;
                 break;
 
-            case 'doc-image':
-                if (data.image) {
-                    this.images.push(data.image);
-                    this.renderImages();
+            // Blocks
+            case 'block-create':
+                if (data.block) {
+                    // Avoid duplicates (if we sent this ourselves)
+                    if (!this.blocks.find(function(b) { return b.id === data.block.id; })) {
+                        this.blocks.push(data.block);
+                        this.renderBlock(data.block);
+                        this.updateBoardHint();
+                    }
                 }
                 break;
 
-            case 'remove-image':
-                this.images = this.images.filter(function(img) { return img.id !== data.id; });
-                this.renderImages();
+            case 'block-update':
+                var bIdx = this.blocks.findIndex(function(b) { return b.id === data.id; });
+                if (bIdx >= 0) {
+                    if (data.content !== undefined) this.blocks[bIdx].content = data.content;
+                    if (data.width !== undefined) this.blocks[bIdx].width = data.width;
+                    if (data.height !== undefined) this.blocks[bIdx].height = data.height;
+                    this.refreshBlockDOM(data.id);
+                }
                 break;
 
+            case 'block-move':
+                var bIdx2 = this.blocks.findIndex(function(b) { return b.id === data.id; });
+                if (bIdx2 >= 0) {
+                    if (data.x !== undefined) this.blocks[bIdx2].x = data.x;
+                    if (data.y !== undefined) this.blocks[bIdx2].y = data.y;
+                    this.refreshBlockDOM(data.id);
+                }
+                break;
+
+            case 'block-delete':
+                this.blocks = this.blocks.filter(function(b) { return b.id !== data.id; });
+                this.removeBlockDOM(data.id);
+                this.updateBoardHint();
+                break;
+
+            case 'blocks-sync':
+                this.blocks = data.blocks || [];
+                this.renderAllBlocks();
+                this.updateBoardHint();
+                break;
+
+            // Drawing
             case 'draw-stroke':
                 if (data.stroke) {
                     this.strokes.push(data.stroke);
@@ -199,251 +260,364 @@ class Workspace {
         }
     }
 
-    // ======================== DOCUMENTO ========================
+    // ======================== BOARD: BLOCKS ========================
 
-    updateDocTextarea(fromRemote) {
-        var ta = document.getElementById('doc-textarea');
-        if (ta && ta.value !== this.docContent) {
-            ta.value = this.docContent;
+    createBlock(type, x, y, extra) {
+        var id = 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+        // Snap position to grid, but in world coordinates
+        var worldX = (x - this.panX) / this.zoom;
+        var worldY = (y - this.panY) / this.zoom;
+        var sx = snapToGrid(worldX, this.gridSize);
+        var sy = snapToGrid(worldY, this.gridSize);
+
+        var block = {
+            id: id,
+            type: type,
+            x: sx,
+            y: sy,
+            width: type === 'image' ? 200 : 200,
+            height: type === 'image' ? 200 : 100
+        };
+
+        if (type === 'text') {
+            block.content = extra && extra.content ? extra.content : '';
+            block.fontSize = this._textFontSize || 16;
+        } else if (type === 'image') {
+            block.content = extra && extra.data ? extra.data : '';
+            block.name = extra && extra.name ? extra.name : 'imagem';
         }
-        var status = document.getElementById('doc-status');
-        if (status) {
-            status.textContent = fromRemote ? 'Sincronizado ✓' : 'Salvando...';
-        }
+
+        this.blocks.push(block);
+        this.renderBlock(block);
+        this.updateBoardHint();
+
+        // Notify server
+        this.send('block-create', { block: block });
+
+        return block;
     }
 
-    sendDocUpdate() {
-        var ta = document.getElementById('doc-textarea');
-        if (!ta) return;
-        this.docContent = ta.value;
-        this.send('doc-update', { content: this.docContent });
-        var status = document.getElementById('doc-status');
-        if (status) status.textContent = 'Sincronizado ✓';
-    }
-
-    renderImages() {
-        var container = document.getElementById('doc-images');
-        if (!container) return;
-        if (this.images.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
+    deleteBlock(blockId) {
         var self = this;
-        var html = '';
-        for (var i = 0; i < this.images.length; i++) {
-            var img = this.images[i];
-            var id = img.id || '';
-            html += '<div class="ws-doc-img-wrap">' +
-                        '<img class="ws-doc-image" src="' + img.data + '" alt="imagem" onclick="window._workspace && window._workspace.openLightbox(this.src)" loading="lazy">' +
-                        '<button class="ws-doc-img-remove" data-id="' + id + '" title="Remover imagem">&times;</button>' +
-                    '</div>';
-        }
-        container.innerHTML = html;
-        var self2 = this;
-        container.querySelectorAll('.ws-doc-img-remove').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var imgId = this.dataset.id;
-                self2.showConfirm('Remover esta imagem?', function() {
-                    self2.send('remove-image', { id: imgId });
-                });
-            });
+        this.showConfirm('Remover este bloco?', function() {
+            self.blocks = self.blocks.filter(function(b) { return b.id !== blockId; });
+            self.removeBlockDOM(blockId);
+            self.updateBoardHint();
+            self.send('block-delete', { id: blockId });
+            if (self._selectedBlockId === blockId) self._selectedBlockId = null;
         });
     }
 
-    openLightbox(src) {
-        var lb = document.getElementById('lightbox');
-        var img = document.getElementById('lightbox-img');
-        if (!lb || !img) return;
-        img.src = src;
-        img.style.setProperty('--lb-scale', '1');
-        img.classList.remove('zoomed');
-        lb.style.display = 'flex';
+    selectBlock(blockId) {
+        if (this._selectedBlockId) {
+            var old = document.querySelector('.ws-block[data-id="' + this._selectedBlockId + '"]');
+            if (old) old.classList.remove('selected');
+        }
+        this._selectedBlockId = blockId;
+        if (blockId) {
+            var el = document.querySelector('.ws-block[data-id="' + blockId + '"]');
+            if (el) el.classList.add('selected');
+        }
     }
 
-    // ======================== MODAL DE CONFIRMAÇÃO ========================
+    // ======================== BOARD: BLOCK RENDERING ========================
 
-    showConfirm(text, callback) {
-        var modal = document.getElementById('confirm-modal');
-        var textEl = document.getElementById('confirm-text');
-        var btnOk = document.getElementById('confirm-ok');
-        var btnCancel = document.getElementById('confirm-cancel');
-        if (!modal || !textEl || !btnOk || !btnCancel) return;
+    renderAllBlocks() {
+        var container = document.getElementById('board-blocks');
+        if (!container) return;
+        container.innerHTML = '';
+        for (var i = 0; i < this.blocks.length; i++) {
+            this.renderBlock(this.blocks[i]);
+        }
+    }
 
-        textEl.textContent = text || 'Confirmar?';
-        modal.style.display = 'flex';
+    renderBlock(block) {
+        var container = document.getElementById('board-blocks');
+        if (!container) return;
 
-        var okHandler, cancelHandler, overlayHandler, escHandler;
+        // Remove existing
+        var existing = container.querySelector('.ws-block[data-id="' + block.id + '"]');
+        if (existing) existing.remove();
 
-        var cleanup = function() {
-            modal.style.display = 'none';
-            if (okHandler) btnOk.removeEventListener('click', okHandler);
-            if (cancelHandler) btnCancel.removeEventListener('click', cancelHandler);
-            if (overlayHandler) {
-                var overlay = modal.querySelector('.ws-modal-overlay');
-                if (overlay) overlay.removeEventListener('click', overlayHandler);
-            }
-            if (escHandler) document.removeEventListener('keydown', escHandler);
-        };
+        var el = document.createElement('div');
+        el.className = 'ws-block';
+        el.dataset.id = block.id;
+        el.style.left = block.x + 'px';
+        el.style.top = block.y + 'px';
+        el.style.width = block.width + 'px';
+        el.style.height = block.height + 'px';
 
-        okHandler = function() {
-            cleanup();
-            if (callback) callback();
-        };
-        cancelHandler = function() {
-            cleanup();
-        };
-
-        btnOk.addEventListener('click', okHandler);
-        btnCancel.addEventListener('click', cancelHandler);
-
-        var overlay = modal.querySelector('.ws-modal-overlay');
-        if (overlay) {
-            overlayHandler = function() {
-                cleanup();
-            };
-            overlay.addEventListener('click', overlayHandler);
+        if (block.id === this._selectedBlockId) {
+            el.classList.add('selected');
         }
 
-        escHandler = function(e) {
-            if (e.key === 'Escape') {
-                cleanup();
-            }
-        };
-        document.addEventListener('keydown', escHandler);
+        // Content
+        if (block.type === 'text') {
+            var textEl = document.createElement('div');
+            textEl.className = 'ws-block-text';
+            textEl.contentEditable = 'true';
+            textEl.dataset.placeholder = 'Escreva algo...';
+            textEl.style.fontSize = (block.fontSize || 16) + 'px';
+            textEl.textContent = block.content || '';
+            el.appendChild(textEl);
+
+            // Bind text edit events
+            var self = this;
+            var editTimer = null;
+            textEl.addEventListener('input', function() {
+                clearTimeout(editTimer);
+                editTimer = setTimeout(function() {
+                    block.content = textEl.textContent || '';
+                    var h = Math.max(40, textEl.scrollHeight + 16);
+                    if (h !== block.height) {
+                        block.height = h;
+                        el.style.height = h + 'px';
+                    }
+                    self.send('block-update', {
+                        id: block.id,
+                        content: block.content,
+                        height: block.height
+                    });
+                }, 300);
+            });
+
+            textEl.addEventListener('focus', function() {
+                self.selectBlock(block.id);
+            });
+
+            textEl.addEventListener('mousedown', function(e) {
+                if (self.activeTool === 'draw') {
+                    e.stopPropagation();
+                    self.selectBlock(block.id);
+                }
+            });
+
+        } else if (block.type === 'image') {
+            var imgWrap = document.createElement('div');
+            imgWrap.className = 'ws-block-image-wrap';
+            var img = document.createElement('img');
+            img.className = 'ws-block-image';
+            img.src = block.content;
+            img.alt = block.name || 'Imagem';
+            img.draggable = false;
+            img.addEventListener('dblclick', function() {
+                self.openLightbox(block.content);
+            });
+            imgWrap.appendChild(img);
+            el.appendChild(imgWrap);
+        }
+
+        // Delete button
+        var delBtn = document.createElement('button');
+        delBtn.className = 'ws-block-delete';
+        delBtn.textContent = '×';
+        delBtn.title = 'Excluir bloco';
+        var self = this;
+        delBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            self.deleteBlock(block.id);
+        });
+        el.appendChild(delBtn);
+
+        // Resize handle
+        var resizeHandle = document.createElement('div');
+        resizeHandle.className = 'ws-block-resize';
+        el.appendChild(resizeHandle);
+
+        // Bind drag events on the block
+        el.addEventListener('mousedown', function(e) {
+            // Don't start drag from textarea, buttons, or resize handle
+            if (e.target === delBtn || e.target === resizeHandle) return;
+            if (e.target.contentEditable === 'true' && document.activeElement === e.target) return;
+            if (e.button !== 0 && e.button !== undefined) return;
+            if (e.ctrlKey || e.metaKey) return; // ctrl+drag = pan
+
+            e.preventDefault();
+            self.selectBlock(block.id);
+            self._startBlockDrag(block.id, el, e.clientX, e.clientY);
+        });
+
+        // Bind resize
+        resizeHandle.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self._startBlockResize(block.id, el, e.clientX, e.clientY);
+        });
+
+        container.appendChild(el);
     }
 
-    // ======================== DESENHO (CANVAS) ========================
+    refreshBlockDOM(blockId) {
+        var block = this.blocks.find(function(b) { return b.id === blockId; });
+        if (!block) return;
+
+        var el = document.querySelector('.ws-block[data-id="' + blockId + '"]');
+        if (!el) {
+            this.renderBlock(block);
+            return;
+        }
+
+        el.style.left = block.x + 'px';
+        el.style.top = block.y + 'px';
+        el.style.width = block.width + 'px';
+        el.style.height = block.height + 'px';
+
+        if (block.type === 'text') {
+            var textEl = el.querySelector('.ws-block-text');
+            if (textEl && document.activeElement !== textEl) {
+                textEl.textContent = block.content || '';
+            }
+        }
+    }
+
+    removeBlockDOM(blockId) {
+        var el = document.querySelector('.ws-block[data-id="' + blockId + '"]');
+        if (el) el.remove();
+    }
+
+    // ======================== BOARD: BLOCK DRAG & RESIZE ========================
+
+    _startBlockDrag(blockId, el, clientX, clientY) {
+        this._dragging = {
+            id: blockId,
+            el: el
+        };
+        this._dragStart = { x: clientX, y: clientY };
+
+        var block = this.blocks.find(function(b) { return b.id === blockId; });
+        if (block) {
+            this._dragOrigPos = { x: block.x, y: block.y };
+            this._dragSnapped = { x: block.x, y: block.y };
+        }
+
+        el.classList.add('dragging');
+
+        var self = this;
+        this._dragMove = function(e) {
+            var dx = (e.clientX - self._dragStart.x) / self.zoom;
+            var dy = (e.clientY - self._dragStart.y) / self.zoom;
+            var rawX = self._dragOrigPos.x + dx;
+            var rawY = self._dragOrigPos.y + dy;
+            var sx = snapToGrid(rawX, self.gridSize);
+            var sy = snapToGrid(rawY, self.gridSize);
+
+            el.style.left = sx + 'px';
+            el.style.top = sy + 'px';
+            self._dragSnapped = { x: sx, y: sy };
+        };
+
+        this._dragEnd = function() {
+            el.classList.remove('dragging');
+            document.removeEventListener('mousemove', self._dragMove);
+            document.removeEventListener('mouseup', self._dragEnd);
+
+            // Save final position
+            var block = self.blocks.find(function(b) { return b.id === blockId; });
+            if (block && (block.x !== self._dragSnapped.x || block.y !== self._dragSnapped.y)) {
+                block.x = self._dragSnapped.x;
+                block.y = self._dragSnapped.y;
+                self.send('block-move', { id: blockId, x: block.x, y: block.y });
+            }
+            self._dragging = null;
+        };
+
+        document.addEventListener('mousemove', this._dragMove);
+        document.addEventListener('mouseup', this._dragEnd);
+    }
+
+    _startBlockResize(blockId, el, clientX, clientY) {
+        this._resizing = { id: blockId, el: el };
+        this._resizeStart = {
+            x: clientX,
+            y: clientY,
+            w: parseInt(el.style.width) || 200,
+            h: parseInt(el.style.height) || 100
+        };
+
+        var self = this;
+        this._resizeMove = function(e) {
+            var dx = (e.clientX - self._resizeStart.x) / self.zoom;
+            var dy = (e.clientY - self._resizeStart.y) / self.zoom;
+            var nw = snapToGrid(Math.max(self._resizeMin, self._resizeStart.w + dx), self.gridSize);
+            var nh = snapToGrid(Math.max(self._resizeMin, self._resizeStart.h + dy), self.gridSize);
+            el.style.width = nw + 'px';
+            el.style.height = nh + 'px';
+        };
+
+        this._resizeEnd = function() {
+            document.removeEventListener('mousemove', self._resizeMove);
+            document.removeEventListener('mouseup', self._resizeEnd);
+
+            var block = self.blocks.find(function(b) { return b.id === blockId; });
+            if (block) {
+                block.width = parseInt(el.style.width) || block.width;
+                block.height = parseInt(el.style.height) || block.height;
+                self.send('block-update', {
+                    id: blockId,
+                    width: block.width,
+                    height: block.height
+                });
+            }
+            self._resizing = null;
+        };
+
+        document.addEventListener('mousemove', this._resizeMove);
+        document.addEventListener('mouseup', this._resizeEnd);
+    }
+
+    updateBoardHint() {
+        var hint = document.getElementById('board-hint');
+        if (!hint) return;
+        if (this.blocks.length === 0 && this.strokes.length === 0) {
+            hint.style.display = 'flex';
+        } else {
+            hint.style.display = 'none';
+        }
+    }
+
+    // ======================== BOARD: CANVAS DRAWING ========================
 
     initCanvas() {
-        var canvas = document.getElementById('draw-canvas');
+        var canvas = document.getElementById('board-canvas');
         if (!canvas) return;
 
         var self = this;
-        this._canvasReady = true;
         var ctx = canvas.getContext('2d');
+        this._ctx = ctx;
 
-        var wrap = canvas.parentElement;
         this._resizeCanvasToWrap();
 
-        var isDrawing = false;
-        var currentStroke = null;
-        var color = '#000000';
-        var size = 3;
+        // ---- Mouse event handlers (on the canvas) ----
+        canvas.addEventListener('mousedown', function(e) { self._onCanvasMouseDown(e); });
+        canvas.addEventListener('mousemove', function(e) { self._onCanvasMouseMove(e); });
+        canvas.addEventListener('mouseup', function(e) { self._onCanvasMouseUp(e); });
+        canvas.addEventListener('mouseleave', function(e) { self._onCanvasMouseUp(e); });
 
-        function getPos(e) {
-            var r = canvas.getBoundingClientRect();
-            var cx, cy;
-            if (e.touches) {
-                cx = e.touches[0].clientX;
-                cy = e.touches[0].clientY;
-                e.preventDefault();
-            } else {
-                cx = e.clientX;
-                cy = e.clientY;
-            }
-            var worldX = (cx - r.left - self._panX) / self._zoom;
-            var worldY = (cy - r.top - self._panY) / self._zoom;
-            return { x: worldX, y: worldY };
-        }
-
-        function applyTransform() {
-            ctx.setTransform(self._zoom, 0, 0, self._zoom, self._panX, self._panY);
-        }
-
-        function onStart(e) {
-            if (e.ctrlKey || e.button === 1) {
-                e.preventDefault();
-                self._isPanning = true;
-                var p = e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
-                self._panStart = { x: p.x - self._panX, y: p.y - self._panY };
-                return;
-            }
-            if (e.button !== 0) return;
-            e.preventDefault();
-            isDrawing = true;
-            var p = getPos(e);
-            currentStroke = { color: color, size: size, points: [p] };
-            canvas.style.cursor = 'crosshair';
-
-            applyTransform();
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = size;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.lineTo(p.x, p.y);
-            ctx.stroke();
-        }
-
-        function onMove(e) {
-            if (self._isPanning) {
-                e.preventDefault();
-                var p = e.touches ? { x: e.touches[0].clientX, y: e.touches[0].clientY } : { x: e.clientX, y: e.clientY };
-                self._panX = p.x - self._panStart.x;
-                self._panY = p.y - self._panStart.y;
-                applyTransform();
-                self.redrawCanvas();
-                return;
-            }
-            if (!isDrawing || !currentStroke) return;
-            e.preventDefault();
-            var p = getPos(e);
-            currentStroke.points.push(p);
-            applyTransform();
-            ctx.lineTo(p.x, p.y);
-            ctx.stroke();
-        }
-
-        function onEnd(e) {
-            if (self._isPanning) {
-                self._isPanning = false;
-                canvas.style.cursor = '';
-                return;
-            }
-            if (!isDrawing || !currentStroke) return;
-            isDrawing = false;
-            canvas.style.cursor = '';
-            self.send('draw-stroke', { stroke: currentStroke });
-            currentStroke = null;
-        }
-
-        canvas.addEventListener('mousedown', onStart);
-        canvas.addEventListener('mousemove', onMove);
-        canvas.addEventListener('mouseup', onEnd);
-        canvas.addEventListener('mouseleave', onEnd);
-
-        canvas.addEventListener('touchstart', onStart, { passive: false });
-        canvas.addEventListener('touchmove', onMove, { passive: false });
-        canvas.addEventListener('touchend', onEnd);
+        // Touch events
+        canvas.addEventListener('touchstart', function(e) { self._onCanvasTouchStart(e); }, { passive: false });
+        canvas.addEventListener('touchmove', function(e) { self._onCanvasTouchMove(e); }, { passive: false });
+        canvas.addEventListener('touchend', function(e) { self._onCanvasTouchEnd(e); });
 
         canvas.addEventListener('contextmenu', function(e) { e.preventDefault(); });
 
-        var colorInput = document.getElementById('draw-color');
-        if (colorInput) {
-            colorInput.addEventListener('input', function() {
-                color = this.value;
-            });
-        }
+        // Wheel zoom
+        canvas.addEventListener('wheel', function(e) {
+            if (!e.ctrlKey && !e.metaKey) return;
+            e.preventDefault();
+            var rect = canvas.getBoundingClientRect();
+            var cx = e.clientX - rect.left;
+            var cy = e.clientY - rect.top;
+            var factor = e.deltaY > 0 ? 0.9 : 1.1;
+            self.setZoom(self.zoom * factor, cx, cy);
+        }, { passive: false });
 
-        var sizeInput = document.getElementById('draw-size');
-        if (sizeInput) {
-            sizeInput.addEventListener('input', function() {
-                size = parseInt(this.value);
-                var label = document.getElementById('draw-size-label');
-                if (label) label.textContent = size + 'px';
-            });
-        }
-
-        this._ctx = ctx;
         this._resizeCanvasToWrap();
         this.redrawCanvas();
         console.log('Canvas inicializado');
     }
 
     _resizeCanvasToWrap() {
-        var canvas = document.getElementById('draw-canvas');
+        var canvas = document.getElementById('board-canvas');
         if (!canvas) return;
         var wrap = canvas.parentElement;
         if (!wrap) return;
@@ -456,37 +630,219 @@ class Workspace {
         }
     }
 
-    drawStroke(stroke) {
-        if (!this._canvasReady || !this._ctx) return;
-        var ctx = this._ctx;
-        var pts = stroke.points || [];
-        if (pts.length < 1) return;
+    _applyTransform() {
+        if (!this._ctx) return;
+        this._ctx.setTransform(this.zoom, 0, 0, this.zoom, this.panX, this.panY);
 
-        ctx.setTransform(this._zoom, 0, 0, this._zoom, this._panX, this._panY);
-
-        ctx.beginPath();
-        ctx.strokeStyle = stroke.color || '#000';
-        ctx.lineWidth = stroke.size || 3;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.moveTo(pts[0].x, pts[0].y);
-        for (var i = 1; i < pts.length; i++) {
-            ctx.lineTo(pts[i].x, pts[i].y);
+        // Also transform blocks overlay
+        var blocksEl = document.getElementById('board-blocks');
+        if (blocksEl) {
+            blocksEl.style.transform = 'translate(' + this.panX + 'px, ' + this.panY + 'px) scale(' + this.zoom + ')';
         }
-        ctx.stroke();
     }
 
+    _clientToWorld(clientX, clientY) {
+        var canvas = document.getElementById('board-canvas');
+        if (!canvas) return { x: clientX, y: clientY };
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: (clientX - rect.left - this.panX) / this.zoom,
+            y: (clientY - rect.top - this.panY) / this.zoom
+        };
+    }
+
+    // ---- Canvas mouse handlers ----
+
+    _onCanvasMouseDown(e) {
+        // Pan: Ctrl+drag or middle button
+        if (e.ctrlKey || e.metaKey || e.button === 1) {
+            e.preventDefault();
+            this._isPanning = true;
+            this._panStart = { x: e.clientX, y: e.clientY };
+            this._panStartPan = { x: this.panX, y: this.panY };
+            var canvas = document.getElementById('board-canvas');
+            if (canvas) canvas.style.cursor = 'grabbing';
+            return;
+        }
+
+        // Text tool: click creates text block
+        if (this.activeTool === 'text') {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            var pos = this._clientToWorld(e.clientX, e.clientY);
+            var block = this.createBlock('text', e.clientX - this.panX, e.clientY - this.panY);
+            // Focus the new text block for editing
+            var self = this;
+            setTimeout(function() {
+                var textEl = document.querySelector('.ws-block[data-id="' + block.id + '"] .ws-block-text');
+                if (textEl) textEl.focus();
+            }, 50);
+            return;
+        }
+
+        // Image tool: click opens file picker
+        if (this.activeTool === 'image') {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            var imgInput = document.getElementById('image-upload');
+            if (imgInput) {
+                this._pendingImagePos = { x: e.clientX, y: e.clientY };
+                imgInput.click();
+            }
+            return;
+        }
+
+        // Draw tool: start drawing
+        if (this.activeTool === 'draw') {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            this._isDrawing = true;
+            var p = this._clientToWorld(e.clientX, e.clientY);
+            this._currentStroke = { color: this._drawColor, size: this._drawSize, points: [p] };
+            var canvas = document.getElementById('board-canvas');
+            if (canvas) canvas.style.cursor = 'crosshair';
+
+            this._applyTransform();
+            this._ctx.beginPath();
+            this._ctx.moveTo(p.x, p.y);
+            this._ctx.strokeStyle = this._drawColor;
+            this._ctx.lineWidth = this._drawSize;
+            this._ctx.lineCap = 'round';
+            this._ctx.lineJoin = 'round';
+            this._ctx.lineTo(p.x, p.y);
+            this._ctx.stroke();
+        }
+    }
+
+    _onCanvasMouseMove(e) {
+        if (this._isPanning) {
+            e.preventDefault();
+            this.panX = this._panStartPan.x + (e.clientX - this._panStart.x);
+            this.panY = this._panStartPan.y + (e.clientY - this._panStart.y);
+            this._applyTransform();
+            this.redrawCanvas();
+            return;
+        }
+
+        if (!this._isDrawing || !this._currentStroke) return;
+        e.preventDefault();
+        var p = this._clientToWorld(e.clientX, e.clientY);
+        this._currentStroke.points.push(p);
+        this._applyTransform();
+        this._ctx.lineTo(p.x, p.y);
+        this._ctx.stroke();
+    }
+
+    _onCanvasMouseUp(e) {
+        if (this._isPanning) {
+            this._isPanning = false;
+            var canvas = document.getElementById('board-canvas');
+            if (canvas) canvas.style.cursor = this.activeTool === 'draw' ? 'crosshair' : 'default';
+            return;
+        }
+        if (!this._isDrawing || !this._currentStroke) return;
+        this._isDrawing = false;
+        var canvas = document.getElementById('board-canvas');
+        if (canvas) canvas.style.cursor = 'crosshair';
+
+        // Only send if the stroke has actual points
+        if (this._currentStroke.points.length > 0) {
+            this.strokes.push(this._currentStroke);
+            this.send('draw-stroke', { stroke: this._currentStroke });
+            this.updateBoardHint();
+        }
+        this._currentStroke = null;
+    }
+
+    // ---- Touch handlers ----
+
+    _onCanvasTouchStart(e) {
+        if (e.touches.length === 2) {
+            // Two-finger = pan
+            e.preventDefault();
+            this._isPanning = true;
+            var cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            this._panStart = { x: cx, y: cy };
+            this._panStartPan = { x: this.panX, y: this.panY };
+            return;
+        }
+
+        if (e.touches.length === 1 && this.activeTool === 'draw') {
+            e.preventDefault();
+            this._isDrawing = true;
+            var t = e.touches[0];
+            var p = this._clientToWorld(t.clientX, t.clientY);
+            this._currentStroke = { color: this._drawColor, size: this._drawSize, points: [p] };
+
+            this._applyTransform();
+            this._ctx.beginPath();
+            this._ctx.moveTo(p.x, p.y);
+            this._ctx.strokeStyle = this._drawColor;
+            this._ctx.lineWidth = this._drawSize;
+            this._ctx.lineCap = 'round';
+            this._ctx.lineJoin = 'round';
+            this._ctx.lineTo(p.x, p.y);
+            this._ctx.stroke();
+        }
+    }
+
+    _onCanvasTouchMove(e) {
+        if (this._isPanning && e.touches.length === 2) {
+            e.preventDefault();
+            var cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            var cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+            this.panX = this._panStartPan.x + (cx - this._panStart.x);
+            this.panY = this._panStartPan.y + (cy - this._panStart.y);
+            this._applyTransform();
+            this.redrawCanvas();
+            return;
+        }
+
+        if (!this._isDrawing || !this._currentStroke || e.touches.length !== 1) return;
+        e.preventDefault();
+        var t = e.touches[0];
+        var p = this._clientToWorld(t.clientX, t.clientY);
+        this._currentStroke.points.push(p);
+        this._applyTransform();
+        this._ctx.lineTo(p.x, p.y);
+        this._ctx.stroke();
+    }
+
+    _onCanvasTouchEnd(e) {
+        if (this._isPanning) {
+            this._isPanning = false;
+            return;
+        }
+        if (!this._isDrawing || !this._currentStroke) return;
+        this._isDrawing = false;
+        if (this._currentStroke.points.length > 0) {
+            this.strokes.push(this._currentStroke);
+            this.send('draw-stroke', { stroke: this._currentStroke });
+            this.updateBoardHint();
+        }
+        this._currentStroke = null;
+    }
+
+    // ---- Canvas rendering ----
+
     redrawCanvas() {
-        if (!this._canvasReady || !this._ctx) return;
-        var canvas = document.getElementById('draw-canvas');
+        if (!this._ctx) return;
+        var canvas = document.getElementById('board-canvas');
         var ctx = this._ctx;
         if (!ctx || !canvas) return;
 
+        // Reset and clear
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.setTransform(this._zoom, 0, 0, this._zoom, this._panX, this._panY);
+        // Draw grid dots
+        this._drawGrid();
 
+        // Apply pan/zoom transform
+        this._applyTransform();
+
+        // Draw all strokes
         for (var i = 0; i < this.strokes.length; i++) {
             ctx.beginPath();
             var s = this.strokes[i];
@@ -504,53 +860,154 @@ class Workspace {
         }
     }
 
+    _drawGrid() {
+        if (!this._ctx) return;
+        var canvas = document.getElementById('board-canvas');
+        var ctx = this._ctx;
+        if (!ctx || !canvas) return;
+        if (this.gridSize < 1) return;
+
+        // Grid dots in screen space: calculate visible world area
+        var gs = this.gridSize * this.zoom;
+        // Only draw if dots aren't too dense or too sparse
+        if (gs < 4 || gs > 100) return;
+
+        // Calculate visible range in world coordinates
+        var worldLeft = -this.panX / this.zoom;
+        var worldTop = -this.panY / this.zoom;
+        var worldRight = worldLeft + canvas.width / this.zoom;
+        var worldBottom = worldTop + canvas.height / this.zoom;
+
+        var startX = Math.floor(worldLeft / this.gridSize) * this.gridSize;
+        var startY = Math.floor(worldTop / this.gridSize) * this.gridSize;
+
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        var dotSize = Math.max(1, Math.min(2, gs * 0.12));
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+        for (var wx = startX; wx <= worldRight + this.gridSize; wx += this.gridSize) {
+            for (var wy = startY; wy <= worldBottom + this.gridSize; wy += this.gridSize) {
+                var sx = wx * this.zoom + this.panX;
+                var sy = wy * this.zoom + this.panY;
+                ctx.fillRect(sx - dotSize / 2, sy - dotSize / 2, dotSize, dotSize);
+            }
+        }
+
+        ctx.restore();
+    }
+
+    drawStroke(stroke) {
+        if (!this._ctx) return;
+        var ctx = this._ctx;
+        var pts = stroke.points || [];
+        if (pts.length < 1) return;
+
+        this._applyTransform();
+        ctx.beginPath();
+        ctx.strokeStyle = stroke.color || '#000';
+        ctx.lineWidth = stroke.size || 3;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (var i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i].x, pts[i].y);
+        }
+        ctx.stroke();
+    }
+
     resizeCanvas() {
-        if (!this._canvasReady) return;
         this._resizeCanvasToWrap();
         this.redrawCanvas();
     }
 
-    // ======================== ZOOM ========================
+    // ---- Zoom ----
 
     setZoom(newZoom, cx, cy) {
-        var oldZoom = this._zoom;
-        newZoom = Math.max(this._minZoom, Math.min(this._maxZoom, newZoom));
+        var oldZoom = this.zoom;
+        newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
         if (newZoom === oldZoom) return;
 
         if (cx !== undefined && cy !== undefined) {
-            // Zoom centered on a specific point
-            this._panX = cx - (cx - this._panX) * (newZoom / oldZoom);
-            this._panY = cy - (cy - this._panY) * (newZoom / oldZoom);
+            this.panX = cx - (cx - this.panX) * (newZoom / oldZoom);
+            this.panY = cy - (cy - this.panY) * (newZoom / oldZoom);
         }
 
-        this._zoom = newZoom;
+        this.zoom = newZoom;
+        this._applyTransform();
         this.redrawCanvas();
         this.updateZoomLabel();
     }
 
     zoomIn() {
-        this.setZoom(this._zoom * 1.25);
+        var canvas = document.getElementById('board-canvas');
+        if (canvas) {
+            var rect = canvas.getBoundingClientRect();
+            this.setZoom(this.zoom * 1.25, rect.width / 2, rect.height / 2);
+        } else {
+            this.setZoom(this.zoom * 1.25);
+        }
     }
 
     zoomOut() {
-        this.setZoom(this._zoom / 1.25);
+        var canvas = document.getElementById('board-canvas');
+        if (canvas) {
+            var rect = canvas.getBoundingClientRect();
+            this.setZoom(this.zoom / 1.25, rect.width / 2, rect.height / 2);
+        } else {
+            this.setZoom(this.zoom / 1.25);
+        }
     }
 
     resetZoom() {
-        this._zoom = 1;
-        this._panX = 0;
-        this._panY = 0;
+        this.zoom = 1;
+        this.panX = 0;
+        this.panY = 0;
+        this._applyTransform();
         this.redrawCanvas();
         this.updateZoomLabel();
     }
 
     updateZoomLabel() {
         var label = document.getElementById('draw-zoom-label');
-        if (label) label.textContent = Math.round(this._zoom * 100) + '%';
+        if (label) label.textContent = Math.round(this.zoom * 100) + '%';
+    }
+
+    // ======================== TOOL SELECTION ========================
+
+    setActiveTool(tool) {
+        this.activeTool = tool;
+
+        var canvas = document.getElementById('board-canvas');
+        if (canvas) {
+            canvas.style.cursor = tool === 'draw' ? 'crosshair' : tool === 'text' ? 'cell' : 'copy';
+        }
+
+        // Update tool buttons
+        document.querySelectorAll('.ws-tool-btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        var toolBtn = document.getElementById('tool-' + tool);
+        if (toolBtn) toolBtn.classList.add('active');
+
+        // Show/hide tool-specific controls
+        var drawTools = document.getElementById('draw-tools');
+        var textTools = document.getElementById('text-tools');
+        var textToolsSep = document.getElementById('text-tools-sep');
+
+        if (drawTools) drawTools.style.display = tool === 'draw' ? 'flex' : 'none';
+        if (textTools) textTools.style.display = tool === 'text' ? 'flex' : 'none';
+        if (textToolsSep) textToolsSep.style.display = tool === 'text' ? '' : 'none';
+
+        // Deselect block when switching to draw mode
+        if (tool === 'draw') {
+            this.selectBlock(null);
+        }
     }
 
     // ======================== CHAT ========================
-
 
     renderChat() {
         var container = document.getElementById('chat-messages');
@@ -648,11 +1105,68 @@ class Workspace {
         if (el) el.textContent = (count || 0) + ' online';
     }
 
+    showConfirm(text, callback) {
+        var modal = document.getElementById('confirm-modal');
+        var textEl = document.getElementById('confirm-text');
+        var btnOk = document.getElementById('confirm-ok');
+        var btnCancel = document.getElementById('confirm-cancel');
+        if (!modal || !textEl || !btnOk || !btnCancel) return;
+
+        textEl.textContent = text || 'Confirmar?';
+        modal.style.display = 'flex';
+
+        var okHandler, cancelHandler, overlayHandler, escHandler;
+
+        var cleanup = function() {
+            modal.style.display = 'none';
+            if (okHandler) btnOk.removeEventListener('click', okHandler);
+            if (cancelHandler) btnCancel.removeEventListener('click', cancelHandler);
+            if (overlayHandler) {
+                var overlay = modal.querySelector('.ws-modal-overlay');
+                if (overlay) overlay.removeEventListener('click', overlayHandler);
+            }
+            if (escHandler) document.removeEventListener('keydown', escHandler);
+        };
+
+        okHandler = function() {
+            cleanup();
+            if (callback) callback();
+        };
+        cancelHandler = function() {
+            cleanup();
+        };
+
+        btnOk.addEventListener('click', okHandler);
+        btnCancel.addEventListener('click', cancelHandler);
+
+        var overlay = modal.querySelector('.ws-modal-overlay');
+        if (overlay) {
+            overlayHandler = function() { cleanup(); };
+            overlay.addEventListener('click', overlayHandler);
+        }
+
+        escHandler = function(e) {
+            if (e.key === 'Escape') { cleanup(); }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+
+    openLightbox(src) {
+        var lb = document.getElementById('lightbox');
+        var img = document.getElementById('lightbox-img');
+        if (!lb || !img) return;
+        img.src = src;
+        img.style.setProperty('--lb-scale', '1');
+        img.classList.remove('zoomed');
+        lb.style.display = 'flex';
+    }
+
     // ======================== BIND EVENTS ========================
 
     bindEvents() {
         var self = this;
 
+        // ---- Lobby ----
         var btnCreate = document.getElementById('btn-create-room');
         if (btnCreate) {
             btnCreate.addEventListener('click', function() {
@@ -668,18 +1182,13 @@ class Workspace {
 
         var btnJoin = document.getElementById('btn-join-room');
         if (btnJoin) {
-            btnJoin.addEventListener('click', function() {
-                self.joinRoom();
-            });
+            btnJoin.addEventListener('click', function() { self.joinRoom(); });
         }
 
         var codeInput = document.getElementById('room-code-input');
         if (codeInput) {
             codeInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    self.joinRoom();
-                }
+                if (e.key === 'Enter') { e.preventDefault(); self.joinRoom(); }
                 this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             });
         }
@@ -707,9 +1216,7 @@ class Workspace {
 
         var btnSaveWs = document.getElementById('btn-save-workspace');
         if (btnSaveWs) {
-            btnSaveWs.addEventListener('click', function() {
-                self.saveCurrentWorkspace();
-            });
+            btnSaveWs.addEventListener('click', function() { self.saveCurrentWorkspace(); });
         }
 
         var btnRefreshSaved = document.getElementById('btn-refresh-saved');
@@ -720,6 +1227,7 @@ class Workspace {
             });
         }
 
+        // ---- Tabs ----
         var tabs = document.querySelectorAll('.ws-tab');
         tabs.forEach(function(tab) {
             tab.addEventListener('click', function() {
@@ -729,25 +1237,14 @@ class Workspace {
                 var panel = document.getElementById('panel-' + this.dataset.tab);
                 if (panel) {
                     panel.classList.add('active');
-                    if (this.dataset.tab === 'draw') {
+                    if (this.dataset.tab === 'board') {
                         setTimeout(function() { self.resizeCanvas(); }, 100);
                     }
                 }
             });
         });
 
-        var docTextarea = document.getElementById('doc-textarea');
-        if (docTextarea) {
-            docTextarea.addEventListener('input', function() {
-                clearTimeout(self._docTimer);
-                var status = document.getElementById('doc-status');
-                if (status) status.textContent = 'Editando...';
-                self._docTimer = setTimeout(function() {
-                    self.sendDocUpdate();
-                }, 400);
-            });
-        }
-
+        // ---- Title ----
         var titleInput = document.getElementById('doc-title-input');
         if (titleInput) {
             titleInput.addEventListener('blur', function() {
@@ -760,6 +1257,53 @@ class Workspace {
             });
         }
 
+        // ---- Tool buttons ----
+        var toolDraw = document.getElementById('tool-draw');
+        if (toolDraw) toolDraw.addEventListener('click', function() { self.setActiveTool('draw'); });
+
+        var toolText = document.getElementById('tool-text');
+        if (toolText) toolText.addEventListener('click', function() { self.setActiveTool('text'); });
+
+        var toolImage = document.getElementById('tool-image');
+        if (toolImage) toolImage.addEventListener('click', function() { self.setActiveTool('image'); });
+
+        // Draw color & size
+        var colorInput = document.getElementById('draw-color');
+        if (colorInput) {
+            colorInput.addEventListener('input', function() { self._drawColor = this.value; });
+        }
+
+        var sizeInput = document.getElementById('draw-size');
+        if (sizeInput) {
+            sizeInput.addEventListener('input', function() {
+                self._drawSize = parseInt(this.value);
+                var label = document.getElementById('draw-size-label');
+                if (label) label.textContent = self._drawSize + 'px';
+            });
+        }
+
+        // Text font size
+        var fontSizeInput = document.getElementById('text-font-size');
+        if (fontSizeInput) {
+            fontSizeInput.addEventListener('input', function() {
+                self._textFontSize = parseInt(this.value);
+                var label = document.getElementById('text-size-label');
+                if (label) label.textContent = self._textFontSize + 'px';
+            });
+        }
+
+        // Grid size
+        var gridSizeInput = document.getElementById('grid-size-input');
+        if (gridSizeInput) {
+            gridSizeInput.addEventListener('input', function() {
+                self.gridSize = parseInt(this.value);
+                var label = document.getElementById('grid-size-label');
+                if (label) label.textContent = self.gridSize + 'px';
+                self.redrawCanvas();
+            });
+        }
+
+        // Image upload
         var imageUpload = document.getElementById('image-upload');
         if (imageUpload) {
             imageUpload.addEventListener('change', function(e) {
@@ -771,14 +1315,52 @@ class Workspace {
                 }
                 var reader = new FileReader();
                 reader.onload = function(ev) {
-                    self.send('doc-image', { data: ev.target.result, name: file.name });
+                    var px = self._pendingImagePos ? self._pendingImagePos.x - self.panX : 100;
+                    var py = self._pendingImagePos ? self._pendingImagePos.y - self.panY : 100;
+                    self.createBlock('image', px, py, { data: ev.target.result, name: file.name });
+                    self._pendingImagePos = null;
                 };
                 reader.readAsDataURL(file);
                 this.value = '';
-                self.toast('Imagem enviada!');
+                self.toast('Imagem adicionada ao board!');
             });
         }
 
+        // Undo / Clear
+        var drawUndo = document.getElementById('draw-undo');
+        if (drawUndo) {
+            drawUndo.addEventListener('click', function() {
+                self.send('draw-undo');
+            });
+        }
+
+        var boardClear = document.getElementById('board-clear');
+        if (boardClear) {
+            boardClear.addEventListener('click', function() {
+                self.showConfirm('Limpar todo o board (desenhos e blocos)?', function() {
+                    self.send('draw-clear');
+                    // Clear all blocks
+                    for (var i = self.blocks.length - 1; i >= 0; i--) {
+                        self.send('block-delete', { id: self.blocks[i].id });
+                    }
+                    self.blocks = [];
+                    self.renderAllBlocks();
+                    self.updateBoardHint();
+                });
+            });
+        }
+
+        // Zoom buttons
+        var zoomInBtn = document.getElementById('draw-zoom-in');
+        if (zoomInBtn) zoomInBtn.addEventListener('click', function() { self.zoomIn(); });
+
+        var zoomOutBtn = document.getElementById('draw-zoom-out');
+        if (zoomOutBtn) zoomOutBtn.addEventListener('click', function() { self.zoomOut(); });
+
+        var zoomResetBtn = document.getElementById('draw-zoom-reset');
+        if (zoomResetBtn) zoomResetBtn.addEventListener('click', function() { self.resetZoom(); });
+
+        // ---- Chat ----
         var btnSend = document.getElementById('btn-send');
         if (btnSend) {
             btnSend.addEventListener('click', function() {
@@ -804,67 +1386,49 @@ class Workspace {
             });
         }
 
-        var drawUndo = document.getElementById('draw-undo');
-        if (drawUndo) {
-            drawUndo.addEventListener('click', function() {
-                self.send('draw-undo');
-            });
-        }
+        // ---- Keyboard shortcuts ----
+        document.addEventListener('keydown', function(e) {
+            // Ignore if typing in input/textarea/contenteditable
+            var tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            var isEditable = tag === 'input' || tag === 'textarea' || (document.activeElement && document.activeElement.contentEditable === 'true');
+            if (isEditable) return;
 
-        var drawClear = document.getElementById('draw-clear');
-        if (drawClear) {
-            drawClear.addEventListener('click', function() {
-                self.showConfirm('Limpar todo o desenho?', function() {
-                    self.send('draw-clear');
-                });
-            });
-        }
+            switch (e.key.toLowerCase()) {
+                case 'd':
+                    self.setActiveTool('draw');
+                    break;
+                case 't':
+                    self.setActiveTool('text');
+                    break;
+                case 'i':
+                    self.setActiveTool('image');
+                    break;
+                case 'delete':
+                case 'backspace':
+                    if (self._selectedBlockId) {
+                        e.preventDefault();
+                        self.deleteBlock(self._selectedBlockId);
+                    }
+                    break;
+                case 'escape':
+                    self.selectBlock(null);
+                    break;
+                case '0':
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        self.resetZoom();
+                    }
+                    break;
+            }
+        });
 
-        // Zoom buttons
-        var zoomInBtn = document.getElementById('draw-zoom-in');
-        if (zoomInBtn) {
-            zoomInBtn.addEventListener('click', function() {
-                self.zoomIn();
-            });
-        }
-
-        var zoomOutBtn = document.getElementById('draw-zoom-out');
-        if (zoomOutBtn) {
-            zoomOutBtn.addEventListener('click', function() {
-                self.zoomOut();
-            });
-        }
-
-        var zoomResetBtn = document.getElementById('draw-zoom-reset');
-        if (zoomResetBtn) {
-            zoomResetBtn.addEventListener('click', function() {
-                self.resetZoom();
-            });
-        }
-
-        // Canvas wheel zoom
-        var canvas = document.getElementById('draw-canvas');
-        if (canvas) {
-            canvas.addEventListener('wheel', function(e) {
-                if (!e.ctrlKey && !e.metaKey) return; // Only zoom with Ctrl+Scroll or Cmd+Scroll
-                e.preventDefault();
-                var rect = canvas.getBoundingClientRect();
-                var cx = e.clientX - rect.left;
-                var cy = e.clientY - rect.top;
-                var factor = e.deltaY > 0 ? 0.9 : 1.1;
-                self.setZoom(self._zoom * factor, cx, cy);
-            }, { passive: false });
-        }
-
+        // Lightbox events
         var lb = document.getElementById('lightbox');
-
         var lbClose = document.getElementById('lightbox-close');
         var lbImg = document.getElementById('lightbox-img');
 
         if (lb && lbClose) {
-            lbClose.addEventListener('click', function() {
-                lb.style.display = 'none';
-            });
+            lbClose.addEventListener('click', function() { lb.style.display = 'none'; });
             lb.addEventListener('click', function(e) {
                 if (e.target === lb) lb.style.display = 'none';
             });
@@ -892,11 +1456,8 @@ class Workspace {
                 this.style.setProperty('--lb-ox', xPct + '%');
                 this.style.setProperty('--lb-oy', yPct + '%');
 
-                if (newScale !== 1) {
-                    this.classList.add('zoomed');
-                } else {
-                    this.classList.remove('zoomed');
-                }
+                if (newScale !== 1) { this.classList.add('zoomed'); }
+                else { this.classList.remove('zoomed'); }
             }, { passive: false });
 
             lbImg.addEventListener('dblclick', function() {
@@ -907,6 +1468,7 @@ class Workspace {
             });
         }
 
+        // Name input persistence
         var nameInput = document.getElementById('user-name-input');
         if (nameInput) {
             var savedName = localStorage.getItem('blocks-chat-username');
@@ -916,12 +1478,15 @@ class Workspace {
             });
         }
 
-        setTimeout(function() { self.initCanvas(); }, 300);
+        // Init canvas (deferred to ensure DOM is ready)
+        setTimeout(function() { self.initCanvas(); }, 200);
 
         window.addEventListener('resize', function() {
             self.resizeCanvas();
         });
     }
+
+    // ======================== ROOM JOIN / LEAVE ========================
 
     joinRoomWithCode(code) {
         if (!code || code.length < 2) {
@@ -955,12 +1520,8 @@ class Workspace {
         var self = this;
         fetch('/api/workspaces')
             .then(function(r) { return r.json(); })
-            .then(function(list) {
-                self.renderSavedWorkspaces(list);
-            })
-            .catch(function() {
-                // Silently fail — workspaces list is best-effort
-            });
+            .then(function(list) { self.renderSavedWorkspaces(list); })
+            .catch(function() {});
     }
 
     saveCurrentWorkspace() {
@@ -1011,7 +1572,6 @@ class Workspace {
             return;
         }
 
-        // Sort by most recent first
         list.sort(function(a, b) {
             return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
         });
@@ -1040,7 +1600,6 @@ class Workspace {
         }
         container.innerHTML = html;
 
-        // Bind events
         container.querySelectorAll('.ws-saved-btn-join').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();

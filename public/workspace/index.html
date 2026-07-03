@@ -34,7 +34,7 @@
             <div class="ws-lobby-box">
                 <div class="ws-lobby-icon">🎨</div>
                 <h1 class="ws-lobby-title">Workspace Colaborativo</h1>
-                <p class="ws-lobby-desc">Documento, desenho e chat em tempo real.<br>Crie ou entre com um código de 6 caracteres.</p>
+                <p class="ws-lobby-desc">Board modular com texto, desenho e chat em tempo real.<br>Crie ou entre com um código de 6 caracteres.</p>
                 <div class="ws-lobby-section">
                     <label class="ws-lobby-label" for="room-code-input">Entrar em uma sala</label>
                     <div class="ws-lobby-input-row">
@@ -88,47 +88,67 @@
 
         <div class="ws-body">
             <div class="ws-tabs">
-                <button class="ws-tab active" data-tab="doc">📝 Documento</button>
-                <button class="ws-tab" data-tab="draw">✏️ Desenho</button>
+                <button class="ws-tab active" data-tab="board">📋 Board</button>
                 <button class="ws-tab" data-tab="chat">💬 Chat</button>
             </div>
 
             <div class="ws-content">
-                <!-- DOCUMENTO -->
-                <div class="ws-panel active" id="panel-doc">
-                    <textarea id="doc-textarea" class="ws-doc-textarea" placeholder="Escreva aqui..."></textarea>
-                    <div class="ws-doc-images" id="doc-images"></div>
-                    <div class="ws-doc-actions">
-                        <label class="btn btn-sm btn-upload">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            Adicionar Imagem
+                <!-- BOARD UNIFICADO -->
+                <div class="ws-panel active" id="panel-board">
+                    <!-- Toolbar -->
+                    <div class="ws-board-toolbar">
+                        <div class="ws-tool-group">
+                            <button id="tool-draw" class="ws-tool-btn active" title="Desenhar (D)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                            </button>
+                            <button id="tool-text" class="ws-tool-btn" title="Bloco de texto (T)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+                            </button>
+                            <button id="tool-image" class="ws-tool-btn" title="Adicionar imagem (I)">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            </button>
                             <input type="file" id="image-upload" accept="image/*" hidden>
-                        </label>
-                        <span class="ws-doc-status" id="doc-status">Sincronizado ✓</span>
-                    </div>
-                </div>
-
-                <!-- DESENHO -->
-                <div class="ws-panel" id="panel-draw">
-                    <div class="ws-draw-toolbar">
-                        <button id="draw-undo" class="btn btn-sm">↩ Desfazer</button>
-                        <button id="draw-clear" class="btn btn-sm">🗑 Limpar</button>
-                        <div class="ws-draw-sep"></div>
-                        <label class="ws-draw-label">Cor</label>
-                        <input type="color" id="draw-color" class="ws-draw-color" value="#000000">
-                        <label class="ws-draw-label">Tam</label>
-                        <input type="range" id="draw-size" class="ws-draw-range" min="1" max="20" value="3">
-                        <span id="draw-size-label" class="ws-draw-size-label">3px</span>
-                        <div class="ws-draw-sep"></div>
+                        </div>
+                        <div class="ws-tool-sep"></div>
+                        <div class="ws-tool-group" id="draw-tools">
+                            <label class="ws-tool-label">Cor</label>
+                            <input type="color" id="draw-color" class="ws-draw-color" value="#000000">
+                            <label class="ws-tool-label">Tam</label>
+                            <input type="range" id="draw-size" class="ws-draw-range" min="1" max="20" value="3">
+                            <span id="draw-size-label" class="ws-tool-size-label">3px</span>
+                        </div>
+                        <div class="ws-tool-sep"></div>
+                        <div class="ws-tool-group" id="text-tools" style="display:none">
+                            <label class="ws-tool-label">Fonte</label>
+                            <input type="range" id="text-font-size" class="ws-draw-range" min="12" max="48" value="16">
+                            <span id="text-size-label" class="ws-tool-size-label">16px</span>
+                        </div>
+                        <div class="ws-tool-sep" id="text-tools-sep" style="display:none"></div>
+                        <div class="ws-tool-group">
+                            <button id="draw-undo" class="btn btn-sm">↩ Desfazer</button>
+                            <button id="board-clear" class="btn btn-sm">🗑 Limpar</button>
+                        </div>
+                        <div class="ws-tool-spacer"></div>
                         <div class="ws-zoom-group">
+                            <span class="ws-tool-label">Grid</span>
+                            <input type="range" id="grid-size-input" class="ws-draw-range" min="10" max="80" value="20" step="10">
+                            <span id="grid-size-label" class="ws-tool-size-label">20px</span>
+                            <div class="ws-tool-sep" style="margin:0 4px"></div>
                             <button id="draw-zoom-out" class="btn btn-sm ws-zoom-btn" title="Zoom out">−</button>
                             <span id="draw-zoom-label" class="ws-zoom-label">100%</span>
                             <button id="draw-zoom-in" class="btn btn-sm ws-zoom-btn" title="Zoom in">+</button>
                             <button id="draw-zoom-reset" class="btn btn-sm ws-zoom-reset" title="Redefinir zoom">⟲</button>
                         </div>
                     </div>
-                    <div class="ws-canvas-wrap">
-                        <canvas id="draw-canvas" class="ws-canvas"></canvas>
+
+                    <!-- Board area: canvas + blocks overlay -->
+                    <div class="ws-board-wrap" id="board-wrap">
+                        <canvas id="board-canvas" class="ws-board-canvas"></canvas>
+                        <div class="ws-board-blocks" id="board-blocks"></div>
+                        <div class="ws-board-hint" id="board-hint">
+                            <div class="ws-board-hint-icon">🖱️</div>
+                            <div><strong>Dica:</strong> Clique para desenhar · Pressione <kbd>T</kbd> e clique para criar bloco de texto · Arraste blocos · Segure <kbd>Ctrl</kbd>+scroll para zoom · Segure <kbd>Ctrl</kbd>+arraste para mover</div>
+                        </div>
                     </div>
                 </div>
 
@@ -151,7 +171,7 @@
         <div class="ws-modal-overlay"></div>
         <div class="ws-modal-box">
             <div class="ws-modal-icon" id="confirm-icon"></div>
-            <p class="ws-modal-text" id="confirm-text">Remover esta imagem?</p>
+            <p class="ws-modal-text" id="confirm-text">Remover este bloco?</p>
             <div class="ws-modal-actions">
                 <button id="confirm-cancel" class="btn btn-sm">Cancelar</button>
                 <button id="confirm-ok" class="btn btn-sm btn-danger">Remover</button>

@@ -1,6 +1,6 @@
 // ============================================
 // server.js — Servidor HTTP + WebSocket
-// Workspace Colaborativo (documento + desenho + chat)
+// Workspace Colaborativo (board modular + desenho + chat)
 // ============================================
 
 import http from 'node:http';
@@ -177,19 +177,20 @@ const server = http.createServer((req, res) => {
 
 const wss = new WebSocketServer({ server });
 
-// rooms: Map<roomCode, { clients: Set<ws>, doc: {title, content}, strokes: Array, messages: Array, images: Array }>
+// rooms: Map<roomCode, { clients: Set<ws>, doc: {title}, blocks: Array, strokes: Array, messages: Array }>
 const rooms = new Map();
 const MAX_HISTORY = 200;
+const MAX_BLOCKS = 500;
 
 function getRoom(code, createIfMissing = true) {
     let room = rooms.get(code);
     if (!room && createIfMissing) {
         room = {
             clients: new Set(),
-            doc: { title: 'Sem título', content: '' },
+            doc: { title: 'Sem título' },
+            blocks: [],
             strokes: [],
-            messages: [],
-            images: []
+            messages: []
         };
         rooms.set(code, room);
     }
@@ -237,9 +238,9 @@ wss.on('connection', (ws) => {
                         type: 'room-created',
                         code,
                         doc: room.doc,
+                        blocks: room.blocks,
                         strokes: room.strokes,
-                        messages: room.messages,
-                        images: room.images
+                        messages: room.messages
                     });
                     console.log(`🏠 Sala criada: ${code}`);
                     break;
@@ -273,24 +274,15 @@ wss.on('connection', (ws) => {
                         type: 'room-joined',
                         code,
                         doc: room.doc,
+                        blocks: room.blocks,
                         strokes: room.strokes,
-                        messages: room.messages,
-                        images: room.images
+                        messages: room.messages
                     });
                     console.log(`🚪 Entrou: ${code} (${room.clients.size})`);
                     break;
                 }
 
-                // Documento
-                case 'doc-update': {
-                    if (!currentRoom) return;
-                    const room = rooms.get(currentRoom);
-                    if (!room) return;
-                    room.doc.content = data.content || '';
-                    broadcast(currentRoom, { type: 'doc-update', content: room.doc.content });
-                    break;
-                }
-
+                // Doc title
                 case 'doc-title': {
                     if (!currentRoom) return;
                     const room = rooms.get(currentRoom);
@@ -300,25 +292,61 @@ wss.on('connection', (ws) => {
                     break;
                 }
 
-                case 'doc-image': {
+                // Blocks (modular text/image blocks)
+                case 'block-create': {
                     if (!currentRoom) return;
                     const room = rooms.get(currentRoom);
                     if (!room) return;
-                    const img = { id: Date.now() + '', data: data.data, name: data.name || 'imagem' };
-                    room.images.push(img);
-                    if (room.images.length > 50) room.images = room.images.slice(-50);
-                    broadcast(currentRoom, { type: 'doc-image', image: img });
+                    const block = data.block;
+                    if (!block || !block.id) return;
+                    room.blocks.push(block);
+                    if (room.blocks.length > MAX_BLOCKS) room.blocks = room.blocks.slice(-MAX_BLOCKS);
+                    broadcast(currentRoom, { type: 'block-create', block });
                     break;
                 }
 
-                case 'remove-image': {
+                case 'block-update': {
                     if (!currentRoom) return;
                     const room = rooms.get(currentRoom);
                     if (!room) return;
-                    const id = data.id;
-                    room.images = room.images.filter(img => img.id !== id);
-                    // Broadcast pra todo mundo remover a imagem da tela
-                    broadcast(currentRoom, { type: 'remove-image', id });
+                    const idx = room.blocks.findIndex(b => b.id === data.id);
+                    if (idx >= 0) {
+                        if (data.content !== undefined) room.blocks[idx].content = data.content;
+                        if (data.width !== undefined) room.blocks[idx].width = data.width;
+                        if (data.height !== undefined) room.blocks[idx].height = data.height;
+                    }
+                    broadcast(currentRoom, { type: 'block-update', id: data.id, content: data.content, width: data.width, height: data.height });
+                    break;
+                }
+
+                case 'block-move': {
+                    if (!currentRoom) return;
+                    const room = rooms.get(currentRoom);
+                    if (!room) return;
+                    const idx2 = room.blocks.findIndex(b => b.id === data.id);
+                    if (idx2 >= 0) {
+                        if (data.x !== undefined) room.blocks[idx2].x = data.x;
+                        if (data.y !== undefined) room.blocks[idx2].y = data.y;
+                    }
+                    broadcast(currentRoom, { type: 'block-move', id: data.id, x: data.x, y: data.y });
+                    break;
+                }
+
+                case 'block-delete': {
+                    if (!currentRoom) return;
+                    const room = rooms.get(currentRoom);
+                    if (!room) return;
+                    room.blocks = room.blocks.filter(b => b.id !== data.id);
+                    broadcast(currentRoom, { type: 'block-delete', id: data.id });
+                    break;
+                }
+
+                case 'blocks-sync': {
+                    if (!currentRoom) return;
+                    const room = rooms.get(currentRoom);
+                    if (!room) return;
+                    room.blocks = data.blocks || [];
+                    broadcast(currentRoom, { type: 'blocks-sync', blocks: room.blocks });
                     break;
                 }
 
