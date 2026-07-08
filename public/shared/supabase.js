@@ -18,7 +18,7 @@ const SupabaseClient = (() => {
             auth: {
                 persistSession: true,
                 autoRefreshToken: true,
-                storageKey: 'blocks_of_note_supabase_auth',
+                storageKey: 'commentarium_supabase_auth',
             },
         });
         return _client;

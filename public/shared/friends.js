@@ -6,8 +6,8 @@
 const Friends = (() => {
     'use strict';
 
-    const STORAGE_KEY = 'blocks_of_note_friends';
-    const REQUESTS_KEY = 'blocks_of_note_friend_requests';
+    const STORAGE_KEY = 'commentarium_friends';
+    const REQUESTS_KEY = 'commentarium_friend_requests';
 
     let _friends = [];
     let _requests = [];

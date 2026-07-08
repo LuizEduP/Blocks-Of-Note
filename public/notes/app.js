@@ -248,7 +248,7 @@ const NotesApp = (() => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `blocks-of-note-export-${Date.now()}.json`;
+            a.download = `commentarium-export-${Date.now()}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

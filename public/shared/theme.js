@@ -4,7 +4,7 @@
    ============================================ */
 
 window.Theme = {
-    STORAGE_KEY: 'blocks-of-note-theme',
+    STORAGE_KEY: 'commentarium-theme',
 
     /** Retorna o tema atual armazenado ou 'light' */
     getCurrent() {

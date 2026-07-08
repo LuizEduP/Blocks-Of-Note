@@ -4,11 +4,11 @@
   <img src="https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square" alt="PRs Welcome">
 </p>
 
-# Blocks of Note
+# Commentarium
 
 > **Anotações inteligentes, tarefas organizadas e colaboração em tempo real — tudo em um só lugar.**
 
-**Blocks of Note** é uma aplicação web full-stack de produtividade pessoal e colaboração. Combina notas, gerenciador de tarefas, workspace colaborativo com desenho livre e chat em tempo real — com autenticação Google, sincronização na nuvem via Supabase e design moderno com tema claro/escuro.
+**Commentarium** é uma aplicação web full-stack de produtividade pessoal e colaboração. Combina notas, gerenciador de tarefas, workspace colaborativo com desenho livre e chat em tempo real — com autenticação Google, sincronização na nuvem via Supabase e design moderno com tema claro/escuro.
 
 ---
 
@@ -86,8 +86,8 @@
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/LuizEduP/Blocks-Of-Note.git
-cd Blocks-Of-Note
+git clone https://github.com/LuizEduP/Commentarium.git
+cd Commentarium
 ```
 
 ### 2. Configure o Supabase
@@ -128,7 +128,7 @@ Acesse **http://localhost:3000** 🚀
 ## 📁 Estrutura do Projeto
 
 ```
-Blocks-Of-Note/
+Commentarium/
 ├── server.js                         # Servidor HTTP + WebSocket
 ├── package.json
 ├── public/                           # Frontend estático

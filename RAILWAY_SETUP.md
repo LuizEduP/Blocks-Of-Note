@@ -5,7 +5,7 @@ Commit `46dde13` já está no GitHub.
 
 ## 2. Conectar no Railway
 - Vá em https://railway.app
-- Crie um novo projeto a partir do repositório `LuizEduP/Blocks-Of-Note`
+- Crie um novo projeto a partir do repositório `LuizEduP/Commentarium`
 - Escolha "Node.js" como template (ou deixe automático)
 
 ## 3. Variáveis de ambiente

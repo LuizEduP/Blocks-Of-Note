@@ -1,4 +1,4 @@
-# Roadmap — Blocks-Of-Note
+# Roadmap — Commentarium
 
 > **Baseado em:** [`docs/specs.md`](specs.md)
 > **Propósito:** Plano de evolução do projeto em fases incrementais, organizadas por prioridade e dependência técnica.
@@ -173,4 +173,4 @@
 
 > **Documento gerado em:** 05/06/2026
 > **Baseado em:** [`docs/specs.md`](specs.md)
-> **Propósito:** Roteiro de evolução do Blocks-Of-Note após simplificação da interface.
+> **Propósito:** Roteiro de evolução do Commentarium após simplificação da interface.

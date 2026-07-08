@@ -1,6 +1,6 @@
 /* ============================================
    playwright.config.js — Playwright E2E Config
-   Blocks-Of-Note
+   Commentarium
    Uso: npx playwright test
    ============================================ */
 

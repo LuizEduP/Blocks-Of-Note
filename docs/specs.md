@@ -1,4 +1,4 @@
-# Especificações Técnicas — Blocks-Of-Note
+# Especificações Técnicas — Commentarium
 
 > **Versão:** 3.0  
 > **Data:** 05/06/2026  
@@ -53,7 +53,7 @@
 ## 2. Estrutura de Diretórios
 
 ```
-Blocks-Of-Note/
+Commentarium/
 │
 ├── index.html                 # Homepage — cards de navegação
 ├── homepage.js                # Animação de entrada dos cards
@@ -529,7 +529,7 @@ Os seguintes documentos ainda referenciam a arquitetura antiga com cubos 3D:
 
 | Arquivo | Problema |
 |---------|----------|
-| [`e2e/notes.spec.js`](../e2e/notes.spec.js) | Referencia `#cube-main-note`, `#notes-orbit`, `.mini-note-scene` (não existem mais). Título esperado `/Minhas Notas/` mas atual é "Notas - Blocks of Note" |
+| [`e2e/notes.spec.js`](../e2e/notes.spec.js) | Referencia `#cube-main-note`, `#notes-orbit`, `.mini-note-scene` (não existem mais). Título esperado `/Minhas Notas/` mas atual é "Notas - Commentarium" |
 | [`e2e/tasks.spec.js`](../e2e/tasks.spec.js) | Referencia `#cube` (não existe mais), `#taskboard-stats` (deveria ser `#board-stats`), `.btn-delete` (deveria ser `.btn-danger`), `#taskboard-filter` (deveria ser `#board-filter`), `#taskboard-search` (deveria ser `#board-search`) |
 
 ---
@@ -834,4 +834,4 @@ Os seguintes documentos ainda referenciam a arquitetura antiga com cubos 3D:
 
 > **Documento gerado em:** 05/06/2026
 > **Versão:** 3.0
-> **Propósito:** Documentação completa e atualizada do Blocks-Of-Note após simplificação da interface.
+> **Propósito:** Documentação completa e atualizada do Commentarium após simplificação da interface.

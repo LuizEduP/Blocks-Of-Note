@@ -1,4 +1,4 @@
-# Resumo — Blocks of Note
+# Resumo — Commentarium
 
 > **Data:** 03/07/2026
 > **Propósito:** Documento síntese que explica como o sistema funciona, o que faz, como faz e quais ferramentas utiliza.
@@ -6,9 +6,9 @@
 
 ---
 
-## 1. O que é o Blocks of Note?
+## 1. O que é o Commentarium?
 
-O **Blocks of Note** é uma aplicação web full-stack de **produtividade e colaboração** que combina:
+O **Commentarium** é uma aplicação web full-stack de **produtividade e colaboração** que combina:
 
 - **Anotações** com editor de texto completo
 - **Gerenciamento de tarefas** com níveis de urgência e quadro kanban
@@ -117,10 +117,10 @@ O sistema adota uma arquitetura de **dupla camada de persistência**:
 1. **localStorage** (sempre disponível, imediato):
    - `my_3d_notes` — Notas do usuário
    - `my_3d_tasks` — Tarefas do usuário
-   - `blocks_of_note_user_profile` — Perfil do usuário logado
-   - `blocks_of_note_friends` — Lista de amigos
+   - `commentarium_user_profile` — Perfil do usuário logado
+   - `commentarium_friends` — Lista de amigos
    - `blocks_chat_messages` — Histórico do chat local
-   - `blocks-of-note-theme` — Preferência de tema
+   - `commentarium-theme` — Preferência de tema
    - `blocks-chat-username` — Nome do usuário no workspace
 
 2. **Supabase PostgreSQL** (nuvem, sincronizado):
@@ -234,7 +234,7 @@ O workspace é o módulo mais complexo do sistema:
 ### 4.4 Estrutura de diretórios
 
 ```
-Blocks-Of-Note/
+Commentarium/
 ├── server.js                     # Servidor HTTP + WebSocket (425 linhas)
 ├── package.json                  # Dependências e scripts
 ├── .env                          # Configuração Supabase
@@ -328,4 +328,4 @@ Blocks-Of-Note/
 ---
 
 > **Documento gerado em:** 03/07/2026
-> **Propósito:** Fornecer uma visão completa e integrada do sistema Blocks of Note para referência rápida.
+> **Propósito:** Fornecer uma visão completa e integrada do sistema Commentarium para referência rápida.

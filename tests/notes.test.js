@@ -280,10 +280,10 @@ describe('Notes Data Layer', () => {
 
             const a = document.createElement('a');
             a.href = url;
-            a.download = `blocks-of-note-export-${Date.now()}.json`;
+            a.download = `commentarium-export-${Date.now()}.json`;
 
             expect(a.href).toBe(mockUrl);
-            expect(a.download).toMatch(/^blocks-of-note-export-\d+\.json$/);
+            expect(a.download).toMatch(/^commentarium-export-\d+\.json$/);
         });
 
         it('deve exibir toast de sucesso com quantidade de notas exportadas', () => {

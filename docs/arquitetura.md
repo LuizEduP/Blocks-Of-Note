@@ -1,4 +1,4 @@
-# Arquitetura — Blocks-Of-Note
+# Arquitetura — Commentarium
 
 > **Baseado em:** [`docs/specs.md`](specs.md)
 > **Propósito:** Estabelecer decisões arquiteturais, convenções e a base sólida do projeto após a simplificação da interface.
@@ -67,7 +67,7 @@ ARIA, navegação por teclado, `prefers-reduced-motion` e `:focus-visible` são 
 ## 📁 Estrutura de Diretórios
 
 ```
-Blocks-Of-Note/
+Commentarium/
 │
 ├── index.html                 # Homepage — cards de navegação
 ├── homepage.js                # Lógica da homepage (IIFE)
@@ -439,4 +439,4 @@ sequenceDiagram
 
 > **Documento gerado em:** 05/06/2026
 > **Baseado em:** [`docs/specs.md`](specs.md)
-> **Propósito:** Definir a base arquitetural do Blocks-Of-Note após simplificação da interface.
+> **Propósito:** Definir a base arquitetural do Commentarium após simplificação da interface.

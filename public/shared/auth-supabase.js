@@ -7,11 +7,11 @@ const Auth = (() => {
     'use strict';
 
     // IMPORTANTE: usa chave DIFERENTE da usada pelo Supabase SDK.
-    // O Supabase SDK salva a sessão completa em 'blocks_of_note_supabase_auth'.
-    // Nós salvamos APENAS o perfil do usuário em 'blocks_of_note_user_profile'
+    // O Supabase SDK salva a sessão completa em 'commentarium_supabase_auth'.
+    // Nós salvamos APENAS o perfil do usuário em 'commentarium_user_profile'
     // para evitar que o SDK sobrescreva nossos dados.
-    const PROFILE_KEY = 'blocks_of_note_user_profile';
-    const SUPABASE_SESSION_KEY = 'blocks_of_note_supabase_auth';
+    const PROFILE_KEY = 'commentarium_user_profile';
+    const SUPABASE_SESSION_KEY = 'commentarium_supabase_auth';
     let _initialized = false;
     let _user = null;
     let _onChangeCallbacks = [];
@@ -105,7 +105,7 @@ const Auth = (() => {
         }
 
         // Pega a URL base atual (funciona tanto em localhost quanto no Railway)
-        // Ex: "https://blocks-of-note-production.up.railway.app" ou "http://localhost:3000"
+        // Ex: "https://commentarium-production.up.railway.app" ou "http://localhost:3000"
         const baseUrl = window.location.origin;
 
         try {

@@ -7,17 +7,43 @@
    HERO
    ============================================ */
 
+/* --- CUBE MESSAGE --- */
+.cube-message {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    font-size: 0.68rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.cube-message.visible {
+    opacity: 1;
+}
+
+.cube-message-sep {
+    color: var(--color-border-strong);
+}
+
 .hero {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-left: 0;
     gap: 60px;
-    padding: 120px 40px 80px;
+    padding: 80px 20px 80px 60px;
     max-width: 1200px;
-    margin: 0 auto;
+    margin: 0;
+    justify-content: space-between;
     position: relative;
-    overflow: hidden;
     opacity: 0;
     transform: translateY(20px);
     transition: opacity 0.8s ease, transform 0.8s ease;
@@ -48,12 +74,18 @@
 
 .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(3rem, 8vw, 5rem);
+    font-size: clamp(5rem, 12vw, 9rem);
     font-weight: 800;
     letter-spacing: -0.04em;
     line-height: 0.95;
     margin-bottom: 20px;
     color: var(--color-text);
+}
+
+.hero-title .font-journalistic {
+    font-family: 'Journalistic', cursive;
+    font-weight: normal;
+    font-size: 1.4em;
 }
 
 .hero-subtitle {
@@ -111,6 +143,7 @@
 /* --- Hero Visual (blocks decorativos) --- */
 .hero-visual {
     flex: 0 0 300px;
+    margin-left: auto;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -363,4 +396,177 @@
         text-align: center;
         gap: 8px;
     }
+}
+
+/* ============================================
+   CHANGELOG BAR — lateral direita
+   ============================================ */
+
+.page-wrap {
+    position: relative;
+    min-height: 100vh;
+}
+
+.changelog-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--color-text-muted);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 60px 6px;
+    border-left: 1px solid var(--color-border);
+    z-index: 98;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* ============================================
+   HERO CUBE 3D — Three.js canvas container
+   ============================================ */
+
+.hero-cube {
+    flex: 0 0 480px;
+    width: 480px;
+    height: 480px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateX(300px);
+}
+
+.hero-cube canvas {
+    display: block;
+}
+
+@media (max-width: 900px) {
+    .hero-cube {
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 350px;
+        height: 350px;
+        margin: 0 auto;
+    }
+}
+
+/* ============================================
+   CHANGELOG MODAL
+   ============================================ */
+
+.changelog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0,0,0,0.15);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.changelog-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.changelog-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    z-index: 1000;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-xl);
+    width: 520px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.changelog-modal.open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.changelog-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 12px;
+}
+
+.changelog-modal-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.changelog-modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.changelog-modal-close:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.changelog-modal-body {
+    padding: 4px 24px 24px;
+}
+
+.changelog-date {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.changelog-modal-body ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.changelog-modal-body li {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    padding-left: 16px;
+    position: relative;
+}
+
+.changelog-modal-body li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--color-accent);
+    font-weight: 700;
 }

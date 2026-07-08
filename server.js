@@ -423,5 +423,5 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🚀 Blocks of Note rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Commentarium rodando em http://localhost:${PORT}`);
 });

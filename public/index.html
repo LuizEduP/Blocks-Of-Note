@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blocks of Note — Anotações Inteligentes</title>
+    <title>Commentarium — Anotações Inteligentes</title>
     <meta name="description" content="Aplicativo de anotações com workspace colaborativo, task board e notas inteligentes.">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Blocks of Note">
+    <meta property="og:title" content="Commentarium">
     <meta property="og:description" content="Anotações inteligentes com workspace colaborativo">
     <meta property="og:type" content="website">
 
@@ -21,6 +21,10 @@
     <link rel="stylesheet" href="shared/toast.css">
     <link rel="stylesheet" href="shared/auth.css">
     <link rel="stylesheet" href="style.css">
+
+    <!-- Three.js + GSAP (hero 3D cube) -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <!-- Supabase SDK -->
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -41,18 +45,42 @@
     <script defer src="homepage.js"></script>
 </head>
 <body>
+    <div class="page-wrap">
+    <!-- CHANGELOG SIDEBAR -->
+    <div class="changelog-bar font-changelog" id="changelog-bar">Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@nG3 lOg$ - Ch@</div>
+
+    <!-- CHANGELOG MODAL -->
+    <div class="changelog-overlay" id="changelog-overlay"></div>
+    <div class="changelog-modal" id="changelog-modal">
+        <div class="changelog-modal-header">
+            <h2>Ch@nG3 lOg$</h2>
+            <button class="changelog-modal-close" id="changelog-close">&times;</button>
+        </div>
+        <div class="changelog-modal-body">
+            <p class="changelog-date">07/07/2026</p>
+            <ul>
+                <li>Cubo 3D interativo (Three.js) no hero — wireframe com grid de cubinhos que reagem ao mouse</li>
+                <li>Efeito hover: cubinhos aparecem em cinza escuro e somem com fade-out via GSAP</li>
+                <li>Fundo do cubo reage à troca de tema claro/escuro (MutationObserver)</li>
+                <li>Bordas do cubo mudam de cor no tema escuro (preto → azul #6688cc)</li>
+                <li>Tema escuro refeito com paleta Abyss Theme do VSCode</li>
+                <li>Paleta de cores unificada: azul #0063a5 como accent nos dois temas</li>
+                <li>Logo da navbar trocado: "m" cursivo (Journalistic) que revela "Commentariu" no hover</li>
+                <li>Logo aplicado em todas as 6 páginas do projeto</li>
+                <li>Barra Ch@nG3 lOg$ vertical à direita com TheBoldFont</li>
+                <li>Mensagem de versão abaixo do cubo ao pairar por 5 segundos</li>
+                <li>Ajustes de alinhamento, espaçamento e responsividade no hero</li>
+            </ul>
+        </div>
+    </div>
+
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar" role="navigation" aria-label="Navegação principal">
         <div class="navbar-inner">
             <div class="navbar-left">
                 <a href="/" class="navbar-logo" aria-label="Ir para início">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                    </svg>
-                    <span class="navbar-wordmark">Blocks of Note</span>
+                    <span class="navbar-wordmark">Commentariu</span>
+                    <span class="navbar-icon font-journalistic">m</span>
                 </a>
                 <div class="navbar-links">
                     <a href="/" class="nav-link active">Início</a>
@@ -68,12 +96,14 @@
         </div>
     </nav>
 
+
     <!-- HERO SECTION -->
     <section class="hero" id="hero">
         <div class="hero-content">
             <div class="hero-badge">Open Source</div>
-            <h1 class="hero-title">Blocks of Note</h1>
-            <p class="hero-subtitle">Anotações inteligentes, task board colaborativo e workspace em tempo real.</p>
+            <h1 class="hero-title">Commen
+                tariu<span class="font-journalistic">m</span></h1>
+            <p class="hero-subtitle">O acervo central da sua equipe. Escreva notas de forma independente em um workspace desenhado para que o conhecimento não se perca, transformando documentação isolada em um repositório compartilhado.</p>
             <div class="hero-actions">
                 <a href="notes/" class="hero-btn hero-btn-primary">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -93,25 +123,16 @@
             </div>
         </div>
 
-        <!-- Ilustração / preview blocks -->
-        <div class="hero-visual">
-            <div class="hero-block hero-block-1">
-                <div class="hero-block-dot"></div>
-                <div class="hero-block-line"></div>
-                <div class="hero-block-line"></div>
-            </div>
-            <div class="hero-block hero-block-2">
-                <div class="hero-block-dot"></div>
-                <div class="hero-block-line"></div>
-                <div class="hero-block-line hero-block-line-short"></div>
-            </div>
-            <div class="hero-block hero-block-3">
-                <div class="hero-block-dot"></div>
-                <div class="hero-block-line"></div>
-                <div class="hero-block-line"></div>
-                <div class="hero-block-line hero-block-line-short"></div>
+        <div class="hero-cube" id="hero-cube">
+            <div class="cube-message" id="cube-message">
+                <span>Version: 1.0000.0</span>
+                <span class="cube-message-sep">•</span>
+                <span>Last Update: 07/07/2026</span>
+                <span class="cube-message-sep">•</span>
+                <span>Made in Brazil</span>
             </div>
         </div>
+
     </section>
 
     <!-- FEATURES GRID -->
@@ -183,11 +204,11 @@
     <footer class="footer">
         <div class="footer-inner">
             <div class="footer-left">
-                <a href="/" class="footer-logo">Blocks of Note</a>
+                <a href="/" class="footer-logo">Commentarium</a>
                 <span class="footer-sep">•</span>
                 <span class="footer-version">v1.0</span>
                 <span class="footer-sep">•</span>
-                <a href="https://github.com/LuizEduP/Blocks-Of-Note" target="_blank" rel="noopener noreferrer" class="footer-link">
+                <a href="https://github.com/LuizEduP/Commentarium" target="_blank" rel="noopener noreferrer" class="footer-link">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
                     </svg>
@@ -213,5 +234,6 @@
             ProfilesSync.syncMyProfile();
         });
     </script>
+    </div>
 </body>
 </html>

@@ -18,7 +18,7 @@ const GOOGLE_CLIENT_ID = '264095391579-ok60k94lad3ejjao85te2apg90o1tq73.apps.goo
 const Auth = (() => {
     'use strict';
 
-    const STORAGE_KEY = 'blocks_of_note_auth';
+    const STORAGE_KEY = 'commentarium_auth';
     const SCOPES = 'profile email';
 
     let _initialized = false;

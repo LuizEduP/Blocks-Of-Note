@@ -1,8 +1,8 @@
 {
-  "name": "blocks-of-note",
+  "name": "commentarium",
   "version": "1.0.0",
   "private": true,
-  "description": "Blocks-Of-Note — Gerenciador de notas e tarefas com interface 3D",
+  "description": "Commentarium — Gerenciador de notas e tarefas com interface 3D",
   "type": "module",
   "scripts": {
     "start": "node server.js",

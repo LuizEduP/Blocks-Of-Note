@@ -1,4 +1,4 @@
-# Visão do Produto — Blocks-Of-Note
+# Visão do Produto — Commentarium
 
 > **Propósito:** Descrever o produto, seu público-alvo e funcionalidades — sem detalhes técnicos.
 > **Documentos relacionados:** [`docs/specs.md`](specs.md), [`docs/arquitetura.md`](arquitetura.md), [`docs/roadmap.md`](roadmap.md)
@@ -7,7 +7,7 @@
 
 ## 🧠 O que o sistema faz
 
-O **Blocks-Of-Note** é uma aplicação web front-end de **anotações e cadastro de tarefas** com interface flat, design brutalista e foco em simplicidade. O conceito central é a **experiência direta e sem frescuras**: cards, grids e tipografia bold.
+O **Commentarium** é uma aplicação web front-end de **anotações e cadastro de tarefas** com interface flat, design brutalista e foco em simplicidade. O conceito central é a **experiência direta e sem frescuras**: cards, grids e tipografia bold.
 
 ### Funcionalidades principais
 
@@ -118,4 +118,4 @@ Página de Notas → botão EXPORTAR → download JSON
 ---
 
 > **Documento gerado em:** 05/06/2026
-> **Propósito:** Definir a visão do produto Blocks-Of-Note do ponto de vista do usuário e do negócio.
+> **Propósito:** Definir a visão do produto Commentarium do ponto de vista do usuário e do negócio.
