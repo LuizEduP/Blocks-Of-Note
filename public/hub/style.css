@@ -97,7 +97,7 @@
     position: relative; z-index: 5; text-align: center;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    transform: rotate(18deg);
+    transform: rotate(0);
 }
 .clock-time {
     font-family: 'Space Grotesk', sans-serif;
@@ -111,7 +111,7 @@
 }
 
 /* === ORBIT (elliptical, tilted) === */
-#orbit-container { transform: rotate(-18deg); }
+#orbit-container { transform: rotate(0); }
 .orbit-ring {
     position: absolute; inset: 0;
     border: 2px dashed var(--hub-orbit-ring);
