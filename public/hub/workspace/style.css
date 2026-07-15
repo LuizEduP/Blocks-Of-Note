@@ -1,0 +1,605 @@
+/* ============================================
+   hub/workspace/style.css — Workspace interno
+   ============================================ */
+
+/* --- LAYOUT --- */
+.wsi-section {
+    padding-top: 72px;
+    min-height: 100vh;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-bottom: 80px;
+}
+
+/* --- TOP BAR --- */
+.wsi-top {
+    padding: 24px 0 8px;
+}
+
+.wsi-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.wsi-back:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+}
+
+/* --- HEADER --- */
+.wsi-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 8px 0 28px;
+    flex-wrap: wrap;
+}
+
+.wsi-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.wsi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--ws-color, #7c3aed);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.wsi-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.wsi-meta {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+.wsi-header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.wsi-btn {
+    padding: 8px 14px !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+}
+
+/* --- TABS --- */
+.wsi-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 24px;
+}
+
+.wsi-tab {
+    border: none;
+    background: transparent;
+    padding: 10px 18px;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-muted);
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.wsi-tab:hover {
+    color: var(--color-text);
+}
+
+.wsi-tab.active {
+    color: var(--color-text);
+    border-bottom-color: var(--color-text);
+    font-weight: 600;
+}
+
+.wsi-tab-content {
+    display: none;
+    animation: fadeIn 0.2s ease;
+}
+
+.wsi-tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- ROOMS GRID --- */
+.wsi-rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+/* --- ROOM CARD --- */
+.wsi-room-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.wsi-room-card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+}
+
+.wsi-room-card:active {
+    transform: translateY(0);
+}
+
+.wsi-room-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    color: var(--color-text-secondary);
+}
+
+.wsi-room-name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+}
+
+.wsi-room-code {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+    padding: 2px 8px;
+    background: var(--color-bg-secondary);
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.wsi-room-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    padding-top: 12px;
+    border-top: 1px solid var(--color-divider);
+}
+
+.wsi-room-online {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.wsi-room-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-success);
+}
+
+.wsi-create-room-card {
+    background: transparent;
+    border: 2px dashed var(--color-border-strong);
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 140px;
+    gap: 10px;
+    color: var(--color-text-muted);
+    transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.wsi-create-room-card:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+    background: var(--color-bg-secondary);
+}
+
+.wsi-create-room-card svg {
+    transition: transform 0.2s;
+}
+
+.wsi-create-room-card:hover svg {
+    transform: rotate(90deg);
+}
+
+.wsi-create-room-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* --- EMPTY ROOMS --- */
+.wsi-empty-rooms {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    animation: fadeIn 0.4s ease;
+}
+
+.wsi-empty-icon {
+    color: var(--color-text-muted);
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.wsi-empty-rooms h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 6px;
+}
+
+.wsi-empty-rooms p {
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+}
+
+/* --- LOADING --- */
+.wsi-rooms-loading {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.wsi-skeleton {
+    background: var(--color-bg-secondary);
+    border-radius: 12px;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* --- MEMBERS --- */
+.wsi-members-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.wsi-members-count {
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+}
+
+.wsi-members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wsi-member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    transition: background 0.1s;
+}
+
+.wsi-member-item:hover {
+    background: var(--color-bg-secondary);
+}
+
+.wsi-member-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.wsi-member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wsi-member-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.wsi-member-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-text);
+}
+
+.wsi-member-email {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.wsi-member-role {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--color-bg-secondary);
+    color: var(--color-text-secondary);
+    text-transform: capitalize;
+}
+
+.wsi-member-role.owner {
+    background: var(--color-brand-primary);
+    color: #fff;
+}
+
+/* --- SETTINGS --- */
+.wsi-settings-group {
+    margin-bottom: 24px;
+}
+
+.wsi-settings-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.wsi-settings-label.danger {
+    color: var(--color-error);
+}
+
+.wsi-settings-hint {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.wsi-settings-row {
+    display: flex;
+    gap: 10px;
+    max-width: 400px;
+}
+
+.wsi-settings-row .input {
+    flex: 1;
+}
+
+.wsi-divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 28px 0;
+}
+
+/* --- COLOR PICKER (reuse from hub but scoped) --- */
+.color-picker {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    padding: 0;
+}
+
+.color-swatch:hover {
+    transform: scale(1.15);
+}
+
+.color-swatch.active {
+    border-color: var(--color-text);
+    box-shadow: 0 0 0 2px var(--color-bg), 0 0 0 4px var(--color-text);
+}
+
+/* --- MODAL --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    z-index: 101;
+    width: 90%;
+    max-width: 420px;
+    animation: modalIn 0.25s ease;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translate(-50%, -48%); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.modal-close:hover {
+    background: var(--color-bg-secondary);
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+
+.modal-hint {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-top: 10px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 24px 20px;
+}
+
+/* --- DANGER BUTTON --- */
+.btn-danger {
+    background: var(--color-error) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 8px 18px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    border-radius: var(--border-radius) !important;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-danger:hover {
+    background: var(--color-error-hover) !important;
+}
+
+/* --- BUTTON SM --- */
+.btn-sm {
+    padding: 7px 14px !important;
+    font-size: 0.82rem !important;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 640px) {
+    .wsi-section {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .wsi-header {
+        flex-direction: column;
+    }
+
+    .wsi-header-right {
+        width: 100%;
+    }
+
+    .wsi-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .wsi-title {
+        font-size: 1.3rem;
+    }
+
+    .wsi-rooms-grid,
+    .wsi-rooms-loading {
+        grid-template-columns: 1fr;
+    }
+
+    .wsi-settings-row {
+        max-width: 100%;
+        flex-direction: column;
+    }
+}

@@ -6,13 +6,40 @@
 
 # Commentarium
 
-> **Anotações inteligentes, tarefas organizadas e colaboração em tempo real — tudo em um só lugar.**
+> **Anotações inteligentes, tarefas organizadas, colaboração em tempo real e dashboard de produtividade — tudo em um só lugar.**
 
-**Commentarium** é uma aplicação web full-stack de produtividade pessoal e colaboração. Combina notas, gerenciador de tarefas, workspace colaborativo com desenho livre e chat em tempo real — com autenticação Google, sincronização na nuvem via Supabase e design moderno com tema claro/escuro.
+**Commentarium** é uma aplicação web full-stack de produtividade pessoal e colaboração. Combina notas, gerenciador de tarefas, workspace colaborativo com desenho livre e chat em tempo real, dashboard de atividade com métricas e heatmaps — com autenticação Google, sincronização na nuvem via Supabase e design moderno com tema claro/escuro.
+
+---
+
+## 🎨 Nova Identidade Visual (v2.0)
+
+A partir de julho/2026, o projeto adota uma paleta de cores unificada e sofisticada:
+
+| Papel | Cor | Hex |
+|---|---|---|
+| Background | Verde-escuro | `#004643` |
+| Headline / Texto | Off-white | `#fffffe` |
+| Paragraph / Secundário | Menta | `#abd1c6` |
+| Destaque / Botões | Âmbar | `#f9bc60` |
+| Texto sobre âmbar | Verde-escuro | `#001e1d` |
+| Terciário / Erro | Coral | `#e16162` |
+
+A paleta é aplicada consistentemente em **todas** as páginas via CSS custom properties em `base.css`.
 
 ---
 
 ## ✨ Funcionalidades
+
+### 🏠 Hub / Dashboard de Produtividade
+- **Relógio digital** com segundos em tempo real (HH:MM:SS)
+- **Órbita elíptica** inclinada (estilo anéis de Saturno) com pílulas de tarefas do dia distribuídas ao longo do contorno
+- Tarefa mais próxima do horário atual destacada em âmbar com tamanho ampliado
+- **Calendário mensal** compacto com destaque pílula no dia atual e indicadores de tarefas
+- **4 gráficos doughnut** (SVG): Produtividade (%), Tempo de Foco (h), Tarefas Concluídas (#), Prioridades (#)
+- **Painel de Atividade** completo: cartões de métricas (Média Diária, Total do Dia, Tendência vs dia anterior), gráfico de barras semanal (7 dias com destaque no dia atual), heatmap mensal (grid de intensidade), lista de atividades com ícones e barras de progresso
+- Navegação entre dias com setas e atalhos de teclado (← →)
+- Contador de progresso geral (X/Y tarefas concluídas)
 
 ### 📝 Notas
 - CRUD completo com editor modal
@@ -56,10 +83,11 @@
 
 ### 🎨 Interface
 - Tema claro/escuro com alternância e persistência
-- Design brutalista moderno (Space Grotesk + Inter)
+- Design moderno com Space Grotesk + Inter
 - Totalmente responsivo (desktop e mobile)
 - Acessibilidade: `focus-visible`, `prefers-reduced-motion`, roles ARIA
 - Notificações toast não-intrusivas
+- Changelog modal interativo na homepage
 
 ---
 
@@ -68,6 +96,9 @@
 | Camada | Tecnologia |
 |--------|-----------|
 | **Frontend** | HTML5 + CSS3 + JavaScript (Vanilla, zero frameworks) |
+| **CSS** | Tailwind CSS CDN (hub) + CSS custom properties (design system) |
+| **3D** | Three.js (cubo da homepage) |
+| **Animação** | GSAP (hover effects, fade transitions) |
 | **Servidor** | Node.js (`node:http` nativo + `ws` para WebSocket) |
 | **Banco de dados** | PostgreSQL via [Supabase](https://supabase.com) |
 | **Autenticação** | Supabase Auth (Google OAuth 2.0) |
@@ -86,8 +117,8 @@
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/LuizEduP/Commentarium.git
-cd Commentarium
+git clone https://github.com/LuizEduP/Blocks-Of-Note.git
+cd Blocks-Of-Note-docs-refactor
 ```
 
 ### 2. Configure o Supabase
@@ -129,39 +160,48 @@ Acesse **http://localhost:3000** 🚀
 
 ```
 Commentarium/
-├── server.js                         # Servidor HTTP + WebSocket
+├── server.js                            # Servidor HTTP + WebSocket
 ├── package.json
-├── public/                           # Frontend estático
-│   ├── index.html                    # Homepage
-│   ├── shared/                       # Módulos compartilhados
-│   │   ├── base.css                  # Design system (variáveis, componentes)
-│   │   ├── storage.js                # localStorage seguro (safeGet/Set/Remove)
-│   │   ├── supabase.js               # Cliente Supabase singleton
-│   │   ├── auth-supabase.js          # Autenticação Google via Supabase
-│   │   ├── auth.css                  # Estilos do login/dropdown
-│   │   ├── toast.js / toast.css      # Sistema de notificações
-│   │   ├── utils.js                  # escapeHtml, formatDate, etc.
-│   │   ├── theme.js                  # Alternância claro/escuro
-│   │   ├── friends.js                # Gerenciamento de amigos
-│   │   ├── profiles-sync.js          # Sync de perfil com Supabase
-│   │   ├── chat-widget.js            # Widget de chat flutuante
-│   │   ├── chat-storage-supabase.js  # Mensagens + imagens via Supabase
-│   │   ├── notes-storage-supabase.js # Notas com sync Supabase
-│   │   └── tasks-storage-supabase.js # Tarefas com sync Supabase
-│   ├── notes/                        # Página de notas
-│   ├── tasks/                        # Página de tarefas (unificada com taskboard)
-│   ├── workspace/                    # Workspace colaborativo (board + desenho + chat)
-│   └── chat/                         # Página de chat com sidebar de amigos
+├── public/                              # Frontend estático
+│   ├── index.html                       # Homepage com cubo 3D (Three.js)
+│   ├── style.css                        # Estilos da homepage
+│   ├── homepage.js                      # Lógica da homepage (cubo, GSAP, changelog)
+│   ├── shared/                          # Módulos compartilhados
+│   │   ├── base.css                     # Design system (variáveis, componentes, navbar)
+│   │   ├── storage.js                   # localStorage seguro (safeGet/Set/Remove)
+│   │   ├── supabase.js                  # Cliente Supabase singleton
+│   │   ├── auth-supabase.js             # Autenticação Google via Supabase
+│   │   ├── auth.css                     # Estilos do login/dropdown
+│   │   ├── toast.js / toast.css         # Sistema de notificações
+│   │   ├── utils.js                     # escapeHtml, formatDate, etc.
+│   │   ├── theme.js                     # Alternância claro/escuro
+│   │   ├── friends.js                   # Gerenciamento de amigos
+│   │   ├── profiles-sync.js             # Sync de perfil com Supabase
+│   │   ├── chat-widget.js               # Widget de chat flutuante
+│   │   ├── chat-storage-supabase.js     # Mensagens + imagens via Supabase
+│   │   ├── notes-storage-supabase.js    # Notas com sync Supabase
+│   │   ├── notes-storage.js             # CRUD local de notas
+│   │   ├── tasks-storage-supabase.js    # Tarefas com sync Supabase
+│   │   └── tasks-storage.js             # CRUD local de tarefas
+│   ├── hub/                             # 🆕 Dashboard de produtividade
+│   │   ├── index.html                   # Layout: calendário | relógio+órbita | métricas + painel atividade
+│   │   ├── style.css                    # Estilos do hub (órbita, calendário, doughnuts, heatmap)
+│   │   └── app.js                       # Lógica: relógio, órbita elíptica, calendário, métricas, atividade
+│   ├── notes/                           # Página de notas
+│   ├── tasks/                           # Página de tarefas (unificada com taskboard)
+│   ├── taskboard/                       # Página legada (redireciona para /tasks/)
+│   ├── workspace/                       # Workspace colaborativo (board + desenho + chat)
+│   └── chat/                            # Página de chat com sidebar de amigos
 ├── supabase/
-│   └── migration.sql                 # Schema do banco (6 tabelas + RLS)
-├── tests/                            # Testes unitários (Vitest)
-├── e2e/                              # Testes end-to-end (Playwright)
-└── docs/                             # Documentação
-    ├── visão.md                      # Visão do produto
-    ├── specs.md                      # Especificações técnicas
-    ├── arquitetura.md                # Decisões arquiteturais
-    ├── roadmap.md                    # Plano de evolução
-    └── resumo.md                     # Resumo completo do sistema
+│   └── migration.sql                    # Schema do banco (6 tabelas + RLS)
+├── tests/                               # Testes unitários (Vitest)
+├── e2e/                                 # Testes end-to-end (Playwright)
+└── docs/                                # Documentação
+    ├── visão.md                         # Visão do produto
+    ├── specs.md                         # Especificações técnicas
+    ├── arquitetura.md                   # Decisões arquiteturais
+    ├── roadmap.md                       # Plano de evolução
+    └── resumo.md                        # Resumo completo do sistema
 ```
 
 ---
@@ -171,11 +211,11 @@ Commentarium/
 | Princípio | Descrição |
 |-----------|-----------|
 | **KISS** | Vanilla JS, zero frameworks, sem build step |
-| **Module Pattern** | Cada módulo em IIFE com Data/UI/Controller layers |
+| **Module Pattern** | Cada módulo em classes com Data/UI/Controller layers |
 | **Offline-first** | localStorage como fonte primária, Supabase como sync |
 | **Acessibilidade** | ARIA, keyboard nav, `prefers-reduced-motion` |
-| **CSS modular** | Design system em `base.css` + estilos por página |
-| **Brutalista** | Bordas grossas, tipografia bold, monocromático com acentos |
+| **CSS modular** | Design system em `base.css` + estilos por página + Tailwind (hub) |
+| **Paleta unificada** | Mesmas cores em todos os temas (claro/escuro) via CSS custom properties |
 
 ---
 
@@ -185,6 +225,32 @@ Commentarium/
 2. Adicione a variável `PORT=3000`
 3. O Railway detecta `npm start` automaticamente
 4. Veja [RAILWAY_SETUP.md](RAILWAY_SETUP.md) para detalhes sobre OAuth redirect
+
+---
+
+## 📋 Changelog
+
+### 14/07/2026 — Dashboard & Nova Paleta
+- Hub Dashboard completo com relógio + órbita elíptica + calendário + métricas + painel de atividade
+- Nova paleta de cores unificada: verde `#004643`, âmbar `#f9bc60`, texto `#fffffe`
+- Design system (`base.css`) refatorado com a nova identidade visual
+- Cubo 3D da homepage adaptado à nova paleta
+- Redirect `/hub` → `/hub/` para evitar 404 em recursos CSS/JS
+- Correções de contraste em botões e avatares
+
+### 07/07/2026 — Abyss Theme & 3D Cube
+- Cubo 3D interativo (Three.js) no hero com grid de cubinhos reativos ao mouse
+- Tema escuro Abyss Theme do VSCode
+- Logo "m" cursivo (Journalistic) com hover reveal
+- Changelog modal com TheBoldFont
+- Mensagem de versão abaixo do cubo
+
+### Anterior
+- Unificação de tarefas + taskboard
+- Workspace colaborativo com board modular, drag & drop e desenho
+- Chat widget flutuante estilo messenger com envio de imagens
+- Perfil e sistema de amigos com Supabase
+- Sincronização completa (notas, tarefas, chat, perfil) via Supabase
 
 ---
 

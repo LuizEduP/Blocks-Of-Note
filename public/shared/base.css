@@ -37,51 +37,51 @@
     padding: 0;
 }
 
-/* --- TEMA CLARO (padrão) --- */
+/* --- TEMA PADRÃO (nova paleta) --- */
 :root,
 [data-theme="light"] {
     /* Paleta institucional */
-    --color-brand-primary: #0063a5;
-    --color-brand-secondary: #3d8ec9;
-    --color-brand-dark: #222831;
+    --color-brand-primary: #f9bc60;
+    --color-brand-secondary: #abd1c6;
+    --color-brand-dark: #001e1d;
 
     /* Cores de fundo */
-    --color-bg: #ffffff;
-    --color-bg-secondary: #f8f9fa;
-    --color-bg-tertiary: #f0f0f0;
+    --color-bg: #004643;
+    --color-bg-secondary: #005a56;
+    --color-bg-tertiary: #006b66;
 
     /* Cores de texto */
-    --color-text: #151516;
-    --color-text-secondary: #6b6b6b;
-    --color-text-muted: #9b9b9b;
+    --color-text: #fffffe;
+    --color-text-secondary: #abd1c6;
+    --color-text-muted: #7aaa9b;
 
     /* Bordas */
-    --color-border: rgba(21, 21, 22, 0.08);
-    --color-border-strong: rgba(21, 21, 22, 0.15);
+    --color-border: rgba(171, 209, 198, 0.12);
+    --color-border-strong: rgba(171, 209, 198, 0.25);
 
     /* Superfície */
-    --color-surface: #f8f9fa;
-    --color-surface-hover: #f0f0f0;
-    --color-divider: rgba(21, 21, 22, 0.08);
+    --color-surface: #005a56;
+    --color-surface-hover: #006b66;
+    --color-divider: rgba(171, 209, 198, 0.10);
 
     /* Cores de estado */
-    --color-success: #0f7b3e;
-    --color-success-bg: #e6f7ed;
-    --color-warning: #9a6b00;
-    --color-warning-bg: #fef7e0;
-    --color-error: #d93838;
-    --color-error-bg: #fde8e8;
-    --color-error-hover: #c00;
-    --color-info: #2563eb;
-    --color-info-bg: #e8f0fe;
+    --color-success: #abd1c6;
+    --color-success-bg: rgba(171, 209, 198, 0.12);
+    --color-warning: #f9bc60;
+    --color-warning-bg: rgba(249, 188, 96, 0.12);
+    --color-error: #e16162;
+    --color-error-bg: rgba(225, 97, 98, 0.12);
+    --color-error-hover: #d45051;
+    --color-info: #f9bc60;
+    --color-info-bg: rgba(249, 188, 96, 0.12);
 
     /* Canvas (workspace drawing) */
-    --color-canvas-bg: #ffffff;
+    --color-canvas-bg: #004643;
 
-    /* Accent — azul Abyss (conecta tema claro e escuro) */
-    --color-accent: #0063a5;
-    --color-accent-bg: #eaf3fb;
-    --color-accent-hover: #004d82;
+    /* Accent */
+    --color-accent: #f9bc60;
+    --color-accent-bg: rgba(249, 188, 96, 0.12);
+    --color-accent-hover: #fcd088;
 
     /* Tipografia */
     --font-display: 'Space Grotesk', sans-serif;
@@ -100,66 +100,66 @@
     --border-strong: 2px solid var(--color-border-strong);
 
     /* Sombras */
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
-    --shadow-xl: 0 12px 40px rgba(0,0,0,0.1);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    --shadow-xl: 0 12px 40px rgba(0,0,0,0.5);
 
     /* Layout */
     --sidebar-width: 240px;
     --header-height: 56px;
 }
 
-/* --- TEMA ESCURO (Abyss Theme) --- */
+/* --- TEMA ESCURO (paleta unificada) --- */
 [data-theme="dark"] {
     /* Paleta institucional */
-    --color-brand-primary: #0063a5;
-    --color-brand-secondary: #4d9ed4;
-    --color-brand-dark: #10192c;
+    --color-brand-primary: #f9bc60;
+    --color-brand-secondary: #abd1c6;
+    --color-brand-dark: #001e1d;
 
-    /* Cores de fundo — Abyss */
-    --color-bg: #000c18;
-    --color-bg-secondary: #060621;
-    --color-bg-tertiary: #10192c;
+    /* Cores de fundo */
+    --color-bg: #004643;
+    --color-bg-secondary: #005a56;
+    --color-bg-tertiary: #006b66;
 
     /* Cores de texto */
-    --color-text: #6688cc;
-    --color-text-secondary: #406385;
-    --color-text-muted: #2a4a6a;
+    --color-text: #fffffe;
+    --color-text-secondary: #abd1c6;
+    --color-text-muted: #7aaa9b;
 
     /* Bordas */
-    --color-border: rgba(43, 43, 74, 0.6);
-    --color-border-strong: rgba(43, 43, 74, 0.85);
+    --color-border: rgba(171, 209, 198, 0.12);
+    --color-border-strong: rgba(171, 209, 198, 0.25);
 
     /* Superfície */
-    --color-surface: #181f2f;
-    --color-surface-hover: #152037;
-    --color-divider: rgba(43, 43, 74, 0.5);
+    --color-surface: #005a56;
+    --color-surface-hover: #006b66;
+    --color-divider: rgba(171, 209, 198, 0.10);
 
     /* Cores de estado */
-    --color-success: #22aa44;
-    --color-success-bg: #0a2a1a;
-    --color-warning: #ddbb88;
-    --color-warning-bg: #2a1f0a;
-    --color-error: #ff9da4;
-    --color-error-bg: #2a0a0f;
-    --color-error-hover: #ff7882;
-    --color-info: #2277ff;
-    --color-info-bg: #0a1a3a;
+    --color-success: #abd1c6;
+    --color-success-bg: rgba(171, 209, 198, 0.12);
+    --color-warning: #f9bc60;
+    --color-warning-bg: rgba(249, 188, 96, 0.12);
+    --color-error: #e16162;
+    --color-error-bg: rgba(225, 97, 98, 0.12);
+    --color-error-hover: #d45051;
+    --color-info: #f9bc60;
+    --color-info-bg: rgba(249, 188, 96, 0.12);
 
     /* Canvas (workspace drawing) */
-    --color-canvas-bg: #060621;
+    --color-canvas-bg: #004643;
 
-    /* Accent — azul Abyss */
-    --color-accent: #0063a5;
-    --color-accent-bg: #051336;
-    --color-accent-hover: #1D4A87;
+    /* Accent */
+    --color-accent: #f9bc60;
+    --color-accent-bg: rgba(249, 188, 96, 0.12);
+    --color-accent-hover: #fcd088;
 
     /* Sombras */
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.35);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.45);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.55);
-    --shadow-xl: 0 12px 40px rgba(0,0,0,0.65);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.35);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.4);
+    --shadow-xl: 0 12px 40px rgba(0,0,0,0.5);
 
     /* Ícone do calendário visível no fundo escuro */
     --calendar-icon-filter: invert(1);
@@ -167,18 +167,18 @@
 
 /* --- TEMA ESCURO: NAVBAR --- */
 [data-theme="dark"] .navbar {
-    background: rgba(16, 25, 44, 0.95);
+    background: rgba(0, 70, 67, 0.95);
 }
 
 [data-theme="dark"] .nav-link:hover {
-    background: rgba(6, 25, 64, 0.7);
+    background: var(--color-accent-bg);
 }
 
 [data-theme="dark"] .nav-link.active {
-    background: rgba(8, 40, 107, 0.8);
+    background: var(--color-accent-bg);
 }
 
-/* --- TEMA ESCURO: COMPONENTES COM #000 --- */
+/* --- TEMA ESCURO: COMPONENTES --- */
 [data-theme="dark"] .sidebar-logo-icon {
     background: var(--color-brand-primary);
 }
@@ -186,7 +186,7 @@
 [data-theme="dark"] .btn-primary {
     background: var(--color-brand-primary);
     border-color: var(--color-brand-primary);
-    color: white;
+    color: #001e1d;
 }
 
 [data-theme="dark"] .btn-primary:hover {
@@ -197,12 +197,12 @@
 [data-theme="dark"] .input:focus,
 [data-theme="dark"] .select:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(0, 99, 165, 0.2);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
 }
 
 [data-theme="dark"] .hero-btn-primary {
     background: var(--color-brand-primary);
-    color: white;
+    color: #001e1d;
 }
 
 [data-theme="dark"] .hero-btn-primary:hover {
@@ -219,22 +219,22 @@
 
 [data-theme="dark"] .ws-chat-msg.own {
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
 }
 
 [data-theme="dark"] .ws-chat-input-field:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(0, 99, 165, 0.2);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
 }
 
 [data-theme="dark"] .tk-quick-add:focus-within {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 4px rgba(0, 99, 165, 0.15);
+    box-shadow: 0 0 0 4px var(--color-accent-bg);
 }
 
 [data-theme="dark"] .tk-field .input:focus {
     border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(0, 99, 165, 0.15);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
 }
 
 [data-theme="dark"] .tk-check:hover {
@@ -248,7 +248,7 @@
 
 [data-theme="dark"] .chat-msg:nth-child(even) {
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
 }
 
 [data-theme="dark"] .ws-board-wrap {
@@ -319,7 +319,7 @@ h1, h2, h3, h4 {
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(0, 70, 67, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--color-border);
@@ -882,7 +882,7 @@ h1, h2, h3, h4 {
     height: 32px;
     border-radius: 50%;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -964,7 +964,7 @@ h1, h2, h3, h4 {
     height: 32px;
     border-radius: 50%;
     background: var(--color-brand-secondary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1017,7 +1017,7 @@ h1, h2, h3, h4 {
 
 .friends-req-accept {
     background: var(--color-success);
-    color: #fff;
+    color: #001e1d;
 }
 
 .friends-req-accept:hover {
@@ -1124,7 +1124,7 @@ h1, h2, h3, h4 {
     height: 48px;
     border-radius: 50%;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1235,7 +1235,7 @@ h1, h2, h3, h4 {
     height: 32px;
     border-radius: 50%;
     background: var(--color-brand-secondary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1288,7 +1288,7 @@ h1, h2, h3, h4 {
 
 .profile-req-accept {
     background: var(--color-success);
-    color: #fff;
+    color: #001e1d;
 }
 
 .profile-req-accept:hover {
@@ -1347,7 +1347,7 @@ h1, h2, h3, h4 {
     height: 32px;
     border-radius: 50%;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1489,7 +1489,7 @@ h1, h2, h3, h4 {
     border-radius: 50%;
     border: none;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1639,7 +1639,7 @@ h1, h2, h3, h4 {
 .chat-widget-msg-mine {
     align-self: flex-end;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     border-color: var(--color-brand-primary);
 }
 
@@ -1716,7 +1716,7 @@ h1, h2, h3, h4 {
     border: none;
     border-radius: 50%;
     background: var(--color-brand-primary);
-    color: #fff;
+    color: #001e1d;
     cursor: pointer;
     transition: all 0.15s ease;
     padding: 0;

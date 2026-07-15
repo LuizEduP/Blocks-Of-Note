@@ -75,7 +75,7 @@ function initHeroCube() {
 
     // Detecta tema e reduced motion
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const bgColor = isDark ? 0x000c18 : 0xffffff;
+    const bgColor = 0x004643;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // --- Three.js setup ---
@@ -95,19 +95,18 @@ function initHeroCube() {
     const group = new THREE.Group();
     scene.add(group);
 
-    // 1. Cubo sem face com bordas pretas
+    // 1. Cubo sem face com bordas
     const size = 5;
     const boxGeometry = new THREE.BoxGeometry(size, size, size);
     const edgesGeometry = new THREE.EdgesGeometry(boxGeometry);
-    const edgesMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+    const edgesMaterial = new THREE.LineBasicMaterial({ color: 0xabd1c6, linewidth: 2 });
     const wireframeCube = new THREE.LineSegments(edgesGeometry, edgesMaterial);
     group.add(wireframeCube);
 
     // Reage à troca de tema: fundo e cor das bordas
     new MutationObserver(() => {
-        const dark = document.documentElement.getAttribute('data-theme') === 'dark';
-        scene.background = new THREE.Color(dark ? 0x000c18 : 0xffffff);
-        edgesMaterial.color.set(dark ? 0x6688cc : 0x000000);
+        scene.background = new THREE.Color(0x004643);
+        edgesMaterial.color.set(0xabd1c6);
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
     // 2. Grid de quadradinhos invisíveis (12x12x12)

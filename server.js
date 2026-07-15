@@ -129,6 +129,17 @@ const server = http.createServer((req, res) => {
 
     // ---- Static files ----
 
+    // Redirect /dir -> /dir/ so relative CSS/JS paths resolve correctly
+    if (!url.endsWith('/') && path.extname(url) === '' && url !== '/') {
+        const candidateDir = path.join(PUBLIC_DIR, url);
+        const candidateIndex = path.join(candidateDir, 'index.html');
+        if (candidateDir.startsWith(PUBLIC_DIR) && fs.existsSync(candidateIndex)) {
+            res.writeHead(301, { 'Location': url + '/' });
+            res.end();
+            return;
+        }
+    }
+
     // Serve index.html for directory paths (e.g. /notes/ -> /notes/index.html)
     if (url.endsWith('/') || path.extname(url) === '') {
         url = path.join(url, 'index.html').replace(/\\/g, '/');

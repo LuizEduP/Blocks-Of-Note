@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub — Commentarium</title>
+    <meta name="description" content="Dashboard de estudos e tarefas">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        body: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="../shared/toast.css">
+    <link rel="stylesheet" href="../shared/auth.css">
+
+    <!-- Hub Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase SDK -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Shared Scripts -->
+    <script defer src="../shared/theme.js"></script>
+    <script defer src="../shared/storage.js"></script>
+    <script defer src="../shared/toast.js"></script>
+    <script defer src="../shared/utils.js"></script>
+    <script defer src="../shared/supabase.js"></script>
+    <script defer src="../shared/auth-supabase.js"></script>
+    <script defer src="../shared/notes-storage-supabase.js"></script>
+    <script defer src="../shared/tasks-storage-supabase.js"></script>
+    <script defer src="../shared/chat-storage-supabase.js"></script>
+    <script defer src="../shared/profiles-sync.js"></script>
+</head>
+<body class="font-body bg-[var(--hub-bg)] text-[var(--hub-text)] min-h-screen antialiased">
+
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[var(--hub-border)] bg-[var(--hub-bg)]/90 backdrop-blur-xl">
+        <div class="flex items-center justify-between h-14 px-8 max-w-full">
+            <div class="flex items-center gap-16">
+                <a href="../" class="flex items-baseline gap-0 no-underline text-[var(--hub-text)]">
+                    <span class="font-display font-bold text-[1.1rem] tracking-[-0.3px] max-w-0 overflow-hidden whitespace-nowrap transition-[max-width] duration-300 hover:max-w-[160px]">Commentariu</span>
+                    <span class="font-journalistic text-[2.2rem] leading-none relative top-[2px]">m</span>
+                </a>
+                <div class="flex gap-2.5">
+                    <a href="../notes/" class="nav-link">Notas</a>
+                    <a href="../tasks/" class="nav-link">Tarefas</a>
+                    <a href="./" class="nav-link active">Hub</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <div id="theme-toggle-container" class="flex items-center"></div>
+                <div id="auth-google" class="flex items-center"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== TOP SECTION: 3-COLUMN DASHBOARD ===== -->
+    <div class="flex min-h-screen pt-14 gap-0">
+
+        <!-- LEFT: Calendar -->
+        <aside class="w-[320px] flex-shrink-0 border-r border-[var(--hub-border)] p-8 flex flex-col gap-8 overflow-y-auto">
+            <div class="rounded-2xl border border-[var(--hub-border)] bg-[var(--hub-surface)] p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <button id="cal-prev" class="cal-nav-btn">&lsaquo;</button>
+                    <span id="cal-month-year" class="font-display text-base font-bold text-[var(--hub-text)] tracking-[-0.01em]"></span>
+                    <button id="cal-next" class="cal-nav-btn">&rsaquo;</button>
+                </div>
+                <div class="grid grid-cols-7 text-center text-[0.7rem] font-semibold text-[var(--hub-text-muted)] mb-2 pb-2 border-b border-[var(--hub-border)]">
+                    <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+                </div>
+                <div id="cal-days" class="grid grid-cols-7 gap-0.5"></div>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-display text-sm font-bold text-[var(--hub-text)] mb-3 tracking-[-0.01em]">Próximas tarefas</h3>
+                <div id="upcoming-list" class="flex flex-col gap-1.5"></div>
+                <p id="upcoming-empty" class="text-xs text-[var(--hub-text-muted)] italic hidden">Nenhuma tarefa pendente.</p>
+            </div>
+        </aside>
+
+        <!-- CENTER: Clock + Orbit -->
+        <main class="flex-1 flex flex-col items-center justify-center p-10 gap-12">
+            <div id="orbit-container" class="relative flex items-center justify-center" style="width:520px;height:300px;">
+                <div id="orbit-ring" class="orbit-ring"></div>
+                <div id="clock" class="clock-face">
+                    <div id="clock-time" class="clock-time">00:00:00</div>
+                    <div id="clock-date" class="clock-date">--</div>
+                </div>
+            </div>
+            <div class="flex gap-3 flex-wrap justify-center">
+                <button id="btn-new-note" class="quick-action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Nova nota
+                </button>
+                <button id="btn-new-task" class="quick-action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                    Nova tarefa
+                </button>
+                <button id="btn-new-workspace" class="quick-action-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+                    Workspaces
+                </button>
+            </div>
+        </main>
+
+        <!-- RIGHT: Metrics -->
+        <aside class="w-[340px] flex-shrink-0 border-l border-[var(--hub-border)] p-8 flex flex-col gap-6 overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h2 class="font-display text-lg font-bold text-[var(--hub-text)] tracking-[-0.02em]">Hub de Estudos</h2>
+                <div class="flex gap-1">
+                    <button class="metric-nav-btn" id="metric-prev" title="Anterior">&lsaquo;</button>
+                    <button class="metric-nav-btn" id="metric-next" title="Próximo">&rsaquo;</button>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-[var(--hub-border)] bg-[var(--hub-surface)] p-6 text-center">
+                <p class="text-xs font-semibold text-[var(--hub-text-muted)] uppercase tracking-wider mb-2">Progresso</p>
+                <div class="flex items-baseline justify-center gap-1">
+                    <span id="progress-done" class="font-display text-5xl font-extrabold text-[var(--hub-accent)] tracking-[-0.03em] leading-none">0</span>
+                    <span class="font-display text-2xl text-[var(--hub-text-muted)]">/</span>
+                    <span id="progress-total" class="font-display text-2xl text-[var(--hub-text-muted)]">0</span>
+                </div>
+                <p id="progress-label" class="text-xs text-[var(--hub-text-muted)] mt-2">tarefas concluídas</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="metric-card">
+                    <div class="metric-ring-wrap">
+                        <svg class="metric-ring-svg" viewBox="0 0 100 100">
+                            <circle class="metric-ring-bg" cx="50" cy="50" r="40"/>
+                            <circle class="metric-ring-fill" cx="50" cy="50" r="40" id="ring-produtividade"/>
+                        </svg>
+                        <span class="metric-ring-value" id="val-produtividade">0%</span>
+                    </div>
+                    <span class="metric-label">Produtividade</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-ring-wrap">
+                        <svg class="metric-ring-svg" viewBox="0 0 100 100">
+                            <circle class="metric-ring-bg" cx="50" cy="50" r="40"/>
+                            <circle class="metric-ring-fill" cx="50" cy="50" r="40" id="ring-foco"/>
+                        </svg>
+                        <span class="metric-ring-value" id="val-foco">0h</span>
+                    </div>
+                    <span class="metric-label">Tempo de Foco</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-ring-wrap">
+                        <svg class="metric-ring-svg" viewBox="0 0 100 100">
+                            <circle class="metric-ring-bg" cx="50" cy="50" r="40"/>
+                            <circle class="metric-ring-fill" cx="50" cy="50" r="40" id="ring-concluidas"/>
+                        </svg>
+                        <span class="metric-ring-value" id="val-concluidas">0</span>
+                    </div>
+                    <span class="metric-label">Concluídas</span>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-ring-wrap">
+                        <svg class="metric-ring-svg" viewBox="0 0 100 100">
+                            <circle class="metric-ring-bg" cx="50" cy="50" r="40"/>
+                            <circle class="metric-ring-fill" cx="50" cy="50" r="40" id="ring-prioridades"/>
+                        </svg>
+                        <span class="metric-ring-value" id="val-prioridades">0</span>
+                    </div>
+                    <span class="metric-label">Prioridades</span>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- ===== BOTTOM: ACTIVITY DASHBOARD ===== -->
+    <div class="activity-dashboard">
+        <div class="activity-inner">
+            <!-- Toolbar -->
+            <div class="ad-toolbar">
+                <div class="flex items-center gap-2.5">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--hub-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span class="font-display text-base font-bold text-[var(--hub-text)] tracking-[-0.01em]">Atividade</span>
+                </div>
+                <div class="flex gap-1">
+                    <button class="ad-nav-btn" id="nav-prev" title="Dia anterior">&lsaquo;</button>
+                    <button class="ad-nav-btn" id="nav-today" title="Hoje">Hoje</button>
+                    <button class="ad-nav-btn" id="nav-next" title="Próximo dia">&rsaquo;</button>
+                </div>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="ad-metrics">
+                <div class="ad-metric-box">
+                    <span class="ad-metric-label">Média Diária</span>
+                    <span class="ad-metric-value" id="metric-avg">0h 0m</span>
+                    <span class="ad-metric-sub" id="metric-avg-range">--</span>
+                </div>
+                <div class="ad-metric-box accent">
+                    <span class="ad-metric-label">Total do Dia</span>
+                    <span class="ad-metric-value large" id="metric-total">0h 0m</span>
+                    <span class="ad-metric-sub" id="metric-date">--</span>
+                </div>
+                <div class="ad-metric-box">
+                    <span class="ad-metric-label">Tendência</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="metric-trend-icon" class="text-lg">--</span>
+                        <span class="ad-metric-value" id="metric-trend">0h 0m</span>
+                    </div>
+                    <span class="ad-metric-sub">vs. dia anterior</span>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="ad-charts">
+                <div class="ad-chart-card">
+                    <span class="ad-chart-title">Atividade Semanal</span>
+                    <div class="bar-chart" id="bar-chart"></div>
+                    <div class="bar-labels" id="bar-labels"></div>
+                </div>
+                <div class="ad-chart-card">
+                    <span class="ad-chart-title" id="heatmap-month-title">Julho</span>
+                    <div class="ad-heatmap-legend">
+                        <span>Menos</span>
+                        <span class="ad-hl-dot" style="background:var(--hub-card)"></span>
+                        <span class="ad-hl-dot" style="background:rgba(249,188,96,0.25)"></span>
+                        <span class="ad-hl-dot" style="background:rgba(249,188,96,0.5)"></span>
+                        <span class="ad-hl-dot" style="background:rgba(249,188,96,0.75)"></span>
+                        <span class="ad-hl-dot" style="background:var(--hub-accent)"></span>
+                        <span>Mais</span>
+                    </div>
+                    <div class="ad-heatmap-grid" id="heatmap-grid"></div>
+                </div>
+            </div>
+
+            <!-- Activity List -->
+            <div class="ad-activity-section">
+                <h3 class="ad-activity-heading">Atividades do Dia</h3>
+                <div class="ad-activity-list" id="activity-list"></div>
+                <p class="ad-activity-empty" id="activity-empty">Nenhuma atividade registrada.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            Theme.init();
+            Auth.init();
+            Auth.renderButton('auth-google');
+            if (typeof NotesStorage?.init === 'function') NotesStorage.init();
+            if (typeof TasksStorage?.init === 'function') TasksStorage.init();
+            ProfilesSync.syncMyProfile();
+        });
+    </script>
+</body>
+</html>
