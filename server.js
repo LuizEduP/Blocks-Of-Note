@@ -184,7 +184,12 @@ const server = http.createServer((req, res) => {
             }
             return;
         }
-        res.writeHead(200, { 'Content-Type': contentType });
+        // Prevent browser caching so deploys reflect immediately
+        const headers = {
+            'Content-Type': contentType,
+            'Cache-Control': 'no-cache, must-revalidate'
+        };
+        res.writeHead(200, headers);
         res.end(data);
     });
 });
