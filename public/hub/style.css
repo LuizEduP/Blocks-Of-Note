@@ -3,28 +3,28 @@
    Paleta verde + relógio/órbita + métricas + atividade
    ============================================ */
 
-/* === COLOR SYSTEM === */
+/* === COLOR SYSTEM — derivado das variáveis padrão do tema === */
 :root,
 [data-theme="dark"],
 [data-theme="light"] {
-    --hub-bg: #004643;
-    --hub-surface: #005a56;
-    --hub-surface-elevated: #006b66;
-    --hub-card: #1a2e2b;
-    --hub-border: rgba(171, 209, 198, 0.12);
-    --hub-text: #fffffe;
-    --hub-text-muted: #abd1c6;
-    --hub-accent: #f9bc60;
-    --hub-accent-soft: rgba(249, 188, 96, 0.15);
-    --hub-accent-hover: #fcd088;
-    --hub-danger: #e16162;
-    --hub-orbit-ring: rgba(171, 209, 198, 0.15);
-    --hub-ring-produtividade: #f9bc60;
-    --hub-ring-foco: #abd1c6;
-    --hub-ring-concluidas: #e8e4e6;
-    --hub-ring-prioridades: #e16162;
-    --hub-bar-bg: #1a3530;
-    --hub-progress-bg: #1a3530;
+    --hub-bg: var(--color-bg);
+    --hub-surface: var(--color-bg-secondary);
+    --hub-surface-elevated: var(--color-bg-tertiary);
+    --hub-card: var(--color-surface);
+    --hub-border: var(--color-border);
+    --hub-text: var(--color-text);
+    --hub-text-muted: var(--color-text-muted);
+    --hub-accent: var(--color-accent);
+    --hub-accent-soft: var(--color-accent-bg);
+    --hub-accent-hover: var(--color-accent-hover);
+    --hub-danger: var(--color-error);
+    --hub-orbit-ring: var(--color-divider);
+    --hub-ring-produtividade: var(--color-accent);
+    --hub-ring-foco: var(--color-brand-secondary);
+    --hub-ring-concluidas: var(--color-surface);
+    --hub-ring-prioridades: var(--color-error);
+    --hub-bar-bg: var(--color-surface-hover);
+    --hub-progress-bg: var(--color-surface-hover);
 }
 
 .font-journalistic {
@@ -66,14 +66,14 @@
 }
 .cal-day:hover { background: var(--hub-accent-soft); }
 .cal-day.other-month { color: var(--hub-text-muted); opacity: 0.35; cursor: default; }
-.cal-day.today { background: var(--hub-accent); color: #001e1d; font-weight: 700; }
+.cal-day.today { background: var(--hub-accent); color: var(--color-accent-text); font-weight: 700; }
 .cal-day.today:hover { background: var(--hub-accent-hover); }
 .cal-day.has-tasks::after {
     content: ''; position: absolute; bottom: 2px;
     width: 3px; height: 3px; border-radius: 50%;
     background: var(--hub-accent);
 }
-.cal-day.today.has-tasks::after { background: #001e1d; }
+.cal-day.today.has-tasks::after { background: var(--color-accent-text); }
 .cal-day.selected { outline: 2px solid var(--hub-accent); outline-offset: -2px; }
 
 /* === UPCOMING TASKS === */
@@ -136,7 +136,7 @@
 }
 .orbit-pill.now {
     background: var(--hub-accent); border-color: var(--hub-accent);
-    color: #001e1d; font-size: 0.76rem; font-weight: 700;
+    color: var(--color-accent-text); font-size: 0.76rem; font-weight: 700;
     padding: 6px 16px; box-shadow: 0 0 28px var(--hub-accent-soft);
     z-index: 10;
 }
