@@ -355,7 +355,7 @@
 /* Dark mode fixes for board */
 [data-theme="dark"] .ws-board-wrap { background: var(--color-bg-secondary); }
 [data-theme="dark"] .ws-block { background: var(--color-bg-secondary); border-color: var(--color-border-strong); }
-[data-theme="dark"] .ws-block.selected { border-color: var(--color-brand-secondary); box-shadow: 0 0 0 2px rgba(171, 209, 198, 0.25); }
+[data-theme="dark"] .ws-block.selected { border-color: var(--color-brand-secondary); box-shadow: 0 0 0 2px var(--color-accent-bg); }
 [data-theme="dark"] .ws-block.dragging { border-color: var(--color-brand-secondary); box-shadow: var(--shadow-lg); }
 [data-theme="dark"] .ws-tool-btn.active { background: var(--color-brand-primary); border-color: var(--color-brand-primary); }
 [data-theme="dark"] .ws-board-hint { background: var(--color-bg-secondary); border-color: var(--color-border-strong); }
